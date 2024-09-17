@@ -5,6 +5,13 @@ Used for authenticating the user and creating the session
 
 ## /api/auth/register
 Used for creating an account
+### Request body:
+```
+{
+    "username": [string],
+    "password": [string]
+}
+```
 
 ## /api/auth/restricted/delete
 Used for deleting an account

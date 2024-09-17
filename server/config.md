@@ -9,6 +9,7 @@
 ```
 {
     db: {
+        "host": [string],
         "username": [string],
         "password": [string],
         "dbName": [string]

@@ -1,0 +1,11 @@
+{
+    "db": {
+        "host": "localhost",
+        "username": "root",
+        "password": "",
+        "dbName": "accountsdb"
+    },
+    "http": {
+        "port": 8080
+    }
+}

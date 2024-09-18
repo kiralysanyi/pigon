@@ -1,22 +1,24 @@
-const express = require("express")
+const express = require("express");
 const app = express();
-let cookieParser = require("cookie-parser")
+let cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-let jsonParser = bodyParser.json
-const fs = require("fs")
-let crypto = require("crypto")
+let jsonParser = bodyParser.json;
+const fs = require("fs");
+let crypto = require("crypto");
 const cors = require("cors");
 const uid = require("uuid").v4;
+const jwt = require("jsonwebtoken");
+
 
 app.use(jsonParser());
 app.use(cookieParser());
 app.use(cors({
     origin: "*"
-}))
+}));
 
 const mysql = require("mysql");
 
-let config = JSON.parse(fs.readFileSync(__dirname + "/config.json"))
+let config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 
 var con = mysql.createConnection({
     host: config["db"]["host"],
@@ -69,53 +71,81 @@ const createUser = (username, password) => {
     })
 }
 
-const createSession = (username, password, clientInfo = {}) => {
+const registerDevice = (deviceID, userID, deviceInfo) => {
     return new Promise(async (resolved) => {
-        if (await userExists(username) == false) {
-            resolved({
-                info: {
-                    type: "error",
-                    message: "User not found"
-                }
-            })
-            return;
+        await sqlQuery(`INSERT INTO devices (deviceID, userID, deviceInfo) VALUES ('${deviceID}', '${userID}', '${JSON.stringify(deviceInfo)}')`);
+        resolved();
+    });
+}
+
+//login handler
+const loginHandler = async (req = app.request, res = app.response, next = () => { }) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    if (await userExists(username) == false) {
+        //user not existing
+        return next(new Error("User not found."));
+    }
+    let response = await sqlQuery(`SELECT * FROM users WHERE username='${username}'`)
+    console.log(response)
+    //id, username, passwordHash;
+    let userInfo = response[0];
+    let deviceName = "N/A"
+
+    if (req.body.deviceName) {
+        deviceName = req.body.deviceName;
+    }
+
+    let hash = userInfo["passwordHash"];
+    console.log(hash, hashPass(password));
+    if (hash == hashPass(password)) {
+        //password verified
+
+        //generating a unique device ID
+
+        let deviceID = uid();
+        let deviceInfo = {
+            "user-agent": req.headers["user-agent"],
+            "deviceName": deviceName
         }
-        let response = await sqlQuery(`SELECT * FROM users WHERE username='${username}'`)
-        console.log(response)
-        if (response.length == 0) {
-            resolved({
-                info: {
-                    type: "error",
-                    message: "User not found"
-                }
-            })
+
+        //creating jwt token
+        //the token will expire after 7 days
+        //TODO: make the expirity modifiable by the user
+        let token;
+        try {
+            token = jwt.sign({
+                userID: userInfo["id"],
+                username: userInfo["username"],
+                deviceID: deviceID,
+                deviceInfo: deviceInfo,
+            }, config["jwt"]["secret"], { expiresIn: "7d" });
+
+            await registerDevice(deviceID, userInfo["id"], deviceInfo);
+        } catch (error) {
+            console.log("Something wrong happened. ", error)
+            return next(error)
         }
-        let hash = response[0]["passwordHash"];
-        console.log(hash, hashPass(password));
-        if (hash == hashPass(password)) {
-            let sesID = uid();
-            await sqlQuery(`INSERT INTO sessions (sessionID, userID, info) VALUES ('${sesID}','${response[0]["id"]}', '${JSON.stringify(clientInfo)}')`)
-            resolved({
-                sessionID: sesID,
-                info: {
-                    type: "confirmation",
-                    message: "Logged in succesfully"
-                }
-            });
-        } else {
-            resolved({
-                info: {
-                    type: "error",
-                    message: "Failed to login"
-                }
-            });
-        }
-    })
+
+        delete userInfo["passwordHash"];
+
+        res.status(200).json({
+            success: true,
+            data: {
+                userInfo: userInfo,
+                token: token
+            }
+        });
+    } else {
+        //bad password
+        return next(new Error("Wrong password."));
+    }
 }
 
 
+
 //register endpoint
-app.post("/api/auth/register", async (req, res) => {
+app.post("/api/v1/auth/register", async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
 
@@ -146,18 +176,7 @@ app.post("/api/auth/register", async (req, res) => {
     });
 })
 
-app.post("/api/auth/login", async (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
-
-    let response = await createSession(username, password, {userAgent: req.headers["user-agent"], createDate: new Date().toUTCString()});
-    if (response.sessionID) {
-        res.cookie("sessionID", response.sessionID, { expires: new Date(253402300000000) }).json(response.info)
-        return
-    }
-
-    res.json(response.info)
-})
+app.post("/api/v1/auth/login", loginHandler)
 
 
 app.listen(config["http"]["port"], () => {

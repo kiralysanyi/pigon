@@ -78,27 +78,76 @@ const registerDevice = (deviceID, userID, deviceInfo) => {
     });
 }
 
+const verifyToken = (token) => {
+    return new Promise(async (resolved) => {
+        /*
+        {
+                userID: 69,
+                username: "lakatos rikárdinnyó",
+                deviceID: "aaa",
+                deviceInfo: {
+                    "user-agent": "xy",
+                    "deviceName": "xyz"
+                }
+        }
+        */
+        let decoded = jwt.verify(token, config["jwt"]["secret"]);
+        let res = await sqlQuery(`SELECT * FROM devices WHERE deviceID = '${decoded["deviceID"]}'`);
+        if (res.length == 0) {
+            resolved({
+                success: false,
+                message: "Device not registered."
+            })
+        }
+
+        resolved({
+            success: true,
+            data: decoded
+        })
+    })
+}
+
+const verifyPass = (username, password) => {
+    return new Promise(async (resolved) => {
+        let response = await sqlQuery(`SELECT * FROM users WHERE username='${username}'`)
+        console.log(response)
+        //id, username, passwordHash;
+        let userInfo = response[0];    
+        let hash = userInfo["passwordHash"];
+        console.log(hash, hashPass(password));
+        if (hash == hashPass(password)) {
+            resolved(true)
+        } else {
+            resolved(false)
+        }
+    })
+
+}
+
 //login handler
 const loginHandler = async (req = app.request, res = app.response, next = () => { }) => {
     let username = req.body.username;
     let password = req.body.password;
     if (await userExists(username) == false) {
         //user not existing
-        return next(new Error("User not found."));
+        res.status(404).json({
+            success: false,
+            data: {
+                message: "User not found"
+            }
+        });
+        return
     }
-    let response = await sqlQuery(`SELECT * FROM users WHERE username='${username}'`)
+    let response = await sqlQuery(`SELECT id, username FROM users WHERE username='${username}'`)
     console.log(response)
-    //id, username, passwordHash;
+    //id, username;
     let userInfo = response[0];
     let deviceName = "N/A"
 
     if (req.body.deviceName) {
         deviceName = req.body.deviceName;
     }
-
-    let hash = userInfo["passwordHash"];
-    console.log(hash, hashPass(password));
-    if (hash == hashPass(password)) {
+    if (await verifyPass(username, password)) {
         //password verified
 
         //generating a unique device ID
@@ -123,11 +172,14 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
 
             await registerDevice(deviceID, userInfo["id"], deviceInfo);
         } catch (error) {
-            console.log("Something wrong happened. ", error)
-            return next(error)
+            res.status(500).json({
+                success: false,
+                data: {
+                    message: "Failed to authenticate, contact system administrator to solve this issue."
+                }
+            });
+            return;
         }
-
-        delete userInfo["passwordHash"];
 
         res.status(200).json({
             success: true,
@@ -138,7 +190,12 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
         });
     } else {
         //bad password
-        return next(new Error("Wrong password."));
+        res.status(500).json({
+            success: false,
+            data: {
+                message: "Wrong password."
+            }
+        });
     }
 }
 
@@ -177,6 +234,52 @@ app.post("/api/v1/auth/register", async (req, res) => {
 })
 
 app.post("/api/v1/auth/login", loginHandler)
+
+app.delete("/api/v1/auth/delete", async (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    
+    if (await userExists(username) == false) {
+        res.status(404).json({
+            success: false,
+            data: {
+                message: "User not found"
+            }
+        });
+        return;
+    }
+
+    if (await verifyPass(username, password)) {
+        try {
+            let response = await sqlQuery(`SELECT id FROM users WHERE username = '${username}'`);
+            let userID = response[0]["id"];
+            await sqlQuery(`DELETE FROM devices WHERE userID='${userID}'`);
+            await sqlQuery(`DELETE FROM userconfig WHERE userID='${userID}'`);
+            await sqlQuery(`DELETE FROM users WHERE id = '${userID}'`);
+            res.json({
+                success: true,
+                data: {
+                    message: "User deleted successfully."
+                }
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                data: {
+                    message: "Failed to delete user"
+                }
+            });
+        }
+
+    } else {
+        res.status(500).json({
+            success: false,
+            data: {
+                message: "Wrong password."
+            }
+        });
+    }
+})
 
 
 app.listen(config["http"]["port"], () => {

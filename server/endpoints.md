@@ -68,17 +68,51 @@ Request type: `DELETE`
 }
 ```
 
-## /api/v1/auth/sessions
-Used for getting info about all active sessions for the currently logged in user
-Request type: `POST`
-
-## /api/v1/auth/sessionInfo
-Used for getting info about the current session
-Request type: `POST`
-
-## /api/v1/auth/userInfo
-Used for getting info about a specific user (authentication required)
+## /api/v1/auth/devices
+Used for getting info about all devices logged in devices for the current user
 Request type: `GET`
+
+Note: authorization header required.
+
+### Response body
+```
+{
+    "success": true,
+    "data": [
+        {
+            "deviceID": [string],
+            "deviceInfo": [json],
+            "registerDate": [date]
+        },
+                {
+            "deviceID": [string],
+            "deviceInfo": [json],
+            "registerDate": [date]
+        }
+    ]
+}
+```
+
+### Response body on fail
+```
+    {
+    "success": false,
+    "data": {
+        "message": "Failed to verify token"
+    }
+}
+```
+
+## /api/v1/auth/userinfo
+Used for getting info about a specific user. If no userID provided, then the server responds with the currently logged in user's info.
+Request type: `GET`
+
+### Request body (optional):
+```
+{
+    userID: [int]
+}
+``` 
 
 ## /api/v1/auth/modify
 Used for modifying user information (password, username, email, everything)

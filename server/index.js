@@ -91,8 +91,17 @@ const verifyToken = (token) => {
                 }
         }
         */
-        let decoded = jwt.verify(token, config["jwt"]["secret"]);
-        let res = await sqlQuery(`SELECT * FROM devices WHERE deviceID = '${decoded["deviceID"]}'`);
+        let decoded;
+        try {
+            decoded = jwt.verify(token, config["jwt"]["secret"]);
+        } catch (error) {
+            resolved({
+                success: false,
+                message: "Failed to verify token"
+            })
+            return;
+        }
+        let res = await sqlQuery(`SELECT 1 FROM devices WHERE deviceID = '${decoded["deviceID"]}'`);
         if (res.length == 0) {
             resolved({
                 success: false,
@@ -109,10 +118,10 @@ const verifyToken = (token) => {
 
 const verifyPass = (username, password) => {
     return new Promise(async (resolved) => {
-        let response = await sqlQuery(`SELECT * FROM users WHERE username='${username}'`)
+        let response = await sqlQuery(`SELECT passwordHash FROM users WHERE username='${username}'`)
         console.log(response)
-        //id, username, passwordHash;
-        let userInfo = response[0];    
+        //passwordHash
+        let userInfo = response[0];
         let hash = userInfo["passwordHash"];
         console.log(hash, hashPass(password));
         if (hash == hashPass(password)) {
@@ -208,18 +217,24 @@ app.post("/api/v1/auth/register", async (req, res) => {
 
     //check password length
     if (password.length < 8) {
-        res.json({
-            type: "error",
-            message: "Password too short, minimum 8 characters required"
+        res.status(500).json({
+            success: false,
+            data: {
+                message: "Password too short, minimum 8 characters required"
+
+            }
         })
         return;
     }
 
     //check if user exists in database
     if (await userExists(username)) {
-        res.json({
-            type: "error",
-            message: "User already exists, try another name,"
+        res.status(500).json({
+            success: false,
+            data: {
+                message: "User already exists"
+
+            }
         })
         return;
     }
@@ -228,9 +243,12 @@ app.post("/api/v1/auth/register", async (req, res) => {
     await createUser(username, password);
 
     res.json({
-        type: "confirmation",
-        message: "Account created succesfully"
-    });
+        success: true,
+        data: {
+            message: "Account created"
+
+        }
+    })
 })
 
 app.post("/api/v1/auth/login", loginHandler)
@@ -238,7 +256,7 @@ app.post("/api/v1/auth/login", loginHandler)
 app.delete("/api/v1/auth/delete", async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
-    
+
     if (await userExists(username) == false) {
         res.status(404).json({
             success: false,
@@ -281,6 +299,190 @@ app.delete("/api/v1/auth/delete", async (req, res) => {
     }
 })
 
+app.get("/api/v1/auth/devices", async (req, res) => {
+    console.log(req.headers.authorization);
+    let token;
+    try {
+        token = req.headers.authorization.split(' ')[1];
+    } catch (error) {
+        res.status(400)
+            .json(
+                {
+                    success: false,
+                    data: {
+                        message: "Token was not provided"
+                    }
+                }
+            );
+        return;
+    }
+    //Authorization: 'Bearer TOKEN'
+    if (!token) {
+        res.status(400)
+            .json(
+                {
+                    success: false,
+                    data: {
+                        message: "Token was not provided"
+                    }
+                }
+            );
+        return;
+    }
+
+    //verifying token
+    /*
+    {
+        userID: 69,
+        username: "lakatos rikárdinnyó",
+        deviceID: "aaa",
+        deviceInfo: {
+            "user-agent": "xy",
+            "deviceName": "xyz"
+        }
+    }
+*/
+    let decoded;
+    try {
+        decoded = await verifyToken(token);
+    } catch (error) {
+        res.status(200).json({
+            success: false,
+            data: {
+                message: "Failed to verify token"
+            }
+        })
+        return;
+    }
+    if (decoded.success == false) {
+        res.status(200).json({
+            success: false,
+            data: {
+                message: decoded.message
+            }
+        })
+        return;
+    }
+
+    let userID = decoded["data"]["userID"];
+    console.log(userID)
+    let devices = await sqlQuery(`SELECT deviceID, deviceInfo, registerDate FROM devices WHERE userID='${userID}'`);
+    console.log("A KURVA ANYÁD: ", devices)
+    if (devices.length == 0) {
+        res.status(500).json({
+            success: false,
+            data: {
+                message: "Failed to fetch devices"
+            }
+        })
+        return;
+    } else {
+        res.status(200).json({
+            success: true,
+            data: devices
+        });
+    }
+
+})
+
+app.get("/api/v1/auth/userinfo", async (req, res) => {
+    console.log(req.headers.authorization);
+    let token;
+    try {
+        token = req.headers.authorization.split(' ')[1];
+    } catch (error) {
+        res.status(400)
+            .json(
+                {
+                    success: false,
+                    data: {
+                        message: "Token was not provided"
+                    }
+                }
+            );
+        return;
+    }
+    //Authorization: 'Bearer TOKEN'
+    if (!token) {
+        res.status(400)
+            .json(
+                {
+                    success: false,
+                    data: {
+                        message: "Token was not provided"
+                    }
+                }
+            );
+        return;
+    }
+
+    //verifying token
+    /*
+    data:
+    {
+        userID: 69,
+        username: "lakatos rikárdinnyó",
+        deviceID: "aaa",
+        deviceInfo: {
+            "user-agent": "xy",
+            "deviceName": "xyz"
+        }
+    }
+*/
+    let decoded;
+    try {
+        decoded = await verifyToken(token);
+    } catch (error) {
+        res.status(200).json({
+            success: false,
+            data: {
+                message: "Failed to verify token"
+            }
+        })
+        return;
+    }
+    if (decoded.success == false) {
+        res.status(200).json({
+            success: false,
+            data: {
+                message: decoded.message
+            }
+        })
+        return;
+    }
+
+    let loggedinuserID = decoded["data"]["userID"];
+    let searchedID = req.body.userID;
+
+    if (searchedID == undefined) {
+        //no userID provided by the client so we respond with the requestor's information
+        let response = await sqlQuery(`SELECT username, registerDate FROM users WHERE id = '${loggedinuserID}'`);
+
+        res.json({
+            success: true,
+            data: response[0]
+        });
+        return;
+    }
+
+    //the user has provided a userID so we search for it and send it back to the client
+    let response = await sqlQuery(`SELECT username, registerDate FROM users WHERE id = '${searchedID}'`);
+
+    if (response.length == 0) {
+        res.json({
+            success: false,
+            data: {
+                message: "User not found"
+            }
+        });
+        return;
+    }
+
+    res.json({
+        success: true,
+        data: response[0]
+    });
+})
 
 app.listen(config["http"]["port"], () => {
     console.log(`Listening at http://localhost:${config["http"]["port"]}`);

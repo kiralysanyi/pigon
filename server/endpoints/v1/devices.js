@@ -1,4 +1,4 @@
-const {registerDevice, createUser, userExists, sqlQuery, verifyPass} = require("../../things/db")
+const {sqlQuery} = require("../../things/db")
 const {verifyToken} = require("../../things/jwt")
 
 const devicesHandler = async (req, res) => {

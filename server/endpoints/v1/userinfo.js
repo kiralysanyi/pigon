@@ -1,5 +1,5 @@
 const {verifyToken} = require("../../things/jwt")
-const {registerDevice, createUser, userExists, sqlQuery, verifyPass} = require("../../things/db")
+const {sqlQuery} = require("../../things/db")
 
 
 const userinfoHandler = async (req, res) => {

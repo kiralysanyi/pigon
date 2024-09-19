@@ -37,6 +37,9 @@ app.get("/api/v1/auth/devices", devicesHandler)
 const userinfoHandler = require("./endpoints/v1/userinfo").userinfoHandler
 app.get("/api/v1/auth/userinfo", userinfoHandler)
 
+const logoutHandler = require("./endpoints/v1/logout").logoutHandler;
+app.get("/api/v1/auth/logout", logoutHandler);
+
 app.listen(config["http"]["port"], () => {
     console.log(`Listening at http://localhost:${config["http"]["port"]}`);
 })

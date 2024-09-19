@@ -19,8 +19,6 @@ const deleteHandler = async (req, res) => {
         try {
             let response = await sqlQuery(`SELECT id FROM users WHERE username = '${username}'`);
             let userID = response[0]["id"];
-            await sqlQuery(`DELETE FROM devices WHERE userID='${userID}'`);
-            await sqlQuery(`DELETE FROM userconfig WHERE userID='${userID}'`);
             await sqlQuery(`DELETE FROM users WHERE id = '${userID}'`);
             res.json({
                 success: true,

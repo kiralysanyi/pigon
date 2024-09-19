@@ -105,6 +105,7 @@ Note: authorization header required.
 
 ## /api/v1/auth/userinfo
 Used for getting info about a specific user. If no userID provided, then the server responds with the currently logged in user's info.
+
 Request type: `GET`
 
 ### Request body (optional):
@@ -113,6 +114,23 @@ Request type: `GET`
     userID: [int]
 }
 ``` 
+
+## /api/v1/auth/logout
+Used for logging out. A.k.a deleting the device from the database, which will invalidate the token.
+
+Request type: `GET`
+
+Request body not required only authorization header containing the token.
+
+### Response body:
+```
+{
+    success: [bool]
+    data: {
+        message: [string]
+    }
+}
+```
 
 ## /api/v1/auth/modify
 Used for modifying user information (password, username, email, everything)

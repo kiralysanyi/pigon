@@ -6,7 +6,7 @@ const registerHandler = async (req, res) => {
 
     //check password length
     if (password.length < 8) {
-        res.status(500).json({
+        res.status(200).json({
             success: false,
             data: {
                 message: "Password too short, minimum 8 characters required"
@@ -18,7 +18,7 @@ const registerHandler = async (req, res) => {
 
     //check if user exists in database
     if (await userExists(username)) {
-        res.status(500).json({
+        res.status(200).json({
             success: false,
             data: {
                 message: "User already exists"

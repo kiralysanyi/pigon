@@ -132,6 +132,28 @@ Request body not required only authorization header containing the token.
 }
 ```
 
+## /api/v1/auth/removedevice
+Used for removing currently logged in devices
+Request type: `DELETE`
+
+Authorization header required.
+### Request body
+```
+{
+    deviceID: [string]
+}
+```
+
+### Response body:
+```
+{
+    success: [bool]
+    data: {
+        message: [string]
+    }
+}
+```
+
 ## /api/v1/auth/modify
 Used for modifying user information (password, username, email, everything)
 ### Request type: `UPDATE`

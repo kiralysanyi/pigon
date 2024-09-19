@@ -40,6 +40,9 @@ app.get("/api/v1/auth/userinfo", userinfoHandler)
 const logoutHandler = require("./endpoints/v1/logout").logoutHandler;
 app.get("/api/v1/auth/logout", logoutHandler);
 
+const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
+app.delete("/api/v1/auth/removedevice", removedeviceHandler);
+
 app.listen(config["http"]["port"], () => {
     console.log(`Listening at http://localhost:${config["http"]["port"]}`);
 })

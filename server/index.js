@@ -44,7 +44,20 @@ const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceH
 app.delete("/api/v1/auth/removedevice", removedeviceHandler);
 
 const changepassHandler = require("./endpoints/v1/changepass").changepassHandler;
-app.post("/api/v1/auth/changepass", changepassHandler);
+app.put("/api/v1/auth/changepass", changepassHandler);
+
+const {challengeHandler, webauthnRegHandler, authHandler} = require("./endpoints/v1/webauthn/webauthn");
+app.get("/api/v1/auth/webauthn/challenge", challengeHandler);
+app.post("/api/v1/auth/webauthn/register", webauthnRegHandler);
+app.post("/api/v1/auth/webauthn/auth", authHandler);
+
+
+//test endpoints
+const path = require("path");
+app.get("/test/webauthn.min.js", (req,res) => {
+    res.sendFile(path.join(__dirname, "node_modules", "@passwordless-id", "webauthn", "dist", "browser", "webauthn.min.js"));
+})
+app.use("/test", express.static("webauthn-test"));
 
 app.listen(config["http"]["port"], () => {
     console.log(`Listening at http://localhost:${config["http"]["port"]}`);

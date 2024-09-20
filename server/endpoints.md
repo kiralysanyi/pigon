@@ -157,7 +157,7 @@ Authorization header required.
 ## /api/v1/auth/changepass
 Used for changing password
 
-Method: `POST`
+Method: `PUT`
 
 Authorization header required.
 
@@ -179,6 +179,45 @@ Authorization header required.
 }
 ```
 
-## /api/v1/auth/modify
-Used for modifying user information (password, username, email, everything)
-### Request type: `UPDATE`
+# Webauthn endpoints
+
+## /api/v1/auth/webauthn/challenge
+Used for getting a challenge from the server
+
+Method: `GET`
+
+### Response body:
+```
+{
+    challenge: [string]
+}
+```
+
+## /api/v1/auth/webauthn/register
+Used for adding webauthn authenticator to existing user
+
+Method: `POST`
+
+Registration object is an object provided by the `@passwordless-id/webauthn` package.
+
+### Request body:
+```
+{
+    username: [string],
+    password: [string],
+    registration: [registration object],
+    challenge: [string]
+}
+```
+
+## /api/v1/auth/webauthn/auth
+Used for authenticating with webauthn
+
+### Request body:
+```
+{
+    username: [string],
+    challenge: [string],
+    authentication: [authentication object]
+}
+```

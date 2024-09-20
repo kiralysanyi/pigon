@@ -1,4 +1,4 @@
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const hashPass = require("./password").hashPass;
 const fs = require("fs");
 
@@ -46,7 +46,7 @@ const createUser = (username, password) => {
         let hash = hashPass(password);
         await sqlQuery(`INSERT INTO users (username, passwordHash) VALUES ('${username}', '${hash}')`);
         let res = await sqlQuery(`SELECT id FROM users WHERE username='${username}'`)
-        await sqlQuery(`INSERT INTO userconfig (userid, config) VALUES ('${res[0]["id"]}', '{}')`)
+        await sqlQuery(`INSERT INTO userconfig (userid) VALUES ('${res[0]["id"]}')`)
         resolved();
     })
 }
@@ -109,7 +109,7 @@ const updatePass = (username, userID, oldpass, newpass) => {
 
         try {
             let passHash = hashPass(newpass);
-            await sqlQuery(`UPDATE users SET passwordHash = '${passHash}'`);
+            await sqlQuery(`UPDATE users SET passwordHash = '${passHash}' WHERE userID = '${userID}'`);
             await sqlQuery(`DELETE FROM devices WHERE userID = '${userID}'`);
             resolved({
                 success: true,

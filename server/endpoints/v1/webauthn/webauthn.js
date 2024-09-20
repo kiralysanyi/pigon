@@ -2,6 +2,9 @@ const { server } = require("@passwordless-id/webauthn");
 const { verifyPass, userExists, sqlQuery, registerDevice } = require("../../../things/db");
 const jwt = require("jsonwebtoken");
 const uid = require("uuid").v4;
+const fs = require("fs");
+let config = JSON.parse(fs.readFileSync(__dirname + "/../../../config.json"));
+
 
 let challenges = [];
 const origin = "http://localhost:8080"
@@ -130,7 +133,7 @@ const authHandler = async (req, res) => {
         let deviceID = uid();
         let deviceInfo = {
             "user-agent": req.headers["user-agent"],
-            "deviceName": deviceName
+            "deviceName": "Webauthn authentication provider"
         }
 
         try {
@@ -152,6 +155,7 @@ const authHandler = async (req, res) => {
                 }
             });
         } catch (error) {
+            console.log(error);
             res.status(500).json({
                 success: false,
                 data: {
@@ -163,6 +167,7 @@ const authHandler = async (req, res) => {
 
 
     } catch (error) {
+        console.log(error)
         res.json({
             success: false,
             data: {

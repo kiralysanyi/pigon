@@ -43,6 +43,9 @@ app.get("/api/v1/auth/logout", logoutHandler);
 const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
 app.delete("/api/v1/auth/removedevice", removedeviceHandler);
 
+const changepassHandler = require("./endpoints/v1/changepass").changepassHandler;
+app.post("/api/v1/auth/changepass", changepassHandler);
+
 app.listen(config["http"]["port"], () => {
     console.log(`Listening at http://localhost:${config["http"]["port"]}`);
 })

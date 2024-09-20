@@ -76,4 +76,58 @@ const verifyPass = (username, password) => {
 
 }
 
-module.exports = {registerDevice, createUser, userExists, sqlQuery, verifyPass}
+const updatePass = (username, userID, oldpass, newpass) => {
+    return new Promise(async (resolved) => {
+        if (newpass.length < 8) {
+            resolved({
+                success: false,
+                data: {
+                    message: "New password too short, minimum 8 characters required"
+                }
+            });
+            return;
+        }
+        if (await userExists(username) == false) {
+            resolved({
+                success: false,
+                data: {
+                    message: "User not found"
+                }
+            });
+            return;
+        }
+
+        if (await verifyPass(username, oldpass) == false) {
+            resolved({
+                success: false,
+                data: {
+                    message: "Wrong password."
+                }
+            })
+            return;
+        }
+
+        try {
+            let passHash = hashPass(newpass);
+            await sqlQuery(`UPDATE users SET passwordHash = '${passHash}'`);
+            await sqlQuery(`DELETE FROM devices WHERE userID = '${userID}'`);
+            resolved({
+                success: true,
+                data: {
+                    message: "Password updated successfully"
+                }
+            });
+            return;
+        } catch (error) {
+            console.log(error);
+            resolved({
+                success: false,
+                data: {
+                    message: "Failed to update password."
+                }
+            });
+        }
+    });
+}
+
+module.exports = {registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass}

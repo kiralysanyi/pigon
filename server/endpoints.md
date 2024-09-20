@@ -154,6 +154,31 @@ Authorization header required.
 }
 ```
 
+## /api/v1/auth/changepass
+Used for changing password
+
+Method: `POST`
+
+Authorization header required.
+
+### Request body:
+```
+{
+    oldpass: [string],
+    newpass: [string]
+}
+```
+
+### Response body:
+```
+{
+    success: [bool],
+    data: {
+        message: [string]
+    }
+}
+```
+
 ## /api/v1/auth/modify
 Used for modifying user information (password, username, email, everything)
 ### Request type: `UPDATE`

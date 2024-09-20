@@ -1,5 +1,18 @@
 import { client } from "./webauthn.min.js"
 
+let clog = console.log;
+
+console.log = (...args) => {
+    clog(args)
+    let line;
+    for (let i in args) {
+        line += args[i]
+    }
+
+    line += "\n";
+    document.getElementById("log").innerHTML += line;
+}
+
 const httprequest = (method, endpoint, body, isJson = false) => {
     return new Promise((resolved) => {
         let req = new XMLHttpRequest();
@@ -57,8 +70,9 @@ const authenticate = async (username) => {
 
     console.log(authentication)
 
-    let response = JSON.parse(await httprequest("POST", "/api/v1/auth/webauthn/auth", JSON.stringify({username, authentication, challenge}), true));
-
+    let response = JSON.parse(await httprequest("POST", "/api/v1/auth/webauthn/auth", JSON.stringify({username, authentication, challenge, deviceName: document.getElementById("deviceName").value}), true));
+    console.log(response)
+    
 }
 
 document.getElementById("regbutton").addEventListener("click", () => {

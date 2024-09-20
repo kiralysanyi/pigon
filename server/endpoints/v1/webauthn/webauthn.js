@@ -90,6 +90,11 @@ const authHandler = async (req, res) => {
     let authentication = req.body.authentication;
     let challenge = req.body.challenge;
     let credentialID = authentication["id"];
+    let deviceName = req.body.deviceName;
+
+    if (deviceName == undefined) {
+        deviceName = "N/A"
+    }
 
     if (username == undefined || authentication == undefined) {
         res.json({
@@ -133,7 +138,7 @@ const authHandler = async (req, res) => {
         let deviceID = uid();
         let deviceInfo = {
             "user-agent": req.headers["user-agent"],
-            "deviceName": "Webauthn authentication provider"
+            "deviceName": deviceName
         }
 
         try {

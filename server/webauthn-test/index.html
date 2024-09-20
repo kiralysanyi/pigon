@@ -6,14 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webauthn functionality test</title>
     <script src="script.js" type="module"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <h1>Authentication test suite</h1>
+    <p>Enabling developer tools is higly recommended.</p>
+
     <h1>Webauthn TEST</h1>
+    <p>Username required for both tests! Password is only required for the register proccess because we only add passkey as an optional login, so the user can use both password and passkey.</p>
     <input type="text" placeholder="Username" name="username" id="username">
+    <br>
     <input type="password" name="password" id="password" placeholder="Password">
+    <br>
+    <input type="text" name="deviceName", id="deviceName" placeholder="Device name (friendly name)">
+    <br>
     <button id="regbutton">Register</button>
     <button id="authbutton">Authenticate</button>
+    <h2>Log:</h2>
+    <p id="log"></p>
 </body>
 
 </html>

@@ -198,7 +198,7 @@ Used for adding webauthn authenticator to existing user
 
 Method: `POST`
 
-Registration object is an object provided by the `@passwordless-id/webauthn` package.
+Registration/Authentication object is an object provided by the `@passwordless-id/webauthn` package.
 
 ### Request body:
 ```
@@ -207,6 +207,16 @@ Registration object is an object provided by the `@passwordless-id/webauthn` pac
     password: [string],
     registration: [registration object],
     challenge: [string]
+}
+```
+
+### Response body:
+```
+{
+    success: [bool],
+    data: {
+        message: [string]
+    }
 }
 ```
 
@@ -219,5 +229,16 @@ Used for authenticating with webauthn
     username: [string],
     challenge: [string],
     authentication: [authentication object]
+}
+```
+
+### Response body:
+```
+{
+    success: [bool],
+    data: {
+        message: [string],
+        token: [string] //only if success = true
+    }
 }
 ```

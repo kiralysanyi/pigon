@@ -12,6 +12,7 @@ Request type: `POST`
 }
 ```
 The `deviceName` field is optional.
+The token is provided in the http only `token` cookie
 ### Response body success:
 ```
 {
@@ -20,8 +21,7 @@ The `deviceName` field is optional.
         "userInfo": {
             "id": [int],
             "username": [string]
-        },
-        "token": [string]
+        }
     }
 }
 ```
@@ -72,7 +72,7 @@ Request type: `DELETE`
 Used for getting info about all devices logged in devices for the current user
 Request type: `GET`
 
-Note: authorization header required.
+Note: Token cookie required
 
 ### Response body
 ```
@@ -120,7 +120,7 @@ Used for logging out. A.k.a deleting the device from the database, which will in
 
 Request type: `GET`
 
-Request body not required only authorization header containing the token.
+Request body not required only token cookie
 
 ### Response body:
 ```
@@ -136,7 +136,7 @@ Request body not required only authorization header containing the token.
 Used for removing currently logged in devices
 Request type: `DELETE`
 
-Authorization header required.
+Token cookie required
 ### Request body
 ```
 {
@@ -159,7 +159,7 @@ Used for changing password
 
 Method: `PUT`
 
-Authorization header required.
+Token cookie required
 
 ### Request body:
 ```

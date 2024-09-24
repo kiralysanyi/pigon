@@ -63,11 +63,16 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
             return;
         }
 
+        res.cookie('token', token, {
+            httpOnly: true,  // This makes the cookie HTTP-only
+            secure: true,    // This ensures the cookie is only sent over HTTPS (recommended for production)
+            maxAge: 365 * 24 * 60 * 60 * 1000,  // Cookie expiry time (1 year here)
+        });
+
         res.status(200).json({
             success: true,
             data: {
-                userInfo: userInfo,
-                token: token
+                userInfo: userInfo
             }
         });
     } else {

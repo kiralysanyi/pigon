@@ -3,10 +3,10 @@ const {sqlQuery} = require("../../things/db")
 
 
 const userinfoHandler = async (req, res) => {
-    console.log(req.headers.authorization);
+    console.log(req.cookies.token);
     let token;
     try {
-        token = req.headers.authorization.split(' ')[1];
+        token = req.cookies.token
     } catch (error) {
         res.status(400)
             .json(

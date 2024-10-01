@@ -2,6 +2,7 @@ const {sqlQuery, userExists, verifyPass, registerDevice} = require("../../things
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const uid = require("uuid").v4;
+const {validateUsername} = require("../../things/usernameRegex");
 
 
 let config = JSON.parse(fs.readFileSync(__dirname + "/../../config.json"));
@@ -10,6 +11,18 @@ let config = JSON.parse(fs.readFileSync(__dirname + "/../../config.json"));
 const loginHandler = async (req = app.request, res = app.response, next = () => { }) => {
     let username = req.body.username;
     let password = req.body.password;
+
+    if(validateUsername(username) == false) {
+        res.status(200).json({
+            success: false,
+            data: {
+                message: "Username can not contain special characters and whitespaces."
+
+            }
+        })
+        return;
+    }
+
     if (await userExists(username) == false) {
         //user not existing
         res.status(404).json({
@@ -20,6 +33,9 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
         });
         return
     }
+
+
+
     let response = await sqlQuery(`SELECT id, username FROM users WHERE username='${username}'`)
     console.log(response)
     //id, username;

@@ -13,6 +13,8 @@ app.use(cors({
     origin: "*"
 }));
 
+app.use(require('sanitize').middleware);
+
 
 let config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 

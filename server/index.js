@@ -53,6 +53,8 @@ app.get("/api/v1/auth/webauthn/challenge", challengeHandler);
 app.post("/api/v1/auth/webauthn/register", webauthnRegHandler);
 app.post("/api/v1/auth/webauthn/auth", authHandler);
 
+app.use("/app", express.static(__dirname + "/public"))
+
 
 //test endpoints
 const path = require("path");

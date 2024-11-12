@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pigon</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/pigonoverlay.js"></script>
+</head>
+
+<body>
+    <nav>
+        <img src="pigonicon.png" width="32px" height="32px" alt="pigon">
+        <div class="title">Pigon</div>
+    </nav>
+    <div id="content">
+        <div class="card">
+            <h1>Welcome to PIGON!!!</h1>
+            <p> <b>The future of instant messengers </b></p>
+            <p>(the 47th one)</p>
+        </div>
+
+        <div class="card">
+            <h1>Login/Register</h1>
+            <button>Login</button>
+            <br>
+            <button id="regbutton">Register</button>
+        </div>
+    </div>
+</body>
+    <script>
+        document.getElementById("regbutton").addEventListener("click", () => {
+            pigonOverlay();
+
+            setTimeout(() => {
+                location.href = "/app/register"
+            }, 1000);
+        })
+    </script>
+</html>

@@ -1,5 +1,9 @@
-const express = require("express");
+const express = require('express');
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 let cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 let jsonParser = bodyParser.json;
@@ -63,6 +67,6 @@ app.get("/test/webauthn.min.js", (req,res) => {
 })
 app.use("/test", express.static("webauthn-test"));
 
-app.listen(config["http"]["port"], () => {
+server.listen(config["http"]["port"], () => {
     console.log(`Listening at http://localhost:${config["http"]["port"]}`);
 })

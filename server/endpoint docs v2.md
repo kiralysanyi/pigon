@@ -4,7 +4,7 @@ This documentation outlines the various authentication endpoints and how they sh
 
 ## **/api/v1/auth/login**
 ### **Description**  
-This endpoint is used to authenticate a user and create a session. On successful authentication, a token is returned, which must be used for subsequent authenticated requests.
+This endpoint is used to authenticate a user and create a session. On successful authentication, a token is returned and stored in a cookie, which is used for subsequent authenticated requests.
 
 ### **Method**  
 `POST`
@@ -30,10 +30,11 @@ This endpoint is used to authenticate a user and create a session. On successful
             "id": 123,
             "username": "your-username"
         },
-        "token": "your-authentication-token"
+        "message": "Login successful"
     }
 }
 ```
+- The authentication token is stored in a secure cookie.
 
 ### **Response (Failure)**
 ```json
@@ -44,7 +45,7 @@ This endpoint is used to authenticate a user and create a session. On successful
     }
 }
 ```
-- In case of failure, the message field will explain the issue (e.g., incorrect login details).
+- In case of failure, the `message` field will explain the issue (e.g., incorrect login details).
 
 ---
 
@@ -65,6 +66,16 @@ This endpoint allows you to create a new user account.
 - `username` *(required)*: The username you wish to register.
 - `password` *(required)*: The password for your new account.
 
+### **Response (Success)**
+```json
+{
+    "success": true,
+    "data": {
+        "message": "Registration successful"
+    }
+}
+```
+
 ---
 
 ## **/api/v1/auth/delete**
@@ -84,7 +95,7 @@ This endpoint deletes a user account. You must provide valid credentials to dele
 - `username` *(required)*: Your account username.
 - `password` *(required)*: Your account password.
 
-### **Response**
+### **Response (Success)**
 ```json
 {
     "success": true,
@@ -114,7 +125,7 @@ Retrieve information about all devices currently logged in with your account. Th
 `GET`
 
 ### **Note**  
-Authorization header with a valid token is required.
+Authentication token must be present in cookies.
 
 ### **Response (Success)**
 ```json
@@ -142,7 +153,7 @@ Authorization header with a valid token is required.
 ```
 Each device entry contains:
 - `deviceID`: The unique identifier of the device.
-- `deviceInfo`: A JSON object containing information about the device (useragent, device name, etc.).
+- `deviceInfo`: A JSON object containing information about the device (user agent, device name, etc.).
 - `registerDate`: The date and time the device was registered.
 
 ### **Response (Failure)**
@@ -172,17 +183,30 @@ Retrieve information about a specific user or the currently logged-in user if no
 ```
 - `userID` *(optional)*: The ID of the user you want information about.
 
+### **Response (Success)**
+```json
+{
+    "success": true,
+    "data": {
+        "userInfo": {
+            "id": 123,
+            "username": "user-username"
+        }
+    }
+}
+```
+
 ---
 
 ## **/api/v1/auth/logout**
 ### **Description**  
-Logs the user out by removing the current device from the database, invalidating the authentication token.
+Logs the user out by removing the current device from the database and invalidating the authentication token.
 
 ### **Method**  
 `GET`
 
 ### **Note**  
-No request body is needed, but the authorization header (containing your token) is required.
+No request body is needed, but the authentication token must be stored in cookies.
 
 ### **Response**
 ```json
@@ -211,7 +235,7 @@ Removes a specific logged-in device from your account, effectively logging that 
 ```
 - `deviceID` *(required)*: The ID of the device to be removed.
 
-### **Response**
+### **Response (Success)**
 ```json
 {
     "success": true,
@@ -240,7 +264,7 @@ Allows you to change your password.
 - `oldpass` *(required)*: Your current password.
 - `newpass` *(required)*: Your new password.
 
-### **Response**
+### **Response (Success)**
 ```json
 {
     "success": true,
@@ -297,7 +321,7 @@ Register a WebAuthn authenticator for an existing user.
 - `registration`: The WebAuthn registration object (as per the WebAuthn specification).
 - `challenge`: The challenge received from the `/challenge` endpoint.
 
-### **Response**
+### **Response (Success)**
 ```json
 {
     "success": true,
@@ -312,6 +336,9 @@ Register a WebAuthn authenticator for an existing user.
 ## **/api/v1/auth/webauthn/auth**
 ### **Description**  
 Authenticate a user using WebAuthn.
+
+### **Method**  
+`POST`
 
 ### **Request Body**
 ```json
@@ -332,15 +359,15 @@ Authenticate a user using WebAuthn.
 }
 ```
 
-### **Response**
+### **Response (Success)**
 ```json
 {
     "success": true,
     "data": {
-        "message": "Authentication successful",
-        "token": "new-authentication-token"
+        "message": "Authentication successful"
     }
 }
 ```
+- The new authentication token is stored in a secure cookie.
 
 In case of failure, a relevant error message will be returned in the `message` field.

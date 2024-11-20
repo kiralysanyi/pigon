@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Form</title>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            background-image: url("pigon.jpg");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        #background {
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.384);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: 300ms;
+        }
+
+        .form-container {
+            display: block;
+            background-color: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            transition: 300ms;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .form-group i {
+            margin-right: 8px;
+            color: #888;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg)
+            }
+
+            0% {
+                transform: rotate(-360deg)
+            }
+        }
+
+        .spinner {
+            position: absolute;
+            bottom: 5px;
+            left: calc(50% - 20px);
+            width: 32px;
+            height: 32px;
+            background-color: white;
+            border-radius: 100%;
+            border: 8px solid white;
+            border-top: 8px solid #4CAF50;
+            animation: 1s linear infinite spin;
+        }
+
+        #message {
+            position: fixed;
+            top: -310px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            width: 300px;
+            height: 100px;
+            border-radius: 20px;
+            background-color: rgb(65, 65, 65);
+            color: white;
+            transition: 500ms;
+            text-align: center;
+            padding: 10px;
+        }
+
+        #submit:disabled {
+            background-color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="background">
+        <div id="message"></div>
+        <div class="form-container" id="form-container">
+            <form id="form">
+                <h1>Pigon Register</h1>
+                <div class="form-group">
+                    <label for="username"><i class="fa fa-user"></i> Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fa fa-lock"></i> Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button id="submit" type="submit" class="submit-btn">Register</button>
+                <div id="spiner" class="spinner"></div>
+            </form>
+        </div>
+    </div>
+</body>
+
+<script src="js/auth.js"></script>
+
+<script>
+    setTimeout(() => {
+        document.getElementById("background").style.opacity = 1;
+    }, 500);
+    let spiner = document.getElementById("spiner")
+    spiner.style.opacity = 0;
+    document.getElementById("form").addEventListener("submit", async (e) => {
+
+        spiner.style.opacity = 1;
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        e.preventDefault();
+        let data = await register(username, password);
+        console.log(data)
+        document.getElementById("message").innerHTML = data.data.message;
+        document.getElementById("message").style.top = "10px";
+        setTimeout(() => {
+            document.getElementById("message").style.top = "-310px";
+        }, 5000);
+        spiner.style.opacity = 0;
+
+        if (data.success == true) {
+            spiner.style.opacity = 1;
+            document.getElementById("submit").disabled = true;
+            setTimeout(() => {
+                location.replace("login.html")
+            }, 2000);
+        }
+})
+</script>
+
+</html>

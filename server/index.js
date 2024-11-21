@@ -9,7 +9,7 @@ const bodyParser = require("body-parser");
 let jsonParser = bodyParser.json;
 const fs = require("fs");
 const cors = require("cors");
-
+const verifyToken = require("./things/jwt").verifyToken;
 
 app.use(jsonParser());
 app.use(cookieParser());
@@ -52,17 +52,42 @@ app.delete("/api/v1/auth/removedevice", removedeviceHandler);
 const changepassHandler = require("./endpoints/v1/changepass").changepassHandler;
 app.put("/api/v1/auth/changepass", changepassHandler);
 
-const {challengeHandler, webauthnRegHandler, authHandler} = require("./endpoints/v1/webauthn/webauthn");
+const { challengeHandler, webauthnRegHandler, authHandler } = require("./endpoints/v1/webauthn/webauthn");
 app.get("/api/v1/auth/webauthn/challenge", challengeHandler);
 app.post("/api/v1/auth/webauthn/register", webauthnRegHandler);
 app.post("/api/v1/auth/webauthn/auth", authHandler);
 
-app.use("/app", express.static(__dirname + "/public"))
+
+
+app.use("/app/webui/", async (req, res, next) => {
+    console.log(req.cookies);
+    if (!req.cookies["token"]) {
+        console.log("No token provided");
+        res.redirect("/app/login.html");
+        return;
+    }
+    if (await verifyToken(req.cookies["token"]) == false) {
+        console.log("Invalid token");
+        res.redirect("/app/login.html");
+        return;
+    }
+
+    next();
+
+})
+
+app.use("/app", express.static(__dirname + "/public"));
+
+app.get("/", (req, res) => {
+    res.redirect("/app/login.html");
+})
+
+
 
 
 //test endpoints
 const path = require("path");
-app.get("/test/webauthn.min.js", (req,res) => {
+app.get("/test/webauthn.min.js", (req, res) => {
     res.sendFile(path.join(__dirname, "node_modules", "@passwordless-id", "webauthn", "dist", "browser", "webauthn.min.js"));
 })
 app.use("/test", express.static("webauthn-test"));

@@ -191,16 +191,5 @@ async function authenticateWebAuthn(username, challenge, authentication) {
     return data;
 }
 
-async function checkIfLoggedIn(redirect = false) {
-    let userinfo = await getUserInfo();
-    console.log(userinfo);
-    if (userinfo.success == false) {
-        return false;
-    }
 
-    if (userinfo.success == true && redirect == true) {
-        location.replace("/app/webui/index.html");
-    }
-}
-
-checkIfLoggedIn(true);
+export {authenticateWebAuthn, changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register}

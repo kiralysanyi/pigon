@@ -1,0 +1,83 @@
+body {
+    background-color: rgb(66, 66, 66);
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+}
+
+nav {
+    position: fixed;
+    top: 5px;
+    left: 5px;
+    width: calc(100% - 10px);
+    height: 40px;
+    background-color: rgb(32, 32, 32);
+    border-radius: 10px;
+}
+
+#mainSidebarContainer {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(124, 124, 124, 0.555);
+    display: none;
+}
+
+#mainSidebar {
+    position: absolute;
+    top: 10px;
+    left: -310px;
+    background-color: rgb(32, 32, 32);
+    width: 300px;
+    height: calc(100% - 20px);
+    border-radius: 10px;
+    transition: 500ms;
+    text-align: center;
+}
+
+#openSidebarBtn {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.158);
+    border-radius: 10px;
+    transition: 200ms;
+    text-align: center;
+    line-height: 30px;
+}
+
+#openSidebarBtn:hover {
+    background-color: rgba(255, 255, 255, 0.267);
+}
+
+#sbcontent {
+    position: absolute;
+    top: 100px;
+    left: 0px;
+    width: 100%;
+    height: calc(100% - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#sbfooter {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    height: 100px;
+}
+
+.sb-btn-smol {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.205);
+    border-radius: 10px;
+    text-align: center;
+    line-height: 40px;
+    margin: 10px;
+    float: left;
+}

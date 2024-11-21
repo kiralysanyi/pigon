@@ -85,6 +85,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-top: 10px;
         }
 
         .submit-btn:hover {
@@ -132,6 +133,12 @@
         #submit:disabled {
             background-color: #888;
         }
+
+        #loginbutton {
+            background-color: white;
+            color: #4CAF50;
+            border: none;
+        }
     </style>
 </head>
 
@@ -150,6 +157,8 @@
                     <input type="password" id="password" name="password" required>
                 </div>
                 <button id="submit" type="submit" class="submit-btn">Register</button>
+                <button id="loginbutton" type="button" class="submit-btn">I already have an account</button>
+
                 <div id="spiner" class="spinner"></div>
             </form>
         </div>
@@ -186,6 +195,10 @@
                 location.replace("login.html")
             }, 2000);
         }
+})
+
+document.getElementById("loginbutton").addEventListener("click", () => {
+    location.href = "/app/login.html"
 })
 </script>
 

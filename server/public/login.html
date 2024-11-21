@@ -85,6 +85,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-top: 10px;
         }
 
         .submit-btn:hover {
@@ -133,9 +134,12 @@
             background-color: #888;
         }
 
-        #passkeybtn {
-            margin-top: 10px;
+        #regbutton {
+            background-color: white;
+            color: #4CAF50;
+            border: none;
         }
+
     </style>
 </head>
 
@@ -156,6 +160,8 @@
                 <button id="submit" type="submit" class="submit-btn">Login</button>
                 <br>
                 <button id="passkeybtn" type="button" class="submit-btn">Use passkey</button>
+                <br>
+                <button id="regbutton" type="button" class="submit-btn">I don't have an account</button>
                 <div id="spiner" class="spinner"></div>
             </form>
         </div>
@@ -194,6 +200,10 @@
                 location.replace("webui/index.html")
             }, 2000);
         }
+    })
+
+    document.getElementById("regbutton").addEventListener("click", () => {
+        location.href = "/app/register.html"
     })
 </script>
 

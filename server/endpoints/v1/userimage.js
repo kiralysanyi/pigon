@@ -11,7 +11,7 @@ if (fs.existsSync(imageDir) == false) {
 }
 
 const getImageHandler = (req, res) => {
-    if (!req.body.id) {
+    if (!req.query.id) {
         res.status(400).json({
             success: false,
             message: "No id provided."
@@ -19,13 +19,18 @@ const getImageHandler = (req, res) => {
         return;
     }
 
-    if (fs.existsSync(imageDir + req.body.id + ".png")) {
-        res.sendFile(imageDir + req.body.id + ".png");
+    if (fs.existsSync(imageDir + req.query.id + ".png")) {
+        res.sendFile(imageDir + req.query.id + ".png");
         return;
     }
 
-    if (fs.existsSync(imageDir + req.body.id + ".jpg")) {
-        res.sendFile(imageDir + req.body.id + ".jpg");
+    if (fs.existsSync(imageDir + req.query.id + ".jpeg")) {
+        res.sendFile(imageDir + req.query.id + ".jpeg");
+        return;
+    }
+
+    if (fs.existsSync(imageDir + req.query.id + ".jpg")) {
+        res.sendFile(imageDir + req.query.id + ".jpg");
         return;
     }
 

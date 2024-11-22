@@ -380,12 +380,7 @@ Get profile picture of a user.
 ### **Method**  
 `GET`
 
-### **Request Body**
-```json
-{
-    "id": 123
-}
-```
+### **Request Params**
 - `id` : The ID of the user you want information about.
 
 ### **Response (Success)**
@@ -400,6 +395,7 @@ Upload profile picture of a user.
 
 ### **Request Body**
 Formdata containing the image. Note: You have to be authenticated for this request.
+Provide the file under the image key.
 
 
 ### **Response (Success)**

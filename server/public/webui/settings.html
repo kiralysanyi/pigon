@@ -58,10 +58,24 @@
 
     let userinfo = await getUserInfo()
     console.log(userinfo)
+
+    document.getElementById("pfp").src = "/api/v1/auth/pfp?id=" + userinfo.data.id;
+
     document.getElementById("username").innerHTML = userinfo.data.username
 
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/jpg, image/jpeg, image/png";
+
+    fileInput.addEventListener("change", () => {
+        uploadFile();
+    })
+
+    document.getElementById("pfp").addEventListener("click", () => {
+        fileInput.click();
+    });
+
     async function uploadFile() {
-        const fileInput = document.getElementById('userimageInput');
         const statusDiv = document.getElementById('uploadStatus');
 
         if (!fileInput.files.length) {
@@ -73,26 +87,29 @@
         const formData = new FormData();
 
         // Append the file to the FormData object
-        formData.append('file', file);
+        formData.append('image', file);
 
         try {
             // Make the POST request to your server's upload endpoint
-            const response = await fetch('https://example.com/upload', { // Replace with your server URL
+            const response = await fetch('/api/v1/auth/pfp', { // Replace with your server URL
                 method: 'POST',
+                credentials: "include",
                 body: formData,
             });
 
             if (response.ok) {
                 const result = await response.json();
-                statusDiv.textContent = `File uploaded successfully: ${result.message}`;
+                window.alert(`File uploaded successfully: ${result.message}`);
+                location.reload();
             } else {
-                statusDiv.textContent = `Error uploading file: ${response.statusText}`;
+                window.alert(`Error uploading file: ${response.statusText}`);
             }
         } catch (error) {
             console.error('Upload failed:', error);
-            statusDiv.textContent = 'Failed to upload file.';
+            window.alert(`Failed to upload file`);
         }
     }
+
 </script>
 
 </html>

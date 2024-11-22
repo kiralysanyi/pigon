@@ -371,3 +371,35 @@ Authenticate a user using WebAuthn.
 - The new authentication token is stored in a secure cookie.
 
 In case of failure, a relevant error message will be returned in the `message` field.
+
+
+## **/api/v1/auth/pfp**
+### **Description**  
+Get profile picture of a user.
+
+### **Method**  
+`GET`
+
+### **Request Body**
+```json
+{
+    "id": 123
+}
+```
+- `id` : The ID of the user you want information about.
+
+### **Response (Success)**
+Profile picture of the user.
+
+## **/api/v1/auth/pfp**
+### **Description**  
+Upload profile picture of a user.
+
+### **Method**  
+`POST`
+
+### **Request Body**
+Formdata containing the image. Note: You have to be authenticated for this request.
+
+
+### **Response (Success)**

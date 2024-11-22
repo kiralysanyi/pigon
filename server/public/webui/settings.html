@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #pfp {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 128px;
+            height: 128px;
+            border-radius: 100%;
+            background-color: pink;
+        }
+
+        #username {
+            position: absolute;
+            top: 148px;
+            left: 0px;
+            width: 100%;
+            height: 40px;
+            color: white;
+            text-align: center;
+            line-height: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <img alt="profile picture" id="pfp">
+    <div id="username"></div>
+</body>
+<script type="module">
+    async function getUserInfo(userID = null) {
+        const body = userID ? JSON.stringify({ userID }) : null;
+        const response = await fetch('/api/v1/auth/userinfo', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: "include",
+            body: body
+        });
+        const data = await response.json();
+        if (data.success) {
+            console.log('User info retrieved', data.data);
+        } else {
+            console.error('Failed to retrieve user info', data.data.message);
+        }
+        return data;
+    }
+
+    let userinfo = await getUserInfo()
+    console.log(userinfo)
+    document.getElementById("username").innerHTML = userinfo.data.username
+
+    async function uploadFile() {
+        const fileInput = document.getElementById('userimageInput');
+        const statusDiv = document.getElementById('uploadStatus');
+
+        if (!fileInput.files.length) {
+            statusDiv.textContent = 'No file selected.';
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+
+        // Append the file to the FormData object
+        formData.append('file', file);
+
+        try {
+            // Make the POST request to your server's upload endpoint
+            const response = await fetch('https://example.com/upload', { // Replace with your server URL
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                statusDiv.textContent = `File uploaded successfully: ${result.message}`;
+            } else {
+                statusDiv.textContent = `Error uploading file: ${response.statusText}`;
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            statusDiv.textContent = 'Failed to upload file.';
+        }
+    }
+</script>
+
+</html>

@@ -45,5 +45,7 @@ document.getElementById("logoutbtn").addEventListener("click", async () => {
 
 document.getElementById("settingsbtn").addEventListener("click", () => {
     let settingsModal = new modal("Settings");
+    settingsModal.contentElement.innerHTML = "<iframe src='./settings.html'></iframe>"
     settingsModal.open();
 })
+

@@ -11,6 +11,12 @@ const fs = require("fs");
 const cors = require("cors");
 const verifyToken = require("./things/jwt").verifyToken;
 
+const userimage = require("./endpoints/v1/userimage");
+
+const fileupload = require("express-fileupload");
+
+app.use(fileupload({limits: {files: 1, fileSize: 10000000}}));
+
 app.use(jsonParser());
 app.use(cookieParser());
 app.use(cors({
@@ -56,6 +62,8 @@ const { challengeHandler, webauthnRegHandler, authHandler } = require("./endpoin
 app.get("/api/v1/auth/webauthn/challenge", challengeHandler);
 app.post("/api/v1/auth/webauthn/register", webauthnRegHandler);
 app.post("/api/v1/auth/webauthn/auth", authHandler);
+app.get("/api/v1/auth/pfp", userimage.getImageHandler);
+app.post("/api/v1/auth/pfp", userimage.uploadHandler);
 
 
 

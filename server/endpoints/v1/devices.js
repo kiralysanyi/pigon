@@ -45,8 +45,10 @@ const devicesHandler = async (req, res) => {
     }
 */
     let decoded;
+    let currentDevID;
     try {
         decoded = await verifyToken(token);
+        currentDevID = decoded["data"]["deviceID"];
     } catch (error) {
         res.status(200).json({
             success: false,
@@ -69,7 +71,6 @@ const devicesHandler = async (req, res) => {
     let userID = decoded["data"]["userID"];
     console.log(userID)
     let devices = await sqlQuery(`SELECT deviceID, deviceInfo, registerDate FROM devices WHERE userID='${userID}'`);
-    console.log("A KURVA ANYÁD: ", devices)
     if (devices.length == 0) {
         res.status(500).json({
             success: false,
@@ -79,6 +80,14 @@ const devicesHandler = async (req, res) => {
         })
         return;
     } else {
+        for(let i in devices) {
+            console.log(devices[i]["deviceID"], currentDevID)
+            if (devices[i]["deviceID"] == currentDevID) {
+                devices[i]["current"] = true;
+            } else {
+                devices[i]["current"] = false;
+            }
+        }
         res.status(200).json({
             success: true,
             data: devices

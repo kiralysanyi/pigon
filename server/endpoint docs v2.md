@@ -138,7 +138,8 @@ Authentication token must be present in cookies.
                 "user-agent": "xyz",
                 "deviceName": "fedora box"
             },
-            "registerDate": "2023-09-15T10:30:00Z"
+            "registerDate": "2023-09-15T10:30:00Z",
+            "current": true
         },
         {
             "deviceID": "device-2-id",
@@ -146,7 +147,8 @@ Authentication token must be present in cookies.
                 "user-agent": "xyz",
                 "deviceName": "windows box"
             },
-            "registerDate": "2023-09-14T14:22:00Z"
+            "registerDate": "2023-09-14T14:22:00Z",
+            "current": false
         }
     ]
 }

@@ -80,4 +80,37 @@ nav {
     line-height: 40px;
     margin: 10px;
     float: left;
+    transition: 200ms;
+}
+
+.sb-btn-smol:hover {
+    background-color: rgba(255, 255, 255, 0.295);
+}
+
+.devicediv {
+    position: relative;
+    width: 90%;
+    height: 40px;
+    background-color: rgb(73, 73, 73);
+    transition: 200ms;
+    border-radius: 10px;
+    text-align: left;
+    line-height: 40px;
+    left: 5%;
+    margin-top: 5px;
+    padding-left: 5px;
+    overflow: hidden;
+    user-select: none;
+}
+
+.devicediv:hover {
+    background-color: rgba(255, 255, 255, 0.329);
+}
+
+.currentdev:hover {
+    background-color: rgba(36, 124, 28, 0.884);
+}
+
+.currentdev {
+    background-color: rgba(36, 124, 28, 0.514);
 }

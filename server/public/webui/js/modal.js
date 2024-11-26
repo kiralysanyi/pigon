@@ -1,6 +1,7 @@
 class modal {
-    constructor(title) {
+    constructor(title, destroyAfterClose = false) {
         this.title = title;
+        this.destroyAfterClose = destroyAfterClose;
         this.container = document.createElement("div");
         this.mainElement = document.createElement("div");
         this.contentElement = document.createElement("div");
@@ -34,6 +35,9 @@ class modal {
         this.container.style.opacity = 0;
         setTimeout(() => {
             document.body.removeChild(this.container);
+            if (this.destroyAfterClose == true) {
+                this.container.remove();
+            }
         }, 310);
     }
 

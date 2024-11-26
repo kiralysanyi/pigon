@@ -192,4 +192,4 @@ async function authenticateWebAuthn(username, challenge, authentication) {
 }
 
 
-export {authenticateWebAuthn, changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register}
+export {authenticateWebAuthn, changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register, removeDevice, registerWebAuthn}

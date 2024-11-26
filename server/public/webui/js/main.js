@@ -1,7 +1,11 @@
-import * as auth from "./auth.js"
+import * as auth from "./auth.js";
 import { modal } from "./modal.js";
+import { parseUserAgent } from "./useragent-parser.js";
 
 let userinfo = await auth.getUserInfo();
+if (userinfo.success == false) {
+    location.href = "/app/login.html"
+}
 
 console.log(userinfo);
 
@@ -44,8 +48,51 @@ document.getElementById("logoutbtn").addEventListener("click", async () => {
 })
 
 document.getElementById("settingsbtn").addEventListener("click", () => {
-    let settingsModal = new modal("Settings");
+    let settingsModal = new modal("Settings", true);
     settingsModal.contentElement.innerHTML = "<iframe src='./settings.html'></iframe>"
     settingsModal.open();
 })
 
+document.getElementById("devicesbtn").addEventListener("click", async () => {
+    let devicesModal = new modal("Devices", true);
+    let devices = await auth.getDevices();
+    if (devices.success == false) {
+        window.alert("Failed to get devices.");
+        return;
+    } else {
+        devices = devices.data;
+        for (let i in devices) {
+            devices[i]["deviceInfo"] = JSON.parse(devices[i]["deviceInfo"]);
+        }
+    }
+    console.log(devices);
+
+    let render = () => {
+        for (let i in devices) {
+            let element = document.createElement("div");
+            element.classList.add("devicediv");
+            devicesModal.contentElement.appendChild(element);
+            let parsedUserAgent = parseUserAgent(devices[i]["deviceInfo"]["user-agent"]);
+            let isCurrent = devices[i]["current"];
+            if (isCurrent) {
+                element.classList.add("currentdev");
+            }
+            element.innerHTML = `<i class="fa-solid fa-laptop"></i> Name: ${devices[i]["deviceInfo"]["deviceName"]} | ${parsedUserAgent.browser}, ${parsedUserAgent.version}`
+            element.addEventListener("click", async () => {
+                let confirmation = window.confirm(`Do you want to remove device: ${devices[i]["deviceInfo"]["deviceName"]} | ${parsedUserAgent.browser}, ${parsedUserAgent.version}`)
+                if (confirmation == true) {
+                    console.log("Removing device: " + devices[i]["deviceID"]);
+                    let res = await auth.removeDevice(devices[i]["deviceID"]);
+                    console.log(res);
+                    if (res.success == true) {
+                        element.remove();
+                    }
+                }
+
+            })
+        }
+    }
+
+    render();
+    devicesModal.open();
+})

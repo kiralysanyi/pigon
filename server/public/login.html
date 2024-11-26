@@ -157,6 +157,10 @@
                     <label for="password"><i class="fa fa-lock"></i> Password</label>
                     <input type="password" id="password" name="password" required>
                 </div>
+                <div class="form-group">
+                    <label for="devname"><i class="fa-solid fa-desktop"></i> Device name</label>
+                    <input type="text" id="devname" name="devname" required>
+                </div>
                 <button id="submit" type="submit" class="submit-btn">Login</button>
                 <br>
                 <button id="passkeybtn" type="button" class="submit-btn">Use passkey</button>
@@ -181,8 +185,9 @@
         spiner.style.opacity = 1;
         let username = document.getElementById("username").value;
         let password = document.getElementById("password").value;
+        let devname = document.getElementById("devname").value;
         e.preventDefault();
-        let data = await login(username, password, "N/A");
+        let data = await login(username, password, devname);
         console.log(data)
         if (data.success == false) {
             document.getElementById("message").innerHTML = data.data.message;

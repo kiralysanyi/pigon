@@ -56,7 +56,7 @@ async function deleteAccount(username, password) {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: "include",
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username: username, password: password })
     });
     const data = await response.json();
     if (data.success) {
@@ -192,4 +192,5 @@ async function authenticateWebAuthn(username, challenge, authentication) {
 }
 
 
-export {authenticateWebAuthn, changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register, removeDevice, registerWebAuthn}
+
+export {changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register, removeDevice}

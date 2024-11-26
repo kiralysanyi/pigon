@@ -31,14 +31,34 @@
             text-align: center;
             line-height: 40px;
         }
+
+        #buttons {
+            position: absolute;
+            top: 188px;
+            left: 0px;
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 
 <body>
     <img alt="profile picture" id="pfp">
     <div id="username"></div>
+    <div id="buttons">
+        <button id="webauthn_reg">WebAuthn registration</button>
+        <button id="deleteacc">Delete Account</button>
+    </div>
 </body>
 <script type="module">
+    document.getElementById("webauthn_reg").addEventListener("click", () => {
+        location.href = "webauthn.html";
+    });
+
+    document.getElementById("deleteacc").addEventListener("click", () => {
+        window.parent.location.href = "delete.html"
+    })
+
     async function getUserInfo(userID = null) {
         const body = userID ? JSON.stringify({ userID }) : null;
         const response = await fetch('/api/v1/auth/userinfo', {

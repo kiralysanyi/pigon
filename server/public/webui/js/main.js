@@ -79,6 +79,9 @@ document.getElementById("devicesbtn").addEventListener("click", async () => {
             }
             element.innerHTML = `<i class="fa-solid fa-laptop"></i> Name: ${devices[i]["deviceInfo"]["deviceName"]} | ${parsedUserAgent.browser}, ${parsedUserAgent.version}`
             element.addEventListener("click", async () => {
+                if (devices[i]["current"] == true) {
+                    return;
+                }
                 let confirmation = window.confirm(`Do you want to remove device: ${devices[i]["deviceInfo"]["deviceName"]} | ${parsedUserAgent.browser}, ${parsedUserAgent.version}`)
                 if (confirmation == true) {
                     console.log("Removing device: " + devices[i]["deviceID"]);

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Deletion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      text-align: center;
+    }
+    .container h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 10px 10px 10px 40px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    .input-group input:focus {
+      border-color: #ff6f61;
+      box-shadow: 0 0 8px rgba(255, 111, 97, 0.5);
+    }
+    .input-group .icon {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      color: #999;
+    }
+    button {
+      background: #ff6f61;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s, transform 0.2s;
+    }
+    button:hover {
+      background: #ff4b47;
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Delete Your Account</h2>
+    <form id="form">
+      <div class="input-group">
+        <i class="fas fa-user icon"></i>
+        <input type="text" name="username" id="username" placeholder="Username" required>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock icon"></i>
+        <input type="password" name="password" id="password" placeholder="Password" required>
+      </div>
+      <button type="submit">
+        <i class="fas fa-trash-alt"></i> Delete Account
+      </button>
+    </form>
+  </div>
+</body>
+<script type="module">
+    import {deleteAccount, getUserInfo} from "./js/auth.js";
+    let userinfo = (await getUserInfo()).data;
+    document.getElementById("username").value = userinfo.username;
+    document.getElementById("username").disabled = true;
+    console.log(userinfo);
+
+    document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+
+        let res = await deleteAccount(username, password);
+        if (res.success == true) {
+            window.alert("Account deleted successfully!");
+            location.href = "/app";
+            return;
+        } else {
+            window.alert("Failed to delete account. Error: " + res.data.message);
+            return;
+        }
+    })
+</script>
+</html>

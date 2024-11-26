@@ -139,7 +139,6 @@
             color: #4CAF50;
             border: none;
         }
-
     </style>
 </head>
 
@@ -209,6 +208,94 @@
 
     document.getElementById("regbutton").addEventListener("click", () => {
         location.href = "/app/register.html"
+    })
+
+</script>
+
+<script type="module">
+    //webauthn handler
+
+    import { client } from "./webauthn.min.js"
+
+    const httprequest = (method, endpoint, body, isJson = false) => {
+        return new Promise((resolved) => {
+            let req = new XMLHttpRequest();
+            req.open(method, endpoint);
+            if (isJson) {
+                req.setRequestHeader("Content-Type", "application/json")
+            }
+            req.addEventListener("loadend", () => {
+                console.log(req.responseText);
+                resolved(req.responseText);
+            })
+            req.send(body);
+        });
+
+    }
+
+    const register = (username, password) => {
+        return new Promise(async (resolved) => {
+            let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
+            let response = JSON.parse(await httprequest("POST", "/api/v1/auth/login", JSON.stringify({ username, password, deviceName: "Webauthn register" }), true));
+            if (response.success == false) {
+                console.log("Failed to authenticate");
+                return;
+            }
+            let token = response["data"]["token"];
+            console.log(token);
+
+            const registration = await client.register({
+                user: username,
+                challenge: challenge,
+                /* possibly other options */
+            });
+            console.log(registration);
+
+            await httprequest("POST", "/api/v1/auth/webauthn/register", JSON.stringify({
+                username,
+                password,
+                registration,
+                challenge,
+            }), true)
+
+
+            resolved();
+        })
+    }
+
+    const authenticate = async (username, devname) => {
+        let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
+
+        const authentication = await client.authenticate({
+            /* Required */
+            challenge: challenge,
+            timeout: 60000
+        })
+
+        console.log(authentication)
+
+        let response = JSON.parse(await httprequest("POST", "/api/v1/auth/webauthn/auth", JSON.stringify({ username, authentication, challenge, deviceName: devname }), true));
+        console.log(response)
+        return response
+
+    }
+
+
+    document.getElementById("passkeybtn").addEventListener("click", async () => {
+        let username = document.getElementById("username").value
+        let devname = document.getElementById("devname").value;
+        if (username === "" || devname === "") {
+            window.alert("Username and Device name field required for this method");
+            return;
+        }
+
+        let res = await authenticate(username, devname);
+        console.log(res);
+        if (res.success == true) {
+            location.href = "webui/index.html"
+        } else {
+            window.alert(res.data.message);
+        }
     })
 </script>
 

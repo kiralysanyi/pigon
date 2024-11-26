@@ -152,11 +152,16 @@ const authHandler = async (req, res) => {
             }, config["jwt"]["secret"], { expiresIn: "7d" });
 
             await registerDevice(deviceID, userInfo["id"], deviceInfo);
-            res.json({
+            res.cookie('token', token, {
+                httpOnly: true,  // This makes the cookie HTTP-only
+                secure: true,    // This ensures the cookie is only sent over HTTPS (recommended for production)
+                maxAge: 365 * 24 * 60 * 60 * 1000,  // Cookie expiry time (1 year here)
+            });
+    
+            res.status(200).json({
                 success: true,
                 data: {
-                    message: "Logged in successfully",
-                    token: token
+                    userInfo: userInfo
                 }
             });
         } catch (error) {

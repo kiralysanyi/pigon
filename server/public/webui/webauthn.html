@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webauthn register</title>
+    <script type="module">
+        import { client } from "../webauthn.min.js"
+
+        const httprequest = (method, endpoint, body, isJson = false) => {
+            return new Promise((resolved) => {
+                let req = new XMLHttpRequest();
+                req.open(method, endpoint);
+                if (isJson) {
+                    req.setRequestHeader("Content-Type", "application/json")
+                }
+                req.addEventListener("loadend", () => {
+                    console.log(req.responseText);
+                    resolved(req.responseText);
+                })
+                req.send(body);
+            });
+
+        }
+
+        const register = (username, password) => {
+            return new Promise(async (resolved) => {
+                let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
+                let response = JSON.parse(await httprequest("POST", "/api/v1/auth/login", JSON.stringify({ username, password, deviceName: "Webauthn register" }), true));
+                if (response.success == false) {
+                    console.log("Failed to authenticate");
+                    return;
+                }
+                let token = response["data"]["token"];
+                console.log(token);
+
+                const registration = await client.register({
+                    user: username,
+                    challenge: challenge,
+                    /* possibly other options */
+                });
+                console.log(registration);
+
+                await httprequest("POST", "/api/v1/auth/webauthn/register", JSON.stringify({
+                    username,
+                    password,
+                    registration,
+                    challenge,
+                }), true)
+
+
+                resolved();
+            })
+        }
+
+        const authenticate = async (username) => {
+            let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
+
+            const authentication = await client.authenticate({
+                /* Required */
+                challenge: challenge,
+                timeout: 60000
+            })
+
+            console.log(authentication)
+
+            let response = JSON.parse(await httprequest("POST", "/api/v1/auth/webauthn/auth", JSON.stringify({ username, authentication, challenge, deviceName: document.getElementById("deviceName").value }), true));
+            console.log(response)
+
+        }
+
+        document.getElementById("regbutton").addEventListener("click", () => {
+            register(document.getElementById("username").value, document.getElementById("password").value);
+        })
+
+
+    </script>
+    <style>
+        body {
+            background-color: rgb(32, 32, 32);
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Webauthn registration</h1>
+    <p>This is an experimental function. Enabling developer tools is higly recommended.</p>
+
+    <input type="text" placeholder="Username" name="username" id="username">
+    <br>
+    <input type="password" name="password" id="password" placeholder="Password">
+    <br>
+    <button id="regbutton">Register</button>
+
+</body>
+
+</html>

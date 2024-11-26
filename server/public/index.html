@@ -23,7 +23,7 @@
 
         <div class="card">
             <h1>Login/Register</h1>
-            <button>Login</button>
+            <button id="loginbtn">Login</button>
             <br>
             <button id="regbutton">Register</button>
         </div>
@@ -35,6 +35,14 @@
 
             setTimeout(() => {
                 location.href = "/app/register.html"
+            }, 1000);
+        })
+
+        document.getElementById("loginbtn").addEventListener("click", () => {
+            pigonOverlay();
+
+            setTimeout(() => {
+                location.href = "/app/login.html"
             }, 1000);
         })
     </script>

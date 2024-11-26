@@ -4,6 +4,7 @@ const {sqlQuery, userExists, verifyPass} = require("../../things/db");
 const deleteHandler = async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
+    console.log("Delete: ",req.body);
 
     if (await userExists(username) == false) {
         res.status(404).json({

@@ -1,5 +1,6 @@
 const { server } = require("@passwordless-id/webauthn");
-const { verifyPass, userExists, sqlQuery, registerDevice } = require("../../../things/db");
+const { verifyPass, userExists, sqlQuery, registerDevice, getUserFromID } = require("../../../things/db");
+const { verifyToken } = require("../../../things/jwt");
 const jwt = require("jsonwebtoken");
 const uid = require("uuid").v4;
 const fs = require("fs");
@@ -16,40 +17,36 @@ const challengeHandler = async (req, res) => {
 }
 
 const webauthnRegHandler = async (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
+
+    if (!req.cookies.token) {
+        res.status(403).json({
+            success: false,
+            message: "Failed to verify user"
+        });
+        return;
+    }
+
+    let verificationResponse = await verifyToken(req.cookies.token);
+    if (verificationResponse.success == false) {
+        res.status(403).json({
+            success: false,
+            message: "Failed to verify token"
+        });
+        return;
+    }
+
     let registration = req.body.registration;
-    console.log(username, password, registration)
 
-    if (username == undefined || password == undefined || registration == undefined) {
-        res.json({
+
+    if (registration == undefined) {
+        res.status(400).json({
             success: false,
-            data: {
-                message: "Invalid request."
-            }
+            message: "Invalid request."
         });
         return;
     }
 
-    if (await userExists(username) == false) {
-        res.json({
-            success: false,
-            data: {
-                message: "User not found"
-            }
-        })
-        return;
-    }
 
-    if (await verifyPass(username, password) == false) {
-        res.json({
-            success: false,
-            data: {
-                message: "Wrong password"
-            }
-        });
-        return;
-    }
 
 
     const expected = {
@@ -59,10 +56,24 @@ const webauthnRegHandler = async (req, res) => {
 
     console.log(expected)
 
+        /*
+    {
+            userID: 69,
+            username: "lakatos rikárdinnyó",
+            deviceID: "aaa",
+            deviceInfo: {
+                "user-agent": "xy",
+                "deviceName": "xyz"
+            }
+    }
+    */
+    let userdata = verificationResponse.data;
+
+
     const registrationParsed = await server.verifyRegistration(registration, expected)
     let credential = registrationParsed["credential"];
     let credentialString = JSON.stringify(credential);
-    let userID = (await sqlQuery(`SELECT id FROM users WHERE username = '${username}'`))[0]["id"];
+    let userID = userdata["userID"];
     try {
         let query = `INSERT INTO credentials (userID, credential, credentialID) VALUES ('${userID}','${credentialString}', '${credential["id"]}')`;
         console.log(query);
@@ -70,23 +81,18 @@ const webauthnRegHandler = async (req, res) => {
         await sqlQuery(`UPDATE userconfig SET passkey = 1 WHERE userID = ${userID}`);
         res.json({
             success: true,
-            data: {
-                message: "Added passkey succesfully"
-            }
+            message: "Added passkey succesfully"
         })
     } catch (error) {
         res.json({
             success: false,
-            data: {
-                message: "Something went wrong :("
-            }
+            message: "Something went wrong :("
         });
     }
 
 }
 
 const authHandler = async (req, res) => {
-    let username = req.body.username;
     let authentication = req.body.authentication;
     let challenge = req.body.challenge;
     let credentialID = authentication["id"];
@@ -95,7 +101,7 @@ const authHandler = async (req, res) => {
     if (deviceName == undefined) {
         deviceName = "N/A"
     }
-
+    /*
     if (username == undefined || authentication == undefined) {
         res.json({
             success: false,
@@ -104,27 +110,41 @@ const authHandler = async (req, res) => {
             }
         });
     }
+        */
+    /*
+        if (await userExists(username) == false) {
+            res.json({
+                success: false,
+                data: {
+                    message: "User not found"
+                }
+            })
+            return;
+        }
+    */
+    let response = await sqlQuery(`SELECT userID, credential FROM credentials WHERE credentialID = '${credentialID}'`);
 
-    if (await userExists(username) == false) {
-        res.json({
-            success: false,
-            data: {
-                message: "User not found"
-            }
-        })
-        return;
-    }
-
-    let response = await sqlQuery(`SELECT credential FROM credentials WHERE credentialID = '${credentialID}'`);
     if (response.length == 0) {
         res.json({
             success: false,
-            data: {
-                message: "Authentication failed"
-            }
+            message: "Authentication failed"
         });
         return;
     }
+    let userID = response[0]["userID"];
+
+
+    let userdata;
+    try {
+        userdata = await getUserFromID(userID);
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to get user information, try another key."
+        });
+        return;
+    }
+
 
     let credential = JSON.parse(response[0]["credential"]);
     //console.log(credential);
@@ -135,6 +155,7 @@ const authHandler = async (req, res) => {
 
     try {
         const authenticationParsed = await server.verifyAuthentication(authentication, credential, expected)
+        console.log(authenticationParsed);
         let deviceID = uid();
         let deviceInfo = {
             "user-agent": req.headers["user-agent"],
@@ -142,35 +163,29 @@ const authHandler = async (req, res) => {
         }
 
         try {
-            let userInfo = (await sqlQuery(`SELECT id, username FROM users WHERE username = '${username}'`))[0]
-
             let token = jwt.sign({
-                userID: userInfo["id"],
-                username: userInfo["username"],
+                userID: userdata["id"],
+                username: userdata["username"],
                 deviceID: deviceID,
                 deviceInfo: deviceInfo,
             }, config["jwt"]["secret"], { expiresIn: "7d" });
 
-            await registerDevice(deviceID, userInfo["id"], deviceInfo);
+            await registerDevice(deviceID, userdata["id"], deviceInfo);
             res.cookie('token', token, {
                 httpOnly: true,  // This makes the cookie HTTP-only
                 secure: true,    // This ensures the cookie is only sent over HTTPS (recommended for production)
                 maxAge: 365 * 24 * 60 * 60 * 1000,  // Cookie expiry time (1 year here)
             });
-    
+
             res.status(200).json({
                 success: true,
-                data: {
-                    userInfo: userInfo
-                }
+                message: "Authentication successful"
             });
         } catch (error) {
             console.log(error);
             res.status(500).json({
                 success: false,
-                data: {
-                    message: "Failed to authenticate, contact system administrator to solve this issue."
-                }
+                message: "Failed to authenticate, contact system administrator to solve this issue."
             });
             return;
         }
@@ -180,13 +195,63 @@ const authHandler = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            data: {
-                message: "Verification failed"
-            }
+            message: "Verification failed"
         });
     }
 
 }
 
+const disablePasskeysHandler = async (req, res) => {
+    if (!req.cookies.token) {
+        res.status(403).json({
+            success: false,
+            message: "Failed to verify user"
+        });
+        return;
+    }
 
-module.exports = { challengeHandler, webauthnRegHandler, authHandler }
+    let verificationResponse = await verifyToken(req.cookies.token);
+    if (verificationResponse.success == false) {
+        res.status(403).json({
+            success: false,
+            message: "Failed to verify token"
+        });
+        return;
+    }
+    /*
+    {
+            userID: 69,
+            username: "lakatos rikárdinnyó",
+            deviceID: "aaa",
+            deviceInfo: {
+                "user-agent": "xy",
+                "deviceName": "xyz"
+            }
+    }
+    */
+    let userdata = verificationResponse.data;
+
+    try {
+        let query = `DELETE FROM credentials WHERE userID=${userdata["userID"]}`;
+        let sqlResponse = await sqlQuery(query);
+
+        query = `UPDATE userconfig SET passkey=0 WHERE userID=${userdata["userID"]}`;
+        sqlResponse = await sqlQuery(query);
+        res.json({
+            success: true,
+            message: "Successfully disabled passkeys"
+        })
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to disable passkeys"
+        })
+        return;
+    }
+
+}
+
+
+module.exports = { challengeHandler, webauthnRegHandler, authHandler, disablePasskeysHandler }

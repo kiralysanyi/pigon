@@ -191,6 +191,22 @@ async function authenticateWebAuthn(username, challenge, authentication) {
     return data;
 }
 
+async function checkIfLoggedIn() {
+    let userinfo = await getUserInfo();
+    console.log(userinfo);
+    if (userinfo.success == false) {
+        return false;
+    }
+
+    if (userinfo.success == true) {
+        return true;
+    }
+}
+
+let isLoggedIn = await checkIfLoggedIn();
+if (isLoggedIn == false) {
+    location.replace("/app/login.html")
+}
 
 
 export {changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register, removeDevice}

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigon Login</title>
+    <title>Change Password</title>
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -17,7 +17,7 @@
             height: 100vh;
             margin: 0;
             background-color: #f4f4f4;
-            background-image: url("pigon.jpg");
+            background-image: url("../pigon.jpg");
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
@@ -147,73 +147,76 @@
         <div id="message"></div>
         <div class="form-container" id="form-container">
             <form id="form">
-                <h1>Pigon Login</h1>
+                <h1>Change Password</h1>
                 <div class="form-group">
-                    <label for="username"><i class="fa fa-user"></i> Username</label>
-                    <input type="text" id="username" name="username" required>
+                    <label for="oldpass"><i class="fa fa-lock"></i> Old Password</label>
+                    <input type="password" id="oldpass" name="oldpass" required>
                 </div>
                 <div class="form-group">
-                    <label for="password"><i class="fa fa-lock"></i> Password</label>
-                    <input type="password" id="password" name="password" required>
+                    <label for="newpass"><i class="fa fa-lock"></i> New Password</label>
+                    <input type="password" id="newpass" name="newpass" required>
                 </div>
                 <div class="form-group">
-                    <label for="devname"><i class="fa-solid fa-desktop"></i> Device name</label>
-                    <input type="text" id="devname" name="devname" required>
+                    <label for="newpass1"><i class="fa fa-lock"></i> Repeat New Password</label>
+                    <input type="password" id="newpass1" name="newpass1" required>
                 </div>
-                <button id="submit" type="submit" class="submit-btn">Login</button>
-                <br>
-                <button id="passkeybtn" type="button" class="submit-btn">Use passkey</button>
-                <br>
-                <button id="regbutton" type="button" class="submit-btn">I don't have an account</button>
+                <button id="submit" type="submit" class="submit-btn">Change password</button>
                 <div id="spiner" class="spinner"></div>
             </form>
         </div>
     </div>
 </body>
 
-<script src="js/auth.js"></script>
+<script type="module">
+    import { changePassword } from "./js/auth.js"
+    function showMessage(message) {
 
-<script>
-    document.getElementById("passkeybtn").addEventListener("click", () => {
-        location.href = "webauthn-auth.html"
-    })
+        document.getElementById("message").innerHTML = message;
+        document.getElementById("message").style.top = "10px";
 
-    setTimeout(() => {
-        document.getElementById("background").style.opacity = 1;
-    }, 500);
-    let spiner = document.getElementById("spiner")
-    spiner.style.opacity = 0;
-    document.getElementById("form").addEventListener("submit", async (e) => {
-
-        spiner.style.opacity = 1;
-        let username = document.getElementById("username").value;
-        let password = document.getElementById("password").value;
-        let devname = document.getElementById("devname").value;
-        e.preventDefault();
-        let data = await login(username, password, devname);
-        console.log(data)
-        if (data.success == false) {
-            document.getElementById("message").innerHTML = data.data.message;
-            document.getElementById("message").style.top = "10px";
-        }
         setTimeout(() => {
             document.getElementById("message").style.top = "-310px";
         }, 5000);
-        spiner.style.opacity = 0;
+    }
 
-        if (data.success == true) {
-            spiner.style.opacity = 1;
-            document.getElementById("submit").disabled = true;
+    let spiner = document.getElementById("spiner");
+    spiner.style.opacity = 0;
+    setTimeout(() => {
+        document.getElementById("background").style.opacity = 1;
+    }, 500);
+
+    document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        document.getElementById("submit").disabled = true;
+        let oldpass = document.getElementById("oldpass").value;
+        let newpass = document.getElementById("newpass").value;
+        let newpass1 = document.getElementById("newpass1").value;
+
+        if (newpass != newpass1) {
+            document.getElementById("newpass").style.border = "3px solid red";
+            document.getElementById("newpass1").style.border = "3px solid red";
             setTimeout(() => {
-                location.replace("webui/index.html")
-            }, 2000);
+                document.getElementById("newpass").style.border = "1px solid #ddd";
+                document.getElementById("newpass1").style.border = "1px solid #ddd";
+            }, 1000);
+            showMessage("Check again!");
+            return;
         }
-    })
 
-    document.getElementById("regbutton").addEventListener("click", () => {
-        location.href = "/app/register.html"
+        let result = await changePassword(oldpass, newpass);
+        showMessage(result.data.message);
+        if (result.success == false) {
+            document.getElementById("submit").disabled = false;
+        }
+
+        if (result.success == true) {
+            location.href = "/app/login.html"
+        }
+
     })
 
 </script>
+
+
 
 </html>

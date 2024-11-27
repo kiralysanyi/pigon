@@ -147,22 +147,12 @@
         <div id="message"></div>
         <div class="form-container" id="form-container">
             <form id="form">
-                <h1>Pigon Login</h1>
-                <div class="form-group">
-                    <label for="username"><i class="fa fa-user"></i> Username</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password"><i class="fa fa-lock"></i> Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
+                <h1>Pigon Login (Passkey)</h1>
                 <div class="form-group">
                     <label for="devname"><i class="fa-solid fa-desktop"></i> Device name</label>
                     <input type="text" id="devname" name="devname" required>
                 </div>
-                <button id="submit" type="submit" class="submit-btn">Login</button>
-                <br>
-                <button id="passkeybtn" type="button" class="submit-btn">Use passkey</button>
+                <button id="submit" type="submit" class="submit-btn">Continue</button>
                 <br>
                 <button id="regbutton" type="button" class="submit-btn">I don't have an account</button>
                 <div id="spiner" class="spinner"></div>
@@ -170,50 +160,121 @@
         </div>
     </div>
 </body>
-
 <script src="js/auth.js"></script>
 
-<script>
-    document.getElementById("passkeybtn").addEventListener("click", () => {
-        location.href = "webauthn-auth.html"
-    })
+<script type="module">
+    //webauthn handler
+
+    import { client } from "./webauthn.min.js"
 
     setTimeout(() => {
         document.getElementById("background").style.opacity = 1;
     }, 500);
     let spiner = document.getElementById("spiner")
     spiner.style.opacity = 0;
-    document.getElementById("form").addEventListener("submit", async (e) => {
 
-        spiner.style.opacity = 1;
-        let username = document.getElementById("username").value;
-        let password = document.getElementById("password").value;
-        let devname = document.getElementById("devname").value;
-        e.preventDefault();
-        let data = await login(username, password, devname);
-        console.log(data)
-        if (data.success == false) {
-            document.getElementById("message").innerHTML = data.data.message;
-            document.getElementById("message").style.top = "10px";
-        }
+    function showMessage(message) {
+
+        document.getElementById("message").innerHTML = message;
+        document.getElementById("message").style.top = "10px";
+
         setTimeout(() => {
             document.getElementById("message").style.top = "-310px";
         }, 5000);
-        spiner.style.opacity = 0;
+    }
 
-        if (data.success == true) {
-            spiner.style.opacity = 1;
-            document.getElementById("submit").disabled = true;
-            setTimeout(() => {
-                location.replace("webui/index.html")
-            }, 2000);
-        }
-    })
 
     document.getElementById("regbutton").addEventListener("click", () => {
         location.href = "/app/register.html"
     })
 
+    const httprequest = (method, endpoint, body, isJson = false) => {
+        return new Promise((resolved) => {
+            let req = new XMLHttpRequest();
+            req.open(method, endpoint);
+            if (isJson) {
+                req.setRequestHeader("Content-Type", "application/json")
+            }
+            req.addEventListener("loadend", () => {
+                console.log(req.responseText);
+                resolved(req.responseText);
+            })
+            req.send(body);
+        });
+
+    }
+
+    const register = (username, password) => {
+        return new Promise(async (resolved) => {
+            let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
+            let response = JSON.parse(await httprequest("POST", "/api/v1/auth/login", JSON.stringify({ username, password, deviceName: "Webauthn register" }), true));
+            if (response.success == false) {
+                console.log("Failed to authenticate");
+                return;
+            }
+            let token = response["data"]["token"];
+            console.log(token);
+
+            const registration = await client.register({
+                user: username,
+                challenge: challenge,
+                /* possibly other options */
+            });
+            console.log(registration);
+
+            await httprequest("POST", "/api/v1/auth/webauthn/register", JSON.stringify({
+                username,
+                password,
+                registration,
+                challenge,
+            }), true)
+
+
+            resolved();
+        })
+    }
+
+    const authenticate = async (devname) => {
+        let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
+
+        const authentication = await client.authenticate({
+            /* Required */
+            challenge: challenge,
+            timeout: 60000
+        })
+
+        console.log(authentication)
+
+        let response = JSON.parse(await httprequest("POST", "/api/v1/auth/webauthn/auth", JSON.stringify({ authentication, challenge, deviceName: devname }), true));
+        console.log(response)
+        return response
+
+    }
+
+
+    document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        spiner.style.opacity = 1;
+        let devname = document.getElementById("devname").value;
+        let data;
+        try {
+            data = await authenticate(devname);
+        } catch (error) {
+            spiner.style.opacity = 0;
+            showMessage(error)
+            return;
+        }
+        if (data.success == false) {
+            showMessage(data.message);
+            spiner.style.opacity = 0;
+            return;
+        } else {
+            location.href = "webui/index.html"
+        }
+
+        spiner.style.opacity = 0;
+    })
 </script>
 
 </html>

@@ -58,10 +58,11 @@ app.delete("/api/v1/auth/removedevice", removedeviceHandler);
 const changepassHandler = require("./endpoints/v1/changepass").changepassHandler;
 app.put("/api/v1/auth/changepass", changepassHandler);
 
-const { challengeHandler, webauthnRegHandler, authHandler } = require("./endpoints/v1/webauthn/webauthn");
+const { challengeHandler, webauthnRegHandler, authHandler, disablePasskeysHandler } = require("./endpoints/v1/webauthn/webauthn");
 app.get("/api/v1/auth/webauthn/challenge", challengeHandler);
 app.post("/api/v1/auth/webauthn/register", webauthnRegHandler);
 app.post("/api/v1/auth/webauthn/auth", authHandler);
+app.delete("/api/v1/auth/webauthn/passkeys", disablePasskeysHandler)
 app.get("/api/v1/auth/pfp", userimage.getImageHandler);
 app.post("/api/v1/auth/pfp", userimage.uploadHandler);
 

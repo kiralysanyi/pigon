@@ -109,7 +109,7 @@ const updatePass = (username, userID, oldpass, newpass) => {
 
         try {
             let passHash = hashPass(newpass);
-            await sqlQuery(`UPDATE users SET passwordHash = '${passHash}' WHERE userID = '${userID}'`);
+            await sqlQuery(`UPDATE users SET passwordHash = '${passHash}' WHERE id = '${userID}'`);
             await sqlQuery(`DELETE FROM devices WHERE userID = '${userID}'`);
             resolved({
                 success: true,
@@ -130,4 +130,17 @@ const updatePass = (username, userID, oldpass, newpass) => {
     });
 }
 
-module.exports = {registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass}
+let getUserFromID = (userID) => {
+    return new Promise(async (resolved) => {
+        const query = `SELECT id, username, registerDate FROM users WHERE id=${userID}`;
+        let data = await sqlQuery(query);
+        if (data.length != 1) {
+            resolved(new Error("User not found"));
+            return;
+        }
+
+        resolved(data[0]);
+    });
+}
+
+module.exports = {registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID}

@@ -5,35 +5,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webauthn register</title>
-    <script type="module">
-        import { client } from "../webauthn.min.js"
+    <style>
+        body {
+            background-color: rgb(32, 32, 32);
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
 
-        const httprequest = (method, endpoint, body, isJson = false) => {
-            return new Promise((resolved) => {
-                let req = new XMLHttpRequest();
-                req.open(method, endpoint);
-                if (isJson) {
-                    req.setRequestHeader("Content-Type", "application/json")
-                }
-                req.addEventListener("loadend", () => {
-                    console.log(req.responseText);
-                    resolved(req.responseText);
-                })
-                req.send(body);
-            });
+        #container {
+            position: fixed;
+            top: 0px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            width: 700px;
+            padding: 10px;
+            background-color: rgb(61, 61, 61);
+            height: 100%;
+            overflow: auto;
+        }
+
+        .settings_group {
+            position: relative;
+            width: calc(100% - 50px);
+            height: auto;
+            margin-top: 10px;
+            margin-left: 10px;
+            background-color: rgb(31, 31, 31);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0px 0px 5px 5px rgb(68, 68, 68);
 
         }
 
-        const register = (username, password) => {
-            return new Promise(async (resolved) => {
-                let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
-                let response = JSON.parse(await httprequest("POST", "/api/v1/auth/login", JSON.stringify({ username, password, deviceName: "Webauthn register" }), true));
-                if (response.success == false) {
-                    console.log("Failed to authenticate");
-                    return;
+        @media only screen and (max-width: 700px) {
+            #container {
+                width: 100%;
+            }
+        }
+
+        #goback {
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            padding: 0px;
+            user-select: none;
+            width: calc(100% - 20px);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div onclick="location.href = 'index.html'" class="settings_group" id="goback">
+            <h2>Go back</h2>
+        </div>
+        <div class="settings_group">
+            <h1>Webauthn registration</h1>
+            <p>This is an experimental function. Enabling developer tools is higly recommended.</p>
+            <button id="regbutton">Add passkey</button>
+        </div>
+
+        <div class="settings_group">
+            <h1>Disable passkeys</h1>
+            <p>Warning! This will invalidate currently used passkeys forever!</p>
+            <button id="disablebtn">Disable</button>
+        </div>
+
+
+    </div>
+</body>
+<script type="module">
+    import { getUserInfo } from "./js/auth.js";
+    let userinfo = (await getUserInfo()).data;
+
+    document.getElementById("disablebtn").addEventListener("click", async () => {
+        if (window.confirm("Do you really want to disable passkey support? This will invalidate currently used passkeys forever!") == true) {
+            console.log("Invalidating passkeys");
+            let res = await fetch("/api/v1/auth/webauthn/passkeys", {
+                method: "DELETE",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
                 }
-                let token = response["data"]["token"];
-                console.log(token);
+            });
+
+            let result = await res.json();
+            console.log(result);
+            window.alert(result.message);
+        }
+    })
+
+    import { client } from "../webauthn.min.js"
+
+    const httprequest = (method, endpoint, body, isJson = false) => {
+        return new Promise((resolved) => {
+            let req = new XMLHttpRequest();
+            req.open(method, endpoint);
+            if (isJson) {
+                req.setRequestHeader("Content-Type", "application/json")
+            }
+            req.addEventListener("loadend", () => {
+                console.log(req.responseText);
+                resolved(req.responseText);
+            })
+            req.send(body);
+        });
+
+    }
+
+    const register = (username) => {
+        return new Promise(async (resolved) => {
+            try {
+                let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
 
                 const registration = await client.register({
                     user: username,
@@ -42,59 +125,29 @@
                 });
                 console.log(registration);
 
-                await httprequest("POST", "/api/v1/auth/webauthn/register", JSON.stringify({
-                    username,
-                    password,
+                let res = await httprequest("POST", "/api/v1/auth/webauthn/register", JSON.stringify({
                     registration,
                     challenge,
                 }), true)
 
 
-                resolved();
-            })
-        }
+                resolved(JSON.parse(res));
+            } catch (error) {
+                console.error(error)
+                resolved({
+                    success: false,
+                    message: "Failed to create passkey"
+                })
+            }
 
-        const authenticate = async (username) => {
-            let challenge = JSON.parse(await httprequest("GET", "/api/v1/auth/webauthn/challenge"))["challenge"];
-
-            const authentication = await client.authenticate({
-                /* Required */
-                challenge: challenge,
-                timeout: 60000
-            })
-
-            console.log(authentication)
-
-            let response = JSON.parse(await httprequest("POST", "/api/v1/auth/webauthn/auth", JSON.stringify({ username, authentication, challenge, deviceName: document.getElementById("deviceName").value }), true));
-            console.log(response)
-
-        }
-
-        document.getElementById("regbutton").addEventListener("click", () => {
-            register(document.getElementById("username").value, document.getElementById("password").value);
         })
+    }
 
-
-    </script>
-    <style>
-        body {
-            background-color: rgb(32, 32, 32);
-            color: white;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>Webauthn registration</h1>
-    <p>This is an experimental function. Enabling developer tools is higly recommended.</p>
-
-    <input type="text" placeholder="Username" name="username" id="username">
-    <br>
-    <input type="password" name="password" id="password" placeholder="Password">
-    <br>
-    <button id="regbutton">Register</button>
-
-</body>
+    document.getElementById("regbutton").addEventListener("click", async () => {
+        let res = await register(userinfo.username);
+        console.log(res)
+        window.alert(res["message"]);
+    })
+</script>
 
 </html>

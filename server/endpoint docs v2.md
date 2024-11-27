@@ -299,6 +299,7 @@ Retrieve a challenge from the server to begin WebAuthn authentication.
 ## **/api/v1/auth/webauthn/register**
 ### **Description**  
 Register a WebAuthn authenticator for an existing user.
+Note: you have to be authenticated for this request
 
 ### **Method**  
 `POST`
@@ -306,8 +307,6 @@ Register a WebAuthn authenticator for an existing user.
 ### **Request Body**
 ```json
 {
-    "username": "your-username",
-    "password": "your-password",
     "registration": {
         "id": "authenticator-id",
         "rawId": "raw-authenticator-id",
@@ -335,6 +334,24 @@ Register a WebAuthn authenticator for an existing user.
 
 ---
 
+## **/api/v1/auth/webauthn/passkeys**
+### **Description**
+Invalidate all passkeys and disable passkey support.
+### **Method**
+`DELETE`
+
+### **Request body**
+No request body required, but you have to be authenticated.
+
+### **Response body**
+```json
+{
+    "success": true,
+    "message": "Message"
+}
+```
+---
+
 ## **/api/v1/auth/webauthn/auth**
 ### **Description**  
 Authenticate a user using WebAuthn.
@@ -345,7 +362,7 @@ Authenticate a user using WebAuthn.
 ### **Request Body**
 ```json
 {
-    "username": "your-username",
+    "deviceName": "randomdevice",
     "challenge": "webauthn-challenge-string",
     "authentication": {
         "id": "authenticator-id",

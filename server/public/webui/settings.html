@@ -46,13 +46,19 @@
     <img alt="profile picture" id="pfp">
     <div id="username"></div>
     <div id="buttons">
-        <button id="webauthn_reg">WebAuthn registration</button>
+        <button id="webauthn">Passkeys</button>
+        <button id="changepass">Change password</button>
         <button id="deleteacc">Delete Account</button>
     </div>
 </body>
 <script type="module">
-    document.getElementById("webauthn_reg").addEventListener("click", () => {
-        location.href = "webauthn.html";
+    document.getElementById("changepass").addEventListener("click", () => {
+        window.parent.location.href = "changepass.html"
+
+    })
+
+    document.getElementById("webauthn").addEventListener("click", () => {
+        window.parent.location.href = "webauthn.html"
     });
 
     document.getElementById("deleteacc").addEventListener("click", () => {

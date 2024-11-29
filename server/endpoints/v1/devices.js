@@ -2,7 +2,6 @@ const {sqlQuery} = require("../../things/db")
 const {verifyToken} = require("../../things/jwt")
 
 const devicesHandler = async (req, res) => {
-    console.log(req.cookies.token);
     let token;
     try {
         token = req.cookies.token
@@ -69,7 +68,6 @@ const devicesHandler = async (req, res) => {
     }
 
     let userID = decoded["data"]["userID"];
-    console.log(userID)
     let devices = await sqlQuery(`SELECT deviceID, deviceInfo, registerDate FROM devices WHERE userID='${userID}'`);
     if (devices.length == 0) {
         res.status(500).json({

@@ -9,32 +9,48 @@ socket.on("message", ({ chatID, senderID, senderName, message, isGroupChat }) =>
     console.log(chatID, senderID, senderName, message, isGroupChat);
 })
 
+socket.on("newchat", (data) => {
+    console.log("New chat: ", data)
+})
+
 socket.on("error", (err) => {
     console.error("Socket:", err);
 })
 
-function createchat(isGroupChat, chatName, participants) {
-    /*
-    Body
-    {
-        isGroupChat: true/false,
-        chatName: "aaa" //only required if isGroupChat = true
-        participants: [] //array of userIDs
-    }
-    */
 
-    fetch("/api/v1/chat/create", {
-        credentials: "include",
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            isGroupChat, chatName, participants
+function createchat({ isGroupChat, chatName, participants }) {
+    return new Promise((resolved, rejected) => {
+        /*
+        Body
+        {
+            isGroupChat: true/false,
+            chatName: "aaa" //only required if isGroupChat = true
+            participants: [] //array of userIDs
+        }
+        */
+
+        fetch("/api/v1/chat/create", {
+            credentials: "include",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                isGroupChat, chatName, participants
+            })
+        }).then(async (res) => {
+            let response = await res.json()
+            console.log(response);
+            if (response.success == true) {
+                resolved();
+            } else {
+                rejected(new Error(response.message));
+            }
+        }).catch((err) => {
+            rejected(err);
         })
-    }).then((response) => {
-        console.log(response);
-    })
+    });
+
 }
 
 window.mkchat = createchat;
@@ -47,6 +63,8 @@ let userinfo = await auth.getUserInfo();
 if (userinfo.success == false) {
     location.href = "/app/login.html"
 }
+
+userinfo = userinfo.data;
 
 console.log(userinfo);
 
@@ -143,7 +161,7 @@ document.getElementById("devicesbtn").addEventListener("click", async () => {
 
 function searchUsers(query) {
     return new Promise((resolved, rejected) => {
-        fetch("/api/v1/auth/search?" + new URLSearchParams({search: query}).toString(), {
+        fetch("/api/v1/auth/search?" + new URLSearchParams({ search: query }).toString(), {
             method: "GET",
             credentials: "include"
         }).then(async (response) => {
@@ -157,13 +175,30 @@ function searchUsers(query) {
             rejected(error)
         })
     });
-    
+
+}
+
+function addPrivateChat(userid) {
+    let data = {
+        isGroupChat: false,
+        chatName: "",
+        participants: [userinfo.id, userid]
+    }
+
+    console.log(data);
+    createchat(data).then(() => {
+        //successfully created chat
+        console.log("Successfully created chat!!!!!!!!!!!");
+    }).catch((err) => {
+        console.error(err)
+        window.alert(err)
+    })
 }
 
 document.getElementById("newchatbtn").addEventListener("click", () => {
     let newModal = new modal("New chat");
     let contentElement = newModal.contentElement;
-    
+
     let searchInput = document.createElement("input");
     searchInput.type = "text";
     searchInput.placeholder = "Search";
@@ -178,7 +213,7 @@ document.getElementById("newchatbtn").addEventListener("click", () => {
     searchInput.addEventListener("keyup", async () => {
         let results = await searchUsers(searchInput.value);
         resultsDisplay.innerHTML = "";
-        
+
         for (let i in results) {
             let resultElement = document.createElement("div");
             resultElement.classList.add("resultElement");
@@ -187,6 +222,10 @@ document.getElementById("newchatbtn").addEventListener("click", () => {
             resultImage.src = "/api/v1/auth/pfp?id=" + results[i]["id"];
             resultElement.appendChild(resultImage);
             resultsDisplay.appendChild(resultElement);
+            resultElement.addEventListener("click", () => {
+                newModal.close();
+                addPrivateChat(results[i]["id"]);
+            })
         }
     })
 })

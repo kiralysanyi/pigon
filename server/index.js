@@ -67,7 +67,6 @@ app.post("/api/v1/auth/pfp", userimage.uploadHandler);
 
 
 app.use("/app/webui/", async (req, res, next) => {
-    console.log(req.cookies);
     if (!req.cookies["token"]) {
         console.log("No token provided");
         res.redirect("/app/login.html");
@@ -90,7 +89,7 @@ app.get("/", (req, res) => {
 })
 
 app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandler)
-
+app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHandler)
 
 //socket.io things
 
@@ -100,6 +99,18 @@ io.use(socketAuthHandler);
 
 const sockets = {}
 
+/**
+ * 
+ * @param {int} userID 
+ * @param {string} channel 
+ * @param {*} data 
+ */
+let sendDataToSockets = (userID, channel, data) => {
+    for (let i in sockets[userID]) {
+        sockets[userID][i].emit(channel, data);
+    }
+}
+
 let sendMessage = (targetID) => {
     for (let i in sockets[targetID]) {
         sockets[targetID][i].emit("message", { senderID: userID, senderName: username, chatID, isGroupChat, message });
@@ -108,6 +119,9 @@ let sendMessage = (targetID) => {
 
 let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }) => {
     console.log("New Chat: ", isGroupChat, chatID, chatName, participants, initiator);
+    for(let i in participants) {
+        sendDataToSockets(participants[i], "newchat", {isGroupChat, chatID, chatName, participants, initiator})
+    }
 }
 
 const { sqlQuery } = require("./things/db")

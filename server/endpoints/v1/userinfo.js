@@ -3,7 +3,6 @@ const {sqlQuery} = require("../../things/db")
 
 
 const userinfoHandler = async (req, res) => {
-    console.log(req.cookies.token);
     let token;
     try {
         token = req.cookies.token

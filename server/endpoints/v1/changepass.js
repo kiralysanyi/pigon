@@ -2,7 +2,6 @@ const {updatePass} = require("../../things/db");
 const {verifyToken} = require("../../things/jwt");
 
 const changepassHandler = async (req, res) => {
-    console.log(req.cookies.token);
     let token;
     try {
         token = req.cookies.token

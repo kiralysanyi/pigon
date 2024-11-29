@@ -1,5 +1,15 @@
 const {sqlQuery, userExists, verifyPass} = require("../../things/db");
+const deletePFP = require("./userimage").deletePFP;
 
+/**
+ * Removes a specific value from an array.
+ * @param {Array} array - The array to modify.
+ * @param {*} valueToRemove - The value to remove.
+ * @returns {Array} - A new array without the specified value.
+ */
+function removeValue(array, valueToRemove) {
+    return array.filter(value => value !== valueToRemove);
+}
 
 const deleteHandler = async (req, res) => {
     let username = req.body.username;
@@ -20,7 +30,25 @@ const deleteHandler = async (req, res) => {
         try {
             let response = await sqlQuery(`SELECT id FROM users WHERE username = '${username}'`);
             let userID = response[0]["id"];
+
+            //remove from chats
+            let chats = await sqlQuery(`SELECT id, participants FROM chats INNER JOIN \`user-chat\` ON chats.id = \`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=${userID}`);
+            console.log(chats);
+            for (let i in chats) {
+                chats[i]["participants"] = removeValue(JSON.parse(chats[i]["participants"]), userID)
+            }
+
+            for (let i in chats) {
+                await sqlQuery(`UPDATE chats SET participants='${JSON.stringify(chats[i]["participants"])}' WHERE id=${chats[i]["id"]}`)
+            }
+
+            //delete chat connections
+            await sqlQuery(`DELETE FROM \`user-chat\` WHERE userID=${userID}`);
+
+
             await sqlQuery(`DELETE FROM users WHERE id = '${userID}'`);
+            deletePFP(userID);
+
             res.json({
                 success: true,
                 data: {

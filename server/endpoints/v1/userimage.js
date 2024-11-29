@@ -1,5 +1,5 @@
 const { sqlQuery } = require("../../things/db");
-const { verifyToken } = require("../../things/jwt")
+const { verifyToken } = require("../../things/jwt");
 const path = require('path');
 
 const fs = require("fs");
@@ -30,16 +30,6 @@ if (fs.existsSync(imageDir) == false) {
 }
 
 const getImageHandler = (req, res) => {
-    if (!req.query.id) {
-        res.status(400).json({
-            success: false,
-            message: "No id provided."
-        });
-        return;
-    }
-
-    
-
     for (let i in extensions) {
         let ext = extensions[i];
         let filePath = imageDir + req.query.id + ext;
@@ -131,4 +121,28 @@ const uploadHandler = async (req, res) => {
     })
 }
 
-module.exports = { getImageHandler, uploadHandler }
+/**
+ * 
+ * @param {*} userID ID of the user
+ */
+let deletePFP = (userID) => {
+    for (let i in extensions) {
+        let ext = extensions[i];
+        let filePath = imageDir + userID + ext;
+        if (fs.existsSync(filePath)) {
+            fs.rmSync(filePath);
+            console.log("DEL:",filePath);
+        }
+
+
+        filePath = imageDir + "smol" + userID + ext;
+        if (fs.existsSync(filePath)) {
+            fs.rmSync(filePath);
+            console.log("DEL:",filePath);
+
+        }
+
+    }
+}
+
+module.exports = { getImageHandler, uploadHandler, deletePFP }

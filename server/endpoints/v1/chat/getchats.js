@@ -48,7 +48,12 @@ let getChatsHandler = async (req, res) => {
             result[i].participants = JSON.parse(result[i]["participants"]);
             if (result[i].groupchat == 0) {
                 let id = removeValue(result[i].participants, userdata.userID)[0];
-                let displayName = (await sqlQuery(`SELECT username FROM users WHERE id=${id}`))[0]["username"];
+                let displayName;
+                try {
+                    displayName = (await sqlQuery(`SELECT username FROM users WHERE id=${id}`))[0]["username"];
+                } catch (error) {
+                    displayName = "Deleted user"
+                }
                 result[i].name = displayName;
             }
 

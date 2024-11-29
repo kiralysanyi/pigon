@@ -9,7 +9,7 @@ const { verifyToken } = require("../../../things/jwt");
  */
 function removeValue(array, valueToRemove) {
     return array.filter(value => value !== valueToRemove);
-  }
+}
 
 let getChatsHandler = async (req, res) => {
     if (!req.cookies.token) {
@@ -51,7 +51,7 @@ let getChatsHandler = async (req, res) => {
                 let displayName = (await sqlQuery(`SELECT username FROM users WHERE id=${id}`))[0]["username"];
                 result[i].name = displayName;
             }
-            
+
         }
         console.log(result)
         res.json({
@@ -70,4 +70,4 @@ let getChatsHandler = async (req, res) => {
 
 }
 
-module.exports = {getChatsHandler}
+module.exports = { getChatsHandler }

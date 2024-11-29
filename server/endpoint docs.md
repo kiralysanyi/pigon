@@ -400,7 +400,8 @@ Get profile picture of a user.
 `GET`
 
 ### **Request Params**
-- `id` : The ID of the user you want information about.
+- `id` : The ID of the user
+- `smol` : (Optional) Return max 256x256 image
 
 ### **Response (Success)**
 Profile picture of the user.
@@ -432,6 +433,41 @@ Example:
     ]
 }
 ```
+
+## **/api/v1/chat/chats**
+### **Description**  
+Retrieve available chats for current user
+
+### **Method**  
+`GET`
+
+### **Response (Success)**
+Array of chats
+
+Example:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "chatid": 52,
+      "name": "galambjani",
+      "participants": [14, 16],
+      "groupchat": 0,
+      "initiator": 16
+    },
+    {
+      "chatid": 53,
+      "name": "kecske",
+      "participants": [14, 15],
+      "groupchat": 0,
+      "initiator": 14
+    }
+  ]
+}
+```
+
+Note: If groupchat is 0 (false) then it will return the other participants name in the name field. If groupchat is 1 (true) then it will retrieve the name of the groupchat.
 
 ## **/api/v1/auth/pfp**
 ### **Description**  

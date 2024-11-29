@@ -3,6 +3,18 @@ const { sqlQuery } = require("../../../things/db");
 let uuidv4 = require("uuid").v4
 const { verifyToken } = require("../../../things/jwt");
 
+function hasDuplicateValue(array) {
+    const seen = new Set();
+
+    for (const value of array) {
+        if (seen.has(value)) {
+            return true;
+        }
+        seen.add(value);
+    }
+
+    return false; 
+}
 
 let createChatHandler = (newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }) => { }) => {
 
@@ -68,6 +80,22 @@ let createChatHandler = (newChatHandler = ({ isGroupChat, chatID, chatName, part
                 message: "Only 2 participants accepted for private chats!"
             })
             return;
+        }
+
+        if (hasDuplicateValue(req.body.participants)) {
+            if (req.body.isGroupChat == false) {
+                res.status(400).json({
+                    success: false,
+                    message: "You can't start a conversation with yourself."
+                });
+                return;
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: "Can't add same participant twice."
+                });
+                return;
+            }
         }
 
         try {

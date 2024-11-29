@@ -9,9 +9,7 @@ socket.on("message", ({ chatID, senderID, senderName, message, isGroupChat }) =>
     console.log(chatID, senderID, senderName, message, isGroupChat);
 })
 
-socket.on("newchat", (data) => {
-    console.log("New chat: ", data)
-})
+
 
 socket.on("error", (err) => {
     console.error("Socket:", err);
@@ -228,4 +226,57 @@ document.getElementById("newchatbtn").addEventListener("click", () => {
             })
         }
     })
+})
+
+let sbcontent = document.getElementById("sbcontent");
+
+/**
+ * Removes a specific value from an array.
+ * @param {Array} array - The array to modify.
+ * @param {*} valueToRemove - The value to remove.
+ * @returns {Array} - A new array without the specified value.
+ */
+function removeValue(array, valueToRemove) {
+    return array.filter(value => value !== valueToRemove);
+}
+
+let renderChatsSB = async () => {
+    sbcontent.innerHTML = "";
+    let chats = {};
+
+    try {
+        let response = await fetch("/api/v1/chat/chats", {
+            method: "GET",
+            credentials: "include"
+        });
+
+        response = await response.json();
+
+        if (response.success == true) {
+            chats = response["data"];
+        } else {
+            console.error(response)
+            window.alert(response.message);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+
+    for (let i in chats) {
+        let element = document.createElement("div");
+        element.classList.add("resultElement");
+        let elementPfp = document.createElement("img");
+        let pfpID = removeValue(chats[i]["participants"], userinfo.id);
+        elementPfp.src = "/api/v1/auth/pfp?id=" + pfpID + "&smol=true";
+        element.innerHTML = chats[i]["name"];
+        element.appendChild(elementPfp);
+        sbcontent.appendChild(element);
+    }
+
+};
+
+renderChatsSB();
+
+socket.on("newchat", (data) => {
+    renderChatsSB();
 })

@@ -106,6 +106,7 @@ const sockets = {}
  * @param {*} data 
  */
 let sendDataToSockets = (userID, channel, data) => {
+    console.log(`Sockets for user: ${userID} `, sockets[userID])
     for (let i in sockets[userID]) {
         sockets[userID][i].emit(channel, data);
     }
@@ -127,7 +128,9 @@ let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }
 const { sqlQuery } = require("./things/db")
 
 io.on("connection", (socket) => {
-    sockets[socket.userInfo.userID] = {}
+    if (sockets[socket.userInfo.userID] == undefined) {
+        sockets[socket.userInfo.userID] = {}
+    }
     sockets[socket.userInfo.userID][socket.userInfo.deviceID] = socket;
     socket.on("disconnect", () => {
         console.log("Socket disconnected");

@@ -204,9 +204,7 @@
         if (data.success == true) {
             spiner.style.opacity = 1;
             document.getElementById("submit").disabled = true;
-            setTimeout(() => {
-                location.replace("webui/index.html")
-            }, 2000);
+            location.replace("webui/index.html")
         }
     })
 

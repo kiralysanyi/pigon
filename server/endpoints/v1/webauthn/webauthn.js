@@ -4,7 +4,6 @@ const { verifyToken } = require("../../../things/jwt");
 const jwt = require("jsonwebtoken");
 const uid = require("uuid").v4;
 const fs = require("fs");
-let config = JSON.parse(fs.readFileSync(__dirname + "/../../../config.json"));
 
 
 let challenges = [];
@@ -168,7 +167,7 @@ const authHandler = async (req, res) => {
                 username: userdata["username"],
                 deviceID: deviceID,
                 deviceInfo: deviceInfo,
-            }, config["jwt"]["secret"], { expiresIn: "7d" });
+            }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
             await registerDevice(deviceID, userdata["id"], deviceInfo);
             res.cookie('token', token, {

@@ -5,8 +5,6 @@ const uid = require("uuid").v4;
 const {validateUsername} = require("../../things/usernameRegex");
 
 
-let config = JSON.parse(fs.readFileSync(__dirname + "/../../config.json"));
-
 //login handler
 const loginHandler = async (req = app.request, res = app.response, next = () => { }) => {
     let username = req.body.username;
@@ -66,7 +64,7 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
                 username: userInfo["username"],
                 deviceID: deviceID,
                 deviceInfo: deviceInfo,
-            }, config["jwt"]["secret"], { expiresIn: "7d" });
+            }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
             await registerDevice(deviceID, userInfo["id"], deviceInfo);
         } catch (error) {

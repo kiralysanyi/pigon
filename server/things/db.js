@@ -2,27 +2,29 @@ const mysql = require("mysql2");
 const hashPass = require("./password").hashPass;
 const fs = require("fs");
 
-let config = JSON.parse(fs.readFileSync(__dirname + "/../config.json"));
-
-var con = mysql.createConnection({
-    host: config["db"]["host"],
-    user: config["db"]["username"],
-    password: config["db"]["password"],
-    database: config["db"]["dbName"]
+// Create the connection pool. The pool-specific settings are the defaults
+const pool = mysql.createPool({
+    host: process.env.DBHOST,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DBNAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    maxIdle: 10, // max idle connections, the default value is the same as `connectionLimit`
+    idleTimeout: 60000, // idle connections timeout, in milliseconds, the default value 60000
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0,
 });
 
-con.connect(function (err) {
-    if (err) throw err;
-    console.log("Mysql connected!");
-});
 
 //TODO: ez így szuboptimális, de jóvanazúgy egyelőre, majd fixeljük
 
 const sqlQuery = async (query) => {
-    return new Promise((resolved) => {
-        con.query(query, (err, result) => {
+    return new Promise((resolved, reject) => {
+        pool.query(query, (err, result) => {
             if (err) {
-                throw err;
+                reject(err);
             }
             resolved(result);
         });
@@ -143,4 +145,4 @@ let getUserFromID = (userID) => {
     });
 }
 
-module.exports = {registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID}
+module.exports = { registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID }

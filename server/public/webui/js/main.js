@@ -1,6 +1,47 @@
 import * as auth from "./auth.js";
 import { modal } from "./modal.js";
 import { parseUserAgent } from "./useragent-parser.js";
+import { io } from "./socket.io.esm.min.js"
+
+const socket = io(location.host);
+
+socket.on("message", ({ chatID, senderID, senderName, message, isGroupChat }) => {
+    console.log(chatID, senderID, senderName, message, isGroupChat);
+})
+
+socket.on("error", (err) => {
+    console.error("Socket:", err);
+})
+
+function createchat(isGroupChat, chatName, participants) {
+    /*
+    Body
+    {
+        isGroupChat: true/false,
+        chatName: "aaa" //only required if isGroupChat = true
+        participants: [] //array of userIDs
+    }
+    */
+
+    fetch("/api/v1/chat/create", {
+        credentials: "include",
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            isGroupChat, chatName, participants
+        })
+    }).then((response) => {
+        console.log(response);
+    })
+}
+
+window.mkchat = createchat;
+
+window.smsg = (message, targetID) => {
+    socket.emit("message", message, targetID);
+}
 
 let userinfo = await auth.getUserInfo();
 if (userinfo.success == false) {

@@ -1,9 +1,11 @@
+require('dotenv').config()
+
 const express = require('express');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server);
+const io = new Server(server, { cookie: true });
 let cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 let jsonParser = bodyParser.json;
@@ -15,7 +17,7 @@ const userimage = require("./endpoints/v1/userimage");
 
 const fileupload = require("express-fileupload");
 
-app.use(fileupload({limits: {files: 1, fileSize: 10000000}}));
+app.use(fileupload({ limits: { files: 1, fileSize: 10000000 } }));
 
 app.use(jsonParser());
 app.use(cookieParser());
@@ -24,10 +26,6 @@ app.use(cors({
 }));
 
 app.use(require('sanitize').middleware);
-
-
-let config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
-
 
 
 
@@ -92,15 +90,60 @@ app.get("/", (req, res) => {
 })
 
 
+//socket.io things
+
+// Authenticate socket connection
+const { socketAuthHandler } = require("./communication_handler/authenticator");
+io.use(socketAuthHandler);
+
+const sockets = {}
+
+let sendMessage = (targetID) => {
+    for (let i in sockets[targetID]) {
+        sockets[targetID][i].emit("message", { senderID: userID, senderName: username, chatID, isGroupChat, message });
+    }
+}
+
+let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }) => {
+    console.log("New Chat: ", isGroupChat, chatID, chatName, participants, initiator);
+}
+
+const { sqlQuery } = require("./things/db")
+
+io.on("connection", (socket) => {
+    sockets[socket.userInfo.userID] = {}
+    sockets[socket.userInfo.userID][socket.userInfo.deviceID] = socket;
+    socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+        delete sockets[socket.userInfo.userID][socket.userInfo.deviceID]
+        console.log(sockets[socket.userInfo.userID]);
+    })
+
+    socket.on("message", (message, chatID) => {
+        let userID = socket.userInfo.userID;
+        let username = socket.userInfo.username;
+        let isGroupChat = false;
 
 
-//test endpoints
-const path = require("path");
-app.get("/test/webauthn.min.js", (req, res) => {
-    res.sendFile(path.join(__dirname, "node_modules", "@passwordless-id", "webauthn", "dist", "browser", "webauthn.min.js"));
+
+        try {
+
+
+            if (Object.keys(sockets[targetID]).length == 0) {
+                //no target devices found only save to db   
+                return;
+            }
+
+
+        } catch (error) {
+            socket.emit("error", error)
+        }
+    })
 })
-app.use("/test", express.static("webauthn-test"));
 
-server.listen(config["http"]["port"], () => {
-    console.log(`Listening at http://localhost:${config["http"]["port"]}`);
+app.post("/api/v1/chat/create", require("./endpoints/v1/chat/createchat").createChatHandler(newChatHandler))
+
+
+server.listen(process.env.PORT, () => {
+    console.log(`Listening at http://localhost:${process.env.PORT}`);
 })

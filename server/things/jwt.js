@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const {sqlQuery} = require("./db")
 
-let config = JSON.parse(fs.readFileSync(__dirname + "/../config.json"));
 
 const verifyToken = (token) => {
     return new Promise(async (resolved) => {
@@ -19,7 +18,7 @@ const verifyToken = (token) => {
         */
         let decoded;
         try {
-            decoded = jwt.verify(token, config["jwt"]["secret"]);
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
         } catch (error) {
             resolved({
                 success: false,

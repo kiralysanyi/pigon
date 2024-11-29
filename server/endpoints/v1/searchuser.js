@@ -34,7 +34,7 @@ let searchHandler = async (req, res) => {
     let searchQuery = req.query.search;
 
     let results = await sqlQuery(`SELECT id, username, registerDate FROM users WHERE username LIKE '%${searchQuery}%'`);
-    console.log(results);
+
 
     res.json({
         success: true,

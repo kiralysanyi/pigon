@@ -139,4 +139,54 @@ document.getElementById("devicesbtn").addEventListener("click", async () => {
 
     render();
     devicesModal.open();
+});
+
+function searchUsers(query) {
+    return new Promise((resolved, rejected) => {
+        fetch("/api/v1/auth/search?" + new URLSearchParams({search: query}).toString(), {
+            method: "GET",
+            credentials: "include"
+        }).then(async (response) => {
+            let res = await response.json()
+            if (res.success == false) {
+                rejected(new Error(res.message))
+                return;
+            }
+            resolved(res["data"]);
+        }).catch((error) => {
+            rejected(error)
+        })
+    });
+    
+}
+
+document.getElementById("newchatbtn").addEventListener("click", () => {
+    let newModal = new modal("New chat");
+    let contentElement = newModal.contentElement;
+    
+    let searchInput = document.createElement("input");
+    searchInput.type = "text";
+    searchInput.placeholder = "Search";
+    searchInput.classList.add("search");
+    contentElement.appendChild(searchInput);
+    newModal.open();
+
+    let resultsDisplay = document.createElement("div");
+    resultsDisplay.classList.add("resultsDisplay");
+    contentElement.appendChild(resultsDisplay);
+
+    searchInput.addEventListener("keyup", async () => {
+        let results = await searchUsers(searchInput.value);
+        resultsDisplay.innerHTML = "";
+        
+        for (let i in results) {
+            let resultElement = document.createElement("div");
+            resultElement.classList.add("resultElement");
+            resultElement.innerHTML = results[i]["username"];
+            let resultImage = document.createElement("img");
+            resultImage.src = "/api/v1/auth/pfp?id=" + results[i]["id"];
+            resultElement.appendChild(resultImage);
+            resultsDisplay.appendChild(resultElement);
+        }
+    })
 })

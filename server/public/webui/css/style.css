@@ -114,3 +114,63 @@ nav {
 .currentdev {
     background-color: rgba(36, 124, 28, 0.514);
 }
+
+.search {
+    position: absolute;
+    left: calc(50% - 100px);
+    width: 200px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background-color: rgb(22, 22, 22);
+    color: white;
+    outline: 0;
+    transition: 200ms;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    top: 10px;
+}
+
+.search:hover {
+    background-color: rgb(43, 43, 43);
+}
+
+.search:focus {
+    background-color: rgb(43, 43, 43);
+}
+
+.resultsDisplay {
+    position: absolute;
+    top: 60px;
+    width: 100%;
+    height: calc(100% - 70px);
+    border-radius: 10px;
+    overflow: auto;
+}
+
+.resultElement {
+    position: relative;
+    width: calc(90% - 80px);
+    margin-left: 5%;
+    margin-top: 5px;
+    background-color: rgba(255, 255, 255, 0.151);
+    color: white;
+    transition: 200ms;
+    float: left;
+    height: 80px;
+    padding-left: 80px;
+    user-select: none;
+    line-height: 80px;
+    font-size: 30px;
+    border-radius: 10px;
+}
+
+.resultElement img {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 60px;
+    height: 60px;
+    border-radius: 100%;
+    border: none;
+}

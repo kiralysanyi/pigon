@@ -405,6 +405,34 @@ Get profile picture of a user.
 ### **Response (Success)**
 Profile picture of the user.
 
+## **/api/v1/auth/search**
+### **Description**  
+Find users
+
+### **Method**  
+`GET`
+
+### **Request Params**
+- `search` : Search query
+
+### **Response (Success)**
+Array of search results
+
+Example:
+```json
+{
+    "success":true,
+    "message":"Search results",
+    "data": [
+                {
+                    "id":16,
+                    "username":"galambjani",
+                    "registerDate":"2024-11-29T07:33:38.000Z"
+                }
+    ]
+}
+```
+
 ## **/api/v1/auth/pfp**
 ### **Description**  
 Upload profile picture of a user.

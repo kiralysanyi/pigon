@@ -89,6 +89,8 @@ app.get("/", (req, res) => {
     res.redirect("/app/login.html");
 })
 
+app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandler)
+
 
 //socket.io things
 

@@ -206,16 +206,12 @@ nav {
     position: absolute;
     bottom: 0px;
     left: 0px;
-    display: flex;
-    flex-direction: column; /* Stacks messages vertically */
-    justify-content: flex-start; /* Start from the top, but scrolling works */
-    align-items: flex-start; /* Align messages to the left */
+    display: block;
     height: 100%; /* Occupies the available vertical space */
     width: 100%;
     overflow-y: auto; /* Enables vertical scrolling */
     padding: 10px; /* Optional: Adds padding for better UX */
-    box-sizing: border-box; /* Includes padding in height/width */
-    padding-top: 70px;
+    padding-top: 90px;
     padding-bottom: 70px;
 }
 
@@ -244,9 +240,9 @@ nav {
 
 #textcontainer input[type="text"] {
     position: absolute;
-    left: 5px;
+    left: 60px;
     top: 5px;
-    width: calc(100% - 60px);
+    width: calc(100% - 120px);
     height: 38px;
     padding: 0px;
     outline: 0;
@@ -277,6 +273,12 @@ nav {
 
 #textcontainer input[type="text"]:focus {
     background-color: rgba(255, 255, 255, 0.151);
+}
+
+#sendimage {
+    position: absolute;
+    left: 5px;
+    top: 5px;
 }
 
 #textcontainer button:hover {
@@ -325,6 +327,7 @@ nav {
     min-height: 45px;
     margin-left: 20px;
     max-width: 80%;
+    width: fit-content;
 }
 
 .msg .name {
@@ -345,4 +348,14 @@ nav {
     height: 40px;
     margin-top: 5px;
     border-radius: 100%;
+}
+
+.msg_content {
+    position: relative;
+    display: block;
+    width: auto;
+}
+
+.msg_content img {
+    max-width: 400px;
 }

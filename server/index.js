@@ -150,8 +150,8 @@ io.on("connection", (socket) => {
         sockets[socket.userInfo.userID] = {}
     }
     sockets[socket.userInfo.userID][socket.userInfo.deviceID] = socket;
-    socket.on("disconnect", () => {
-        console.log("Socket disconnected");
+    socket.on("disconnect", (reason) => {
+        console.log("Socket disconnected", reason);
         delete sockets[socket.userInfo.userID][socket.userInfo.deviceID]
     })
 
@@ -171,7 +171,9 @@ io.on("connection", (socket) => {
 
         try {
             //sanitize
-            message.content = sanitizeInput(message.content);
+            if (message.type == "text") {
+                message.content = sanitizeInput(message.content);
+            }
 
             await sqlQuery(`INSERT INTO messages (chatid, senderid, message) VALUES ('${chatID}','${senderID}','${JSON.stringify(message)}')`);
 

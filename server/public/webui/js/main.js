@@ -270,27 +270,30 @@ let renderChat = (page = 1) => {
     }).then(async (response) => {
         let res = await response.json();
         for (let i in res) {
-            console.log(res[i]["message"]);
             let message = JSON.parse(res[i]["message"]);
+            let element = document.createElement("div");
+            element.classList.add("msg");
+            let element_namedisplay = document.createElement("div");
+            element_namedisplay.classList.add("name");
+            let element_pfp = document.createElement("img");
+            element_pfp.classList.add("pfp");
+            let element_msg = document.createElement("div");
+            element_msg.classList.add("msg_content");
+            element.appendChild(element_namedisplay);
+            element.appendChild(element_pfp);
+            element.appendChild(element_msg);
+            element_namedisplay.innerHTML = res[i]["username"];
+            if (userinfo.id == res[i]["senderid"]) {
+                element_namedisplay.innerHTML = "You"
+            }
+            element_pfp.src = "/api/v1/auth/pfp?id=" + res[i]["senderid"] + "&smol=true";
+            msgcontainer.appendChild(element);
             if (message.type == "text") {
-                let element = document.createElement("div");
-                element.classList.add("msg");
-                let element_namedisplay = document.createElement("div");
-                element_namedisplay.classList.add("name");
-                let element_pfp = document.createElement("img");
-                element_pfp.classList.add("pfp");
-                let element_msg = document.createElement("div");
-                element_msg.classList.add("msg_content");
-                element.appendChild(element_namedisplay);
-                element.appendChild(element_pfp);
-                element.appendChild(element_msg);
                 element_msg.innerHTML = decodeHTML(message.content);
-                element_namedisplay.innerHTML = res[i]["username"];
-                if (userinfo.id == res[i]["senderid"]) {
-                    element_namedisplay.innerHTML = "You"
-                }
-                element_pfp.src = "/api/v1/auth/pfp?id=" + res[i]["senderid"] + "&smol=true";
-                msgcontainer.appendChild(element);
+            }
+
+            if (message.type == "image") {
+                element_msg.innerHTML = `<img src="${message.content}"></img>`
             }
         }
         msgcontainer.scrollTop = msgcontainer.scrollHeight;
@@ -350,11 +353,11 @@ renderChatsSB();
 function sanitizeInput(input) {
     // Replace characters that could break JSON
     return input.replace(/\\/g, '\\\\') // Escape backslashes
-                .replace(/"/g, '\\"')   // Escape double quotes
-                .replace(/</g, '&lt;') // Escape < to prevent HTML injection
-                .replace(/>/g, '&gt;') // Escape > to prevent HTML injection
-                .replace(/&/g, '&amp;') // Escape &
-                .replace(/'/g, '&#39;'); // Escape single quotes
+        .replace(/"/g, '\\"')   // Escape double quotes
+        .replace(/</g, '&lt;') // Escape < to prevent HTML injection
+        .replace(/>/g, '&gt;') // Escape > to prevent HTML injection
+        .replace(/&/g, '&amp;') // Escape &
+        .replace(/'/g, '&#39;'); // Escape single quotes
 }
 
 // Decode sanitized input for display
@@ -364,11 +367,11 @@ function decodeHTML(html) {
     return element.value;
 }
 
-let addMessageToContainer = (chatID, senderID, name, message) => {
+let addMessageToContainer = (chatID, senderID, name, message, type) => {
     if (chatID != selectedchat) {
         return;
     }
-    message = sanitizeInput(message);
+
     let element = document.createElement("div");
     element.classList.add("msg");
     let element_namedisplay = document.createElement("div");
@@ -380,7 +383,6 @@ let addMessageToContainer = (chatID, senderID, name, message) => {
     element.appendChild(element_namedisplay);
     element.appendChild(element_pfp);
     element.appendChild(element_msg);
-    element_msg.innerHTML = decodeHTML(message);
     element_namedisplay.innerHTML = name;
     element_pfp.src = "/api/v1/auth/pfp?id=" + senderID + "&smol=true";
     msgcontainer.appendChild(element);
@@ -388,6 +390,16 @@ let addMessageToContainer = (chatID, senderID, name, message) => {
     if (msgcontainer.scrollTop > (msgcontainer.scrollHeight - 1500)) {
         msgcontainer.scrollTop = msgcontainer.scrollHeight;
     }
+
+    if (type == "text") {
+        message = sanitizeInput(message);
+        element_msg.innerHTML = decodeHTML(message);
+    }
+
+    if (type == "image") {
+        element_msg.innerHTML = `<img src="${message}"></img>`
+    }
+
 }
 
 socket.on("message", (data) => {
@@ -397,7 +409,7 @@ socket.on("message", (data) => {
     console.log(data);
 
     if (selectedchat == data["chatID"]) {
-        addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], decodeHTML(data["message"]["content"]));
+        addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], data["message"]["content"], data["message"]["type"]);
     }
 })
 
@@ -425,4 +437,68 @@ msgform.addEventListener("submit", (e) => {
     sendMessage(selectedchat, message.content, message.type);
 
     console.log(message);
+})
+
+//image sending
+
+function sendImage(file) {
+    let fr = new FileReader();
+    //prepare
+    fr.addEventListener("load", () => {
+        console.log("Loaded file")
+        let img = document.createElement("img");
+        img.addEventListener("load", () => {
+            let canvas = document.createElement("canvas");
+            let ctx = canvas.getContext("2d")
+
+            if (img.width < 1024 && img.height < 1024) {
+                //good to go
+                sendMessage(selectedchat, fr.result, "image");
+                addMessageToContainer(selectedchat, userinfo.id, userinfo.username, fr.result, "image");
+                console.log("Image sent!");
+                return;
+            }
+
+            // Calculate the new dimensions while maintaining the aspect ratio
+            let width = img.width;
+            let height = img.height;
+
+            let maxWidth = 1024;
+            let maxHeight = 1024;
+
+            if (width > maxWidth || height > maxHeight) {
+                if (width / height > maxWidth / maxHeight) {
+                    width = maxWidth;
+                    height = (img.height * maxWidth) / img.width;
+                } else {
+                    height = maxHeight;
+                    width = (img.width * maxHeight) / img.height;
+                }
+            }
+
+            console.log("Resizing");
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+
+            let base64 = canvas.toDataURL('image/jpeg', 0.5);
+            sendMessage(selectedchat, base64, "image");
+            console.log("Image sent!");
+            addMessageToContainer(selectedchat, userinfo.id, userinfo.username, base64, "image");
+        });
+        img.src = fr.result;
+
+    });
+    fr.readAsDataURL(file);
+}
+
+document.getElementById("sendimage").addEventListener("click", async () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/jpg, image/jpeg, image/png";
+    fileInput.addEventListener("change", (event) => {
+        sendImage(fileInput.files[0]);
+    });
+    fileInput.click();
 })

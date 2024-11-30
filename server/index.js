@@ -132,6 +132,16 @@ function removeValue(array, valueToRemove) {
     return array.filter(value => value !== valueToRemove);
 }
 
+function sanitizeInput(input) {
+    // Replace characters that could break JSON
+    return input.replace(/\\/g, '\\\\') // Escape backslashes
+                .replace(/"/g, '\\"')   // Escape double quotes
+                .replace(/</g, '&lt;') // Escape < to prevent HTML injection
+                .replace(/>/g, '&gt;') // Escape > to prevent HTML injection
+                .replace(/&/g, '&amp;') // Escape &
+                .replace(/'/g, '&#39;'); // Escape single quotes
+}
+
 io.on("connection", (socket) => {
     if (socket.userInfo == undefined) {
         return;
@@ -160,6 +170,9 @@ io.on("connection", (socket) => {
         }
 
         try {
+            //sanitize
+            message.content = sanitizeInput(message.content);
+
             await sqlQuery(`INSERT INTO messages (chatid, senderid, message) VALUES ('${chatID}','${senderID}','${JSON.stringify(message)}')`);
 
             let toNotify = []

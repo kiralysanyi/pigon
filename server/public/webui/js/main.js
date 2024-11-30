@@ -270,6 +270,7 @@ let renderChat = (page = 1) => {
     }).then(async (response) => {
         let res = await response.json();
         for (let i in res) {
+            console.log(res[i]["message"]);
             let message = JSON.parse(res[i]["message"]);
             if (message.type == "text") {
                 let element = document.createElement("div");
@@ -283,7 +284,7 @@ let renderChat = (page = 1) => {
                 element.appendChild(element_namedisplay);
                 element.appendChild(element_pfp);
                 element.appendChild(element_msg);
-                element_msg.innerHTML = message.content;
+                element_msg.innerHTML = decodeHTML(message.content);
                 element_namedisplay.innerHTML = res[i]["username"];
                 if (userinfo.id == res[i]["senderid"]) {
                     element_namedisplay.innerHTML = "You"
@@ -345,10 +346,28 @@ let renderChatsSB = async () => {
 
 renderChatsSB();
 
+function sanitizeInput(input) {
+    // Replace characters that could break JSON
+    return input.replace(/\\/g, '\\\\') // Escape backslashes
+                .replace(/"/g, '\\"')   // Escape double quotes
+                .replace(/</g, '&lt;') // Escape < to prevent HTML injection
+                .replace(/>/g, '&gt;') // Escape > to prevent HTML injection
+                .replace(/&/g, '&amp;') // Escape &
+                .replace(/'/g, '&#39;'); // Escape single quotes
+}
+
+// Decode sanitized input for display
+function decodeHTML(html) {
+    const element = document.createElement('textarea');
+    element.innerHTML = html;
+    return element.value;
+}
+
 let addMessageToContainer = (chatID, senderID, name, message) => {
     if (chatID != selectedchat) {
         return;
     }
+    message = sanitizeInput(message);
     let element = document.createElement("div");
     element.classList.add("msg");
     let element_namedisplay = document.createElement("div");
@@ -360,7 +379,7 @@ let addMessageToContainer = (chatID, senderID, name, message) => {
     element.appendChild(element_namedisplay);
     element.appendChild(element_pfp);
     element.appendChild(element_msg);
-    element_msg.innerHTML = message;
+    element_msg.innerHTML = decodeHTML(message);
     element_namedisplay.innerHTML = name;
     element_pfp.src = "/api/v1/auth/pfp?id=" + senderID + "&smol=true";
     msgcontainer.appendChild(element);
@@ -374,7 +393,7 @@ socket.on("message", (data) => {
     console.log(data);
 
     if (selectedchat == data["chatID"]) {
-        addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], data["message"]["content"]);
+        addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], decodeHTML(data["message"]["content"]));
     }
 })
 

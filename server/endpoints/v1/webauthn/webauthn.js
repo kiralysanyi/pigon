@@ -7,7 +7,7 @@ const fs = require("fs");
 
 
 let challenges = [];
-const origin = "http://localhost:8080"
+const origin = process.env.ORIGIN;
 
 const challengeHandler = async (req, res) => {
     const challenge = server.randomChallenge();

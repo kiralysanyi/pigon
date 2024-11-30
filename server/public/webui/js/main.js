@@ -3,12 +3,32 @@ import { modal } from "./modal.js";
 import { parseUserAgent } from "./useragent-parser.js";
 import { io } from "./socket.io.esm.min.js"
 
+/*
+let isLoggedIn = await auth.checkIfLoggedIn();
+if (isLoggedIn == false) {
+    location.replace("/app/login.html")
+}
+    */
+
 const socket = io(location.host);
 
-socket.on("message", ({ chatID, senderID, senderName, message, isGroupChat }) => {
-    console.log(chatID, senderID, senderName, message, isGroupChat);
-})
+socket.on("connect", () => {
+    document.getElementById("indicator").style.backgroundColor = "green";
+});
 
+socket.on("disconnect", () => {
+    document.getElementById("indicator").style.backgroundColor = "red";
+});
+
+
+
+let sendMessage = (chatID, content, type = "text") => {
+    let message = {
+        type,
+        content
+    }
+    socket.emit("message", { chatID, message });
+}
 
 
 socket.on("error", (err) => {
@@ -51,11 +71,6 @@ function createchat({ isGroupChat, chatName, participants }) {
 
 }
 
-window.mkchat = createchat;
-
-window.smsg = (message, targetID) => {
-    socket.emit("message", message, targetID);
-}
 
 let userinfo = await auth.getUserInfo();
 if (userinfo.success == false) {
@@ -240,6 +255,51 @@ function removeValue(array, valueToRemove) {
     return array.filter(value => value !== valueToRemove);
 }
 
+let msgcontainer = document.getElementById("msgcontainer");
+let textcontainer = document.getElementById("textcontainer");
+let currentChatInfodiv = document.getElementById("currentChatInfo");
+let currentPfp = document.getElementById("currentPfp");
+let currentChatname = document.getElementById("currentChatname");
+let selectedchat = undefined;
+
+let renderChat = (page = 1) => {
+    msgcontainer.innerHTML = "";
+    fetch("/api/v1/chat/messages?chatid=" + selectedchat + "&page=" + page, {
+        method: "GET",
+        credentials: "include"
+    }).then(async (response) => {
+        let res = await response.json();
+        for (let i in res) {
+            let message = JSON.parse(res[i]["message"]);
+            if (message.type == "text") {
+                let element = document.createElement("div");
+                element.classList.add("msg");
+                let element_namedisplay = document.createElement("div");
+                element_namedisplay.classList.add("name");
+                let element_pfp = document.createElement("img");
+                element_pfp.classList.add("pfp");
+                let element_msg = document.createElement("div");
+                element_msg.classList.add("msg_content");
+                element.appendChild(element_namedisplay);
+                element.appendChild(element_pfp);
+                element.appendChild(element_msg);
+                element_msg.innerHTML = message.content;
+                element_namedisplay.innerHTML = res[i]["username"];
+                if (userinfo.id == res[i]["senderid"]) {
+                    element_namedisplay.innerHTML = "You"
+                }
+                element_pfp.src = "/api/v1/auth/pfp?id=" + res[i]["senderid"] + "&smol=true";
+                msgcontainer.appendChild(element);
+            }
+        }
+        console.log(res);
+
+    }).catch((err) => {
+        console.error(err);
+    })
+}
+
+
 let renderChatsSB = async () => {
     sbcontent.innerHTML = "";
     let chats = {};
@@ -266,17 +326,80 @@ let renderChatsSB = async () => {
         let element = document.createElement("div");
         element.classList.add("resultElement");
         let elementPfp = document.createElement("img");
-        let pfpID = removeValue(chats[i]["participants"], userinfo.id);
+        let pfpID = removeValue(chats[i]["participants"], userinfo.id)[0];
         elementPfp.src = "/api/v1/auth/pfp?id=" + pfpID + "&smol=true";
         element.innerHTML = chats[i]["name"];
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);
+        element.addEventListener("click", () => {
+            currentPfp.src = elementPfp.src;
+            currentChatname.innerHTML = chats[i]["name"];
+            currentChatInfodiv.style.display = "block";
+            textcontainer.style.display = "block";
+            selectedchat = chats[i]["chatid"];
+            renderChat();
+        })
     }
 
 };
 
 renderChatsSB();
 
+let addMessageToContainer = (chatID, senderID, name, message) => {
+    if (chatID != selectedchat) {
+        return;
+    }
+    let element = document.createElement("div");
+    element.classList.add("msg");
+    let element_namedisplay = document.createElement("div");
+    element_namedisplay.classList.add("name");
+    let element_pfp = document.createElement("img");
+    element_pfp.classList.add("pfp");
+    let element_msg = document.createElement("div");
+    element_msg.classList.add("msg_content");
+    element.appendChild(element_namedisplay);
+    element.appendChild(element_pfp);
+    element.appendChild(element_msg);
+    element_msg.innerHTML = message;
+    element_namedisplay.innerHTML = name;
+    element_pfp.src = "/api/v1/auth/pfp?id=" + senderID + "&smol=true";
+    msgcontainer.appendChild(element);
+
+}
+
+socket.on("message", (data) => {
+    //data:{"chatID":66,"senderID":17,"message":{"type":"text","content":"Sznia"}}
+    data = JSON.parse(data);
+
+    console.log(data);
+
+    if (selectedchat == data["chatID"]) {
+        addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], data["message"]["content"]);
+    }
+})
+
 socket.on("newchat", (data) => {
     renderChatsSB();
+})
+
+let msgform = document.getElementById("messageform");
+let msginput = document.getElementById("message");
+
+msgform.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (msginput.value == "") {
+        return;
+    }
+    let message = {
+        type: "text",
+        content: msginput.value
+    }
+
+    addMessageToContainer(selectedchat, userinfo.id, "You", message.content);
+
+    msginput.value = "";
+
+    sendMessage(selectedchat, message.content, message.type);
+
+    console.log(message);
 })

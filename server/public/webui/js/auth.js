@@ -208,5 +208,4 @@ if (isLoggedIn == false) {
     location.replace("/app/login.html")
 }
 
-
-export {changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register, removeDevice}
+export { changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register, removeDevice, checkIfLoggedIn }

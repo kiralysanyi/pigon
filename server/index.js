@@ -90,6 +90,7 @@ app.get("/", (req, res) => {
 
 app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandler)
 app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHandler)
+app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)
 
 //socket.io things
 
@@ -112,22 +113,29 @@ let sendDataToSockets = (userID, channel, data) => {
     }
 }
 
-let sendMessage = (targetID) => {
-    for (let i in sockets[targetID]) {
-        sockets[targetID][i].emit("message", { senderID: userID, senderName: username, chatID, isGroupChat, message });
-    }
-}
-
 let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }) => {
     console.log("New Chat: ", isGroupChat, chatID, chatName, participants, initiator);
-    for(let i in participants) {
-        sendDataToSockets(participants[i], "newchat", {isGroupChat, chatID, chatName, participants, initiator})
+    for (let i in participants) {
+        sendDataToSockets(participants[i], "newchat", { isGroupChat, chatID, chatName, participants, initiator })
     }
 }
 
 const { sqlQuery } = require("./things/db")
 
+/**
+ * Removes a specific value from an array.
+ * @param {Array} array - The array to modify.
+ * @param {*} valueToRemove - The value to remove.
+ * @returns {Array} - A new array without the specified value.
+ */
+function removeValue(array, valueToRemove) {
+    return array.filter(value => value !== valueToRemove);
+}
+
 io.on("connection", (socket) => {
+    if (socket.userInfo == undefined) {
+        return;
+    }
     if (sockets[socket.userInfo.userID] == undefined) {
         sockets[socket.userInfo.userID] = {}
     }
@@ -135,34 +143,48 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log("Socket disconnected");
         delete sockets[socket.userInfo.userID][socket.userInfo.deviceID]
-        console.log(sockets[socket.userInfo.userID]);
     })
 
-    socket.on("message", (message, chatID) => {
-        let userID = socket.userInfo.userID;
-        let username = socket.userInfo.username;
-        let isGroupChat = false;
+    socket.on("message", async ({ chatID, message }) => {
+        let senderID = socket.userInfo.userID;
+        let senderName = socket.userInfo.username;
 
+        if (chatID == undefined) {
+            socket.emit("error", "No target")
+            return;
+        }
 
+        if (message.type == undefined || message.content == undefined) {
+            socket.emit("error", "Invalid message")
+            return;
+        }
 
         try {
+            await sqlQuery(`INSERT INTO messages (chatid, senderid, message) VALUES ('${chatID}','${senderID}','${JSON.stringify(message)}')`);
 
+            let toNotify = []
 
-            if (Object.keys(sockets[targetID]).length == 0) {
-                //no target devices found only save to db   
-                return;
+            let result = await sqlQuery(`SELECT participants FROM chats WHERE id=${chatID}`);
+
+            toNotify = removeValue(JSON.parse(result[0]["participants"]), senderID);
+
+            for (let i in toNotify) {
+                sendDataToSockets(toNotify[i], "message", JSON.stringify({ chatID, senderID, message, senderName: senderName }))
             }
 
-
         } catch (error) {
-            socket.emit("error", error)
+            console.error(error);
+            socket.emit("error", error);
         }
+
     })
+
 })
 
 app.post("/api/v1/chat/create", require("./endpoints/v1/chat/createchat").createChatHandler(newChatHandler))
 
 
 server.listen(process.env.PORT, () => {
-    console.log(`Listening at http://localhost:${process.env.PORT}`);
+    console.log(`Listening on port:${process.env.PORT}`);
+    console.log(`Origin: ${process.env.ORIGIN}`);
 })

@@ -6,6 +6,7 @@ body {
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
+    background-position: center;
 }
 
 nav {
@@ -203,15 +204,30 @@ nav {
 
 #msgcontainer {
     position: absolute;
-    top: 0px;
+    bottom: 0px;
     left: 0px;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-start;
-    height: calc(100% - 70px);
+    flex-direction: column; /* Stacks messages vertically */
+    justify-content: flex-start; /* Start from the top, but scrolling works */
+    align-items: flex-start; /* Align messages to the left */
+    height: 100%; /* Occupies the available vertical space */
     width: 100%;
-    overflow-y: auto;
+    overflow-y: auto; /* Enables vertical scrolling */
+    padding: 10px; /* Optional: Adds padding for better UX */
+    box-sizing: border-box; /* Includes padding in height/width */
+    padding-top: 70px;
+    padding-bottom: 70px;
+}
+
+/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
+#msgcontainer::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+}
+
+/* Optionally, hide scrollbar for Firefox */
+#msgcontainer {
+    scrollbar-width: none; /* For Firefox */
 }
 
 #textcontainer {

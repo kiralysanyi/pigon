@@ -293,6 +293,7 @@ let renderChat = (page = 1) => {
                 msgcontainer.appendChild(element);
             }
         }
+        msgcontainer.scrollTop = msgcontainer.scrollHeight;
         console.log(res);
 
     }).catch((err) => {
@@ -383,7 +384,10 @@ let addMessageToContainer = (chatID, senderID, name, message) => {
     element_namedisplay.innerHTML = name;
     element_pfp.src = "/api/v1/auth/pfp?id=" + senderID + "&smol=true";
     msgcontainer.appendChild(element);
-
+    console.log(msgcontainer.scrollTop, msgcontainer.scrollHeight);
+    if (msgcontainer.scrollTop > (msgcontainer.scrollHeight - 1500)) {
+        msgcontainer.scrollTop = msgcontainer.scrollHeight;
+    }
 }
 
 socket.on("message", (data) => {
@@ -415,7 +419,7 @@ msgform.addEventListener("submit", (e) => {
     }
 
     addMessageToContainer(selectedchat, userinfo.id, "You", message.content);
-
+    msgcontainer.scrollTop = msgcontainer.scrollHeight;
     msginput.value = "";
 
     sendMessage(selectedchat, message.content, message.type);

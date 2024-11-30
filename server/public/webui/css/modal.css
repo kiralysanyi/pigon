@@ -66,3 +66,10 @@
 .modal_closebtn:hover {
     background-color: rgba(255, 255, 255, 0.329);
 }
+
+@media screen and (max-width: 500px) {
+    .modal {
+        width: 100%;
+        height: 100%;
+    }
+}

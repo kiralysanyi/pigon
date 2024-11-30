@@ -67,7 +67,7 @@ let getMessagesHandler = async (req, res) => {
     }
 
     try {
-        let result = await sqlQuery(`SELECT \`senderid\`, \`message\`, \`date\`, users.username FROM messages INNER JOIN users ON messages.senderid = users.id WHERE cancelled = 0 AND chatid = ${req.query.chatid} ORDER BY \`date\` ASC LIMIT 50 OFFSET ${offset};`);
+        let result = await sqlQuery(`SELECT \`senderid\`, \`message\`, \`date\`, users.username FROM messages LEFT JOIN users ON messages.senderid = users.id WHERE cancelled = 0 AND chatid = ${req.query.chatid} ORDER BY \`date\` ASC LIMIT 50 OFFSET ${offset};`);
         res.json(result);
     } catch (error) {
         console.error(error);

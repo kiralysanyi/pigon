@@ -297,7 +297,7 @@ let renderChat = (page = 1) => {
             }
 
             if (message.type == "video") {
-                element_msg.innerHTML = `<video src="${message.content}" controls autoplay muted></video>`
+                element_msg.innerHTML = `<video src="${message.content}" controls loop autoplay muted></video>`
             }
         }
         msgcontainer.scrollTop = msgcontainer.scrollHeight;
@@ -405,7 +405,7 @@ let addMessageToContainer = (chatID, senderID, name, message, type) => {
     }
 
     if (type == "video") {
-        element_msg.innerHTML = `<video src="${message}" controls autoplay muted></video>`
+        element_msg.innerHTML = `<video src="${message}" controls loop autoplay muted></video>`
     }
 
 }

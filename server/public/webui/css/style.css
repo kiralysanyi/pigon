@@ -333,6 +333,7 @@ nav {
     width: auto;
     height: fit-content;
     min-height: 40px;
+    max-height: 450px;
 }
 
 .msg .name {
@@ -361,6 +362,7 @@ nav {
     position: relative;
     display: block;
     width: auto;
+    max-height: 400px;
 }
 
 .msg_content img {
@@ -369,5 +371,5 @@ nav {
 
 .msg video {
     max-width: 400px;
-    max-height: 500px;
+    max-height: 400px;
 }

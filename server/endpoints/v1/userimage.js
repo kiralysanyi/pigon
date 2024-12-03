@@ -1,4 +1,3 @@
-const { sqlQuery } = require("../../things/db");
 const { verifyToken } = require("../../things/jwt");
 const path = require('path');
 

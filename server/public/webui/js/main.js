@@ -295,6 +295,10 @@ let renderChat = (page = 1) => {
             if (message.type == "image") {
                 element_msg.innerHTML = `<img src="${message.content}"></img>`
             }
+
+            if (message.type == "video") {
+                element_msg.innerHTML = `<video src="${message.content}" controls autoplay muted></video>`
+            }
         }
         msgcontainer.scrollTop = msgcontainer.scrollHeight;
         console.log(res);
@@ -400,11 +404,18 @@ let addMessageToContainer = (chatID, senderID, name, message, type) => {
         element_msg.innerHTML = `<img src="${message}"></img>`
     }
 
+    if (type == "video") {
+        element_msg.innerHTML = `<video src="${message}" controls autoplay muted></video>`
+    }
+
 }
 
 socket.on("message", (data) => {
     //data:{"chatID":66,"senderID":17,"message":{"type":"text","content":"Sznia"}}
     data = JSON.parse(data);
+    if (data["senderID"] == userinfo["id"]) {
+        data["senderName"] = "You"
+    }
 
     console.log(data);
 
@@ -430,7 +441,6 @@ msgform.addEventListener("submit", (e) => {
         content: msginput.value
     }
 
-    addMessageToContainer(selectedchat, userinfo.id, "You", message.content);
     msgcontainer.scrollTop = msgcontainer.scrollHeight;
     msginput.value = "";
 
@@ -441,64 +451,55 @@ msgform.addEventListener("submit", (e) => {
 
 //image sending
 
-function sendImage(file) {
-    let fr = new FileReader();
-    //prepare
-    fr.addEventListener("load", () => {
-        console.log("Loaded file")
-        let img = document.createElement("img");
-        img.addEventListener("load", () => {
-            let canvas = document.createElement("canvas");
-            let ctx = canvas.getContext("2d")
+async function sendFile(file, type) {
+    const formData = new FormData();
 
-            if (img.width < 1024 && img.height < 1024) {
-                //good to go
-                sendMessage(selectedchat, fr.result, "image");
-                addMessageToContainer(selectedchat, userinfo.id, userinfo.username, fr.result, "image");
-                console.log("Image sent!");
-                return;
-            }
-
-            // Calculate the new dimensions while maintaining the aspect ratio
-            let width = img.width;
-            let height = img.height;
-
-            let maxWidth = 1024;
-            let maxHeight = 1024;
-
-            if (width > maxWidth || height > maxHeight) {
-                if (width / height > maxWidth / maxHeight) {
-                    width = maxWidth;
-                    height = (img.height * maxWidth) / img.width;
-                } else {
-                    height = maxHeight;
-                    width = (img.width * maxHeight) / img.height;
-                }
-            }
-
-            console.log("Resizing");
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
-
-
-            let base64 = canvas.toDataURL('image/jpeg', 0.5);
-            sendMessage(selectedchat, base64, "image");
-            console.log("Image sent!");
-            addMessageToContainer(selectedchat, userinfo.id, userinfo.username, base64, "image");
+    // Append the file to the FormData object
+    formData.append('file', file);
+    formData.append("chatid", selectedchat);
+    try {
+        // Make the POST request to your server's upload endpoint
+        const response = await fetch('/api/v1/chat/cdn', { // Replace with your server URL
+            method: 'POST',
+            credentials: "include",
+            body: formData,
         });
-        img.src = fr.result;
 
-    });
-    fr.readAsDataURL(file);
+        if (response.ok) {
+            const result = await response.json();
+            window.alert(`File uploaded successfully: ${result.message}`);
+            
+            sendMessage(selectedchat, "/api/v1/chat/cdn?filename=" + result["filename"], type);
+        } else {
+            window.alert(`Error uploading file: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Upload failed:', error);
+        window.alert(`Failed to upload file`);
+    }
 }
 
 document.getElementById("sendimage").addEventListener("click", async () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = "image/jpg, image/jpeg, image/png";
+    fileInput.accept = "image/jpg, image/jpeg, image/png, video/mp4, video/webm";
     fileInput.addEventListener("change", (event) => {
-        sendImage(fileInput.files[0]);
+        let type = null;
+        if (fileInput.files[0].type.includes("video")) {
+            type = "video";
+        }
+
+        if (fileInput.files[0].type.includes("image")) {
+            type = "image"
+        }
+
+        if (type == null) {
+            console.error("Unknown filetype");
+            window.alert("Unknown filetype");
+            return;
+        }
+        
+        sendFile(fileInput.files[0], type);
     });
     fileInput.click();
 })

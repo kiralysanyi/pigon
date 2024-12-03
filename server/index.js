@@ -92,6 +92,11 @@ app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandle
 app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHandler)
 app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)
 
+//cdn
+const {cdnGetHandler, cdnPostHandler} = require("./endpoints/v1/chat/cdn")
+app.get("/api/v1/chat/cdn", cdnGetHandler);
+app.post("/api/v1/chat/cdn", cdnPostHandler);
+
 //socket.io things
 
 // Authenticate socket connection
@@ -181,7 +186,7 @@ io.on("connection", (socket) => {
 
             let result = await sqlQuery(`SELECT participants FROM chats WHERE id=${chatID}`);
 
-            toNotify = removeValue(JSON.parse(result[0]["participants"]), senderID);
+            toNotify = JSON.parse(result[0]["participants"]);
 
             for (let i in toNotify) {
                 sendDataToSockets(toNotify[i], "message", JSON.stringify({ chatID, senderID, message, senderName: senderName }))

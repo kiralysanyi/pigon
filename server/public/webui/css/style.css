@@ -331,7 +331,8 @@ nav {
     margin-left: 20px;
     max-width: 80%;
     width: auto;
-    min-height: fit-content;
+    height: fit-content;
+    min-height: 40px;
 }
 
 .msg .name {
@@ -343,6 +344,8 @@ nav {
     font-size: 15px;
     color: rgba(255, 255, 255, 0.171);
 }
+
+
 
 .msg .pfp {
     position: absolute;
@@ -362,4 +365,9 @@ nav {
 
 .msg_content img {
     max-width: 400px;
+}
+
+.msg video {
+    max-width: 400px;
+    max-height: 500px;
 }

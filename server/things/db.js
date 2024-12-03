@@ -145,4 +145,14 @@ let getUserFromID = (userID) => {
     });
 }
 
-module.exports = { registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID }
+const checkIfUserInChat = async (chatid, userid) => {
+    let result = await sqlQuery(`SELECT 1 FROM \`user-chat\` WHERE userID=${userid} AND chatid=${chatid}`);
+
+    if (result.length == 1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+module.exports = { checkIfUserInChat, registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID }

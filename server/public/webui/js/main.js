@@ -268,6 +268,17 @@ let currentChatInfodiv = document.getElementById("currentChatInfo");
 let currentPfp = document.getElementById("currentPfp");
 let currentChatname = document.getElementById("currentChatname");
 let selectedchat = undefined;
+let currentChatMenu = document.getElementById("currentChatMenu")
+
+currentChatInfodiv.addEventListener("click", () => {
+    currentChatMenu.classList.remove("chatMenuClosed");
+    currentChatMenu.classList.add("chatMenuOpen");
+});
+
+document.getElementById("ccm_close").addEventListener("click", () => {
+    currentChatMenu.classList.remove("chatMenuOpen");
+    currentChatMenu.classList.add("chatMenuClosed");
+});
 
 let renderChat = (page = 1) => {
     msgcontainer.innerHTML = "";
@@ -307,7 +318,9 @@ let renderChat = (page = 1) => {
                 element_msg.innerHTML = `<video src="${message.content}" controls loop autoplay muted></video>`
             }
         }
-        msgcontainer.scrollTop = msgcontainer.scrollHeight;
+        setTimeout(() => {
+            msgcontainer.scrollTop = msgcontainer.scrollHeight;
+        }, 100);
         console.log(res);
 
     }).catch((err) => {
@@ -352,11 +365,26 @@ let renderChatsSB = async () => {
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);
         element.addEventListener("click", () => {
+            document.getElementById("chatInfo_participants").innerHTML = "";
             currentPfp.src = elementPfp.src;
             currentChatname.innerHTML = chats[i]["name"];
             currentChatInfodiv.style.display = "block";
             textcontainer.style.display = "block";
             selectedchat = chats[i]["chatid"];
+            document.getElementById("currentPfp_menu").src = elementPfp.src;
+            document.getElementById("currentChatname_menu").innerHTML = chats[i]["name"];
+            (async () => {
+                for (let x in chats[i]["participants"]) {
+                    let pfpurl = "/api/v1/auth/pfp?id=" + chats[i]["participants"][x];
+                    let username = (await auth.getUserInfo(chats[i]["participants"][x])).data.username;
+                    document.getElementById("chatInfo_participants").innerHTML += `
+                    <div class="user">
+                        <img src='${pfpurl}'></img>
+                        ${username}
+                    </div>
+                    `
+                }
+            })()
             renderChat();
         })
     }
@@ -479,7 +507,7 @@ async function sendFile(file, type) {
         if (response.ok) {
             const result = await response.json();
             window.alert(`File uploaded successfully: ${result.message}`);
-            
+
             sendMessage(selectedchat, "/api/v1/chat/cdn?filename=" + result["filename"], type);
         } else {
             window.alert(`Error uploading file: ${response.statusText}`);
@@ -509,7 +537,7 @@ document.getElementById("sendimage").addEventListener("click", async () => {
             window.alert("Unknown filetype");
             return;
         }
-        
+
         sendFile(fileInput.files[0], type);
     });
     fileInput.click();

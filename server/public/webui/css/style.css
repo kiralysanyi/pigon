@@ -340,7 +340,7 @@ nav {
 
 .msg .name {
     position: absolute;
-    top: 0px;
+    top: 2.5px;
     left: 0px;
     height: 10px;
     line-height: 10px;
@@ -374,4 +374,102 @@ nav {
 .msg video {
     max-width: 400px;
     max-height: 400px;
+}
+
+.chatMenuOpen {
+    transform: translate(-50%, 0%) scale(1,1);
+    top: 0px;
+}
+
+.chatMenuClosed {
+    transform: translate(-50%, 0%) scale(0,0);
+    top: -100%;
+}
+
+#currentChatMenu {
+    position: fixed;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.781);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    transition: 500ms;
+    overflow-x: auto;
+}
+
+#currentChatInfo_menu {
+    position: absolute;
+    top: 2.5px;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    width: 200px;
+    height: 35px;
+    background-color: rgb(43, 43, 43);
+    border-radius: 10px;
+    padding-left: 35px;
+    color: white;
+    line-height: 35px;
+    user-select: none;
+    transition: 200ms;
+    display: block;
+}
+
+#currentPfp_menu {
+    position: absolute;
+    top: 2.5px;
+    left: 2.5px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 100%;
+}
+
+#ccm_close {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    background-color: rgba(255, 255, 255, 0.103);
+    transition: 200ms;
+    color: white;
+    text-align: center;
+    line-height: 40px;
+}
+
+#ccm_close:hover {
+    background-color: rgba(255, 255, 255, 0.247);
+}
+
+#chatInfo_participants {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    width: 300px;
+    background-color: rgb(43, 43, 43);
+    height: auto;
+    transform: translate(-50%, 0%);
+}
+
+#chatInfo_participants .user {
+    position: relative;
+    width: calc(100% - 60px);
+    height: 50px;
+    background-color: rgb(54, 54, 54);
+    border-radius: 25px;
+    padding-left: 60px;
+    line-height: 50px;
+    margin-top: 10px;
+    user-select: none;
+}
+
+#chatInfo_participants .user img {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
 }

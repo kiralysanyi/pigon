@@ -345,6 +345,9 @@ let renderChatsSB = async () => {
         let elementPfp = document.createElement("img");
         let pfpID = removeValue(chats[i]["participants"], userinfo.id)[0];
         elementPfp.src = "/api/v1/auth/pfp?id=" + pfpID + "&smol=true";
+        if (chats[i]["groupchat"] == 1) {
+            elementPfp.src = "group.png"
+        }
         element.innerHTML = chats[i]["name"];
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);

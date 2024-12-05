@@ -68,7 +68,7 @@ const userinfoHandler = async (req, res) => {
     }
 
     let loggedinuserID = decoded["data"]["userID"];
-    let searchedID = req.body.userID;
+    let searchedID = req.query.userID;
 
     if (searchedID == undefined) {
         //no userID provided by the client so we respond with the requestor's information

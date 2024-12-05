@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Group</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .search {
+            position: absolute;
+            left: calc(50% - 100px);
+            width: 200px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            background-color: rgb(22, 22, 22);
+            color: white;
+            outline: 0;
+            transition: 200ms;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            top: 10px;
+        }
+
+        .search:hover {
+            background-color: rgb(43, 43, 43);
+        }
+
+        .search:focus {
+            background-color: rgb(43, 43, 43);
+        }
+
+        .resultsDisplay {
+            position: absolute;
+            top: 60px;
+            width: 100%;
+            height: calc(100% - 70px);
+            border-radius: 10px;
+            overflow: auto;
+        }
+
+        .resultElement {
+            position: relative;
+            width: calc(90% - 80px);
+            margin-left: 5%;
+            margin-top: 5px;
+            background-color: rgba(255, 255, 255, 0.151);
+            color: white;
+            transition: 200ms;
+            float: left;
+            height: 80px;
+            padding-left: 80px;
+            user-select: none;
+            line-height: 80px;
+            font-size: 30px;
+            border-radius: 10px;
+        }
+
+        .resultElement img {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 60px;
+            height: 60px;
+            border-radius: 100%;
+            border: none;
+        }
+
+
+        #users {
+            position: absolute;
+            top: 50px;
+            left: 0px;
+            width: 100%;
+            height: calc(100% - 50px);
+        }
+
+        #resultsDisplay {
+            position: absolute;
+            top: 50px;
+            left: 0px;
+            width: 100%;
+            height: calc(100% - 100px);
+            overflow-y: auto;
+        }
+
+        #donebtn {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            height: 40px;
+            width: 100px;
+            border-radius: 10px;
+            background-color: rgb(0, 81, 255);
+            color: white;
+            transform: translate(-50%, 0%);
+            transition: 200ms;
+            text-align: center;
+            line-height: 40px;
+            user-select: none;
+        }
+
+        #donebtn:hover {
+            background-color: rgb(0, 102, 255);
+        }
+
+        #addedUsers {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 50px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            white-space: nowrap;
+            display: flex;
+            scroll-behavior: smooth;
+            gap: 10px;
+        }
+
+        #addedUsers .user {
+            position: relative;
+            flex-shrink: 0;
+            min-width: 100px;
+            height: 40px;
+            line-height: 50px;
+            background-color: rgba(255, 255, 255, 0.116);
+            color: white;
+            padding-left: 50px;
+            user-select: none;
+        }
+
+        #addedUsers .user:hover {
+            background-color: rgba(255, 255, 255, 0.219);
+        }
+
+        #addedUsers .user img {
+            width: 40px;
+            height: 40px;
+            border-radius: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        #addedUsers::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        #addedUsers::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        #addedUsers::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="addedUsers">
+
+    </div>
+
+    <div id="users">
+        <input type="text" class="search" name="searchInput" id="searchInput">
+        <div id="resultsDisplay">
+
+        </div>
+        <div id="donebtn">Done</div>
+    </div>
+</body>
+<script type="module">
+    import * as auth from "./js/auth.js";
+
+    document.getElementById("addedUsers").addEventListener('wheel', (e) => {
+        e.preventDefault();
+        document.getElementById("addedUsers").scrollLeft += e.deltaY;
+    });
+
+    let userinfo = await auth.getUserInfo();
+    let addedUsers = [];
+    let name;
+    let addedUsersDiv = document.getElementById("addedUsers");
+
+    let promptFunction = () => {
+        name = window.prompt("Chat name");
+        if (name == "" || name == undefined) {
+            promptFunction();
+        }
+    }
+
+    promptFunction();
+
+    /**
+ * Removes a specific value from an array.
+ * @param {Array} array - The array to modify.
+ * @param {*} valueToRemove - The value to remove.
+ * @returns {Array} - A new array without the specified value.
+ */
+    function removeValue(array, valueToRemove) {
+        return array.filter(value => value !== valueToRemove);
+    }
+
+    async function addUser(id) {
+        if (addedUsers.includes(id)) {
+            return;
+        }
+        addedUsers.push(id);
+        addedUsersDiv.innerHTML = "";
+        for (let i in addedUsers) {
+            let element = document.createElement("div");
+            element.classList.add("user");
+            let info = (await auth.getUserInfo(addedUsers[i]))["data"];
+            console.log(info);
+            element.innerHTML = `<img src="/api/v1/auth/pfp?id=${addedUsers[i]}&smol=true"></img>${info["username"]}`
+            addedUsersDiv.appendChild(element);
+            element.addEventListener("click", () => {
+                removeUser(id);
+            })
+        }
+    }
+
+    async function removeUser(id) {
+        if (id == userinfo.data.id) {
+            return;
+        }
+        addedUsers = removeValue(addedUsers, id);
+        addedUsersDiv.innerHTML = "";
+        for (let i in addedUsers) {
+            let element = document.createElement("div");
+            element.classList.add("user");
+            let info = (await auth.getUserInfo(addedUsers[i]))["data"];
+            console.log(info);
+            element.innerHTML = `<img src="/api/v1/auth/pfp?id=${addedUsers[i]}&smol=true"></img>${info["username"]}`
+            addedUsersDiv.appendChild(element);
+        }
+    }
+
+    addUser(userinfo.data.id);
+
+    function createchat({ isGroupChat, chatName, participants }) {
+        return new Promise((resolved, rejected) => {
+            /*
+            Body
+            {
+                isGroupChat: true/false,
+                chatName: "aaa" //only required if isGroupChat = true
+                participants: [] //array of userIDs
+            }
+            */
+
+            fetch("/api/v1/chat/create", {
+                credentials: "include",
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    isGroupChat, chatName, participants
+                })
+            }).then(async (res) => {
+                let response = await res.json()
+                console.log(response);
+                if (response.success == true) {
+                    resolved();
+                } else {
+                    rejected(new Error(response.message));
+                }
+            }).catch((err) => {
+                rejected(err);
+            })
+        });
+
+    }
+
+    function createGroupChat(chatName, participants) {
+        return new Promise((resolved, rejected) => {
+            let data = {
+                isGroupChat: true,
+                chatName,
+                participants
+            }
+
+            console.log(data);
+            createchat(data).then(() => {
+                //successfully created chat
+                console.log("Successfully created chat!!!!!!!!!!!");
+                resolved();
+            }).catch((err) => {
+                console.error(err)
+                window.alert(err)
+                rejected(err);
+            })
+        });
+    }
+
+
+    document.getElementById("donebtn").addEventListener("click", async () => {
+        await createGroupChat(name, addedUsers);
+
+        window.parent.location.reload();
+    })
+
+
+    function searchUsers(query) {
+        return new Promise((resolved, rejected) => {
+            fetch("/api/v1/auth/search?" + new URLSearchParams({ search: query }).toString(), {
+                method: "GET",
+                credentials: "include"
+            }).then(async (response) => {
+                let res = await response.json()
+                if (res.success == false) {
+                    rejected(new Error(res.message))
+                    return;
+                }
+                resolved(res["data"]);
+            }).catch((error) => {
+                rejected(error)
+            })
+        });
+
+    }
+
+    let searchInput = document.getElementById("searchInput");
+    let resultsDisplay = document.getElementById("resultsDisplay");
+
+    searchInput.addEventListener("keyup", async () => {
+        let results = await searchUsers(searchInput.value);
+        resultsDisplay.innerHTML = "";
+
+        for (let i in results) {
+            let resultElement = document.createElement("div");
+            resultElement.classList.add("resultElement");
+            resultElement.innerHTML = results[i]["username"];
+            let resultImage = document.createElement("img");
+            resultImage.src = "/api/v1/auth/pfp?id=" + results[i]["id"];
+            resultElement.appendChild(resultImage);
+            resultsDisplay.appendChild(resultElement);
+            resultElement.addEventListener("click", () => {
+                console.log("Add user to array:", results[i]["id"]);
+                addUser(results[i]["id"]);
+            })
+        }
+    })
+</script>
+
+</html>

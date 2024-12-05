@@ -208,6 +208,13 @@ function addPrivateChat(userid) {
     })
 }
 
+
+document.getElementById("newgroupbtn").addEventListener("click", () => {
+    let gruppModal = new modal("Create Group");
+    gruppModal.contentElement.innerHTML = "<iframe src='mkgroup.html'></iframe>"
+    gruppModal.open();
+})
+
 document.getElementById("newchatbtn").addEventListener("click", () => {
     let newModal = new modal("New chat");
     let contentElement = newModal.contentElement;
@@ -320,6 +327,7 @@ let renderChatsSB = async () => {
         });
 
         response = await response.json();
+        console.log(response);
 
         if (response.success == true) {
             chats = response["data"];

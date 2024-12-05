@@ -98,6 +98,11 @@ let createChatHandler = (newChatHandler = ({ isGroupChat, chatID, chatName, part
             }
         }
 
+        let groupchat = 0;
+        if (req.body.isGroupChat == true) {
+            groupchat = 1;
+        }
+
         try {
             let chatname = uuidv4();
             if (req.body.isGroupChat == true) {
@@ -116,7 +121,7 @@ let createChatHandler = (newChatHandler = ({ isGroupChat, chatID, chatName, part
                 }
             }
 
-            await sqlQuery(`INSERT INTO chats (name, participants, initiator, groupchat) VALUES ('${chatname}', '${JSON.stringify(req.body.participants.sort())}', '${userdata.userID}', '${req.body.isGroupChat}')`);
+            await sqlQuery(`INSERT INTO chats (name, participants, initiator, groupchat) VALUES ('${chatname}', '${JSON.stringify(req.body.participants.sort())}', '${userdata.userID}', '${groupchat}')`);
             let chatid = (await sqlQuery("SELECT LAST_INSERT_ID();"))[0]["LAST_INSERT_ID()"];
 
 

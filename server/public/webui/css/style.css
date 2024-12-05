@@ -334,6 +334,7 @@ nav {
     height: fit-content;
     min-height: 40px;
     max-height: 450px;
+    flex: 1 0 auto;
 }
 
 .msg .name {

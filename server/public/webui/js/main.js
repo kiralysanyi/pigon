@@ -329,6 +329,8 @@ let renderChat = (page = 1) => {
 }
 
 
+import { contextMenu } from "./contextmenu.js";
+
 let renderChatsSB = async () => {
     sbcontent.innerHTML = "";
     let chats = {};
@@ -354,6 +356,7 @@ let renderChatsSB = async () => {
 
     for (let i in chats) {
         let element = document.createElement("div");
+        element.id = "chat" + chats[i]["chatid"];
         element.classList.add("resultElement");
         let elementPfp = document.createElement("img");
         let pfpID = removeValue(chats[i]["participants"], userinfo.id)[0];
@@ -364,7 +367,13 @@ let renderChatsSB = async () => {
         element.innerHTML = chats[i]["name"];
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);
-        element.addEventListener("click", () => {
+        element.addEventListener("click", async () => {
+            if (chats[i]["groupchat"] == 1) {
+                let ownername = (await auth.getUserInfo(chats[i]["initiator"]))["data"].username;
+                document.getElementById("ownerdisplay").innerHTML = "Owner: " + ownername;
+            } else {
+                document.getElementById("ownerdisplay").innerHTML = "";
+            }
             document.getElementById("chatInfo_participants").innerHTML = "";
             currentPfp.src = elementPfp.src;
             currentChatname.innerHTML = chats[i]["name"];
@@ -377,12 +386,36 @@ let renderChatsSB = async () => {
                 for (let x in chats[i]["participants"]) {
                     let pfpurl = "/api/v1/auth/pfp?id=" + chats[i]["participants"][x];
                     let username = (await auth.getUserInfo(chats[i]["participants"][x])).data.username;
-                    document.getElementById("chatInfo_participants").innerHTML += `
-                    <div class="user">
-                        <img src='${pfpurl}'></img>
-                        ${username}
-                    </div>
-                    `
+
+                    let element = document.createElement("div");
+                    element.classList.add("user");
+                    let img = document.createElement("img")
+                    img.src = pfpurl;
+                    element.innerHTML += username
+                    element.appendChild(img);
+                    document.getElementById("chatInfo_participants").appendChild(element);
+                    if (chats[i]["groupchat"] == 1) {
+                        contextMenu(element, ["Remove"], async (selected) => {
+                            if (selected == "Remove") {
+                                console.log("Remove user from group");
+                                fetch("/api/v1/chat/groupuser", {
+                                    method: "DELETE",
+                                    body: JSON.stringify({ chatid: chats[i]["chatid"], targetid: chats[i]["participants"][x] }),
+                                    credentials: "include",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    }
+                                }).then(async (res) => {
+                                    let response = await res.json();
+                                    if (response.success == true) {
+                                        await renderChatsSB();
+                                        console.log("chat" + chats[i]["chatid"]);
+                                        document.getElementById("chat" + chats[i]["chatid"]).click();
+                                    }
+                                });
+                            }
+                        })
+                    }
                 }
             })()
             renderChat();

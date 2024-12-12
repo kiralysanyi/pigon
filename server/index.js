@@ -92,6 +92,10 @@ app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandle
 app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHandler)
 app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)
 
+const {addgroupuserHandler, deletegroupuserHandler} = require("./endpoints/v1/chat/groupthings");
+app.post("/api/v1/chat/groupuser", addgroupuserHandler);
+app.delete("/api/v1/chat/groupuser", deletegroupuserHandler);
+
 //cdn
 const {cdnGetHandler, cdnPostHandler} = require("./endpoints/v1/chat/cdn")
 app.get("/api/v1/chat/cdn", cdnGetHandler);
@@ -127,15 +131,7 @@ let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }
 
 const { sqlQuery } = require("./things/db")
 
-/**
- * Removes a specific value from an array.
- * @param {Array} array - The array to modify.
- * @param {*} valueToRemove - The value to remove.
- * @returns {Array} - A new array without the specified value.
- */
-function removeValue(array, valueToRemove) {
-    return array.filter(value => value !== valueToRemove);
-}
+const {removeValue} = require("./things/helper");
 
 function sanitizeInput(input) {
     // Replace characters that could break JSON

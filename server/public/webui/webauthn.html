@@ -50,6 +50,26 @@
             padding: 0px;
             user-select: none;
             width: calc(100% - 20px);
+            transition: 200ms;
+        }
+
+        #goback:hover {
+            background-color: rgb(53, 53, 53);
+        }
+
+        button {
+            position: relative;
+            color: white;
+            border: none;
+            height: 40px;
+            border-radius: 15px;
+            transition: 200ms;
+            width: 140px;
+            background-color: rgb(0, 119, 255);
+        }
+
+        button:hover {
+            filter: saturate(4);
         }
     </style>
 </head>
@@ -68,7 +88,7 @@
         <div class="settings_group">
             <h1>Disable passkeys</h1>
             <p>Warning! This will invalidate currently used passkeys forever!</p>
-            <button id="disablebtn">Disable</button>
+            <button style="background-color: rgb(133, 0, 0);" id="disablebtn">Disable</button>
         </div>
 
 

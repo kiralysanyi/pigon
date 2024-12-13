@@ -167,12 +167,12 @@ app.post('/api/v1/push/subscribe', async (req, res) => {
     */
     let userdata = verificationResponse.data;
     if (subscriptions[userdata["userID"]] == undefined) {
-        subscriptions[userdata["userID"]] = [];
+        subscriptions[userdata["userID"]] = {};
     }
 
     const subscription = req.body;
     console.log(subscription);
-    subscriptions[userdata["userID"]].push(subscription);
+    subscriptions[userdata["userID"]][userdata.deviceID] = subscription;
     res.status(201).json({});
 })
 

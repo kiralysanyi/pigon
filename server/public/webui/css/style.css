@@ -449,8 +449,9 @@ nav {
     left: 50%;
     width: 300px;
     background-color: rgb(43, 43, 43);
-    height: auto;
+    height: 400px;
     transform: translate(-50%, 0%);
+    overflow-y: auto;
 }
 
 #chatInfo_participants .user {
@@ -500,4 +501,24 @@ nav {
 
 .contextMenu div:hover {
     background-color: rgba(255, 255, 255, 0.103);
+}
+
+#adduserbtn {
+    position: absolute;
+    width: 200px;
+    height: 50px;
+    background-color: rgb(0, 89, 255);
+    color: white;
+    border-radius: 15px;
+    transition: 200ms;
+    text-align: center;
+    line-height: 50px;
+    user-select: none;
+    font-size: 18px;
+    left: calc(50% - 100px);
+    top: 510px;
+}
+
+#adduserbtn:hover {
+    background-color: rgb(0, 119, 255); 
 }

@@ -1,6 +1,6 @@
 const { sqlQuery } = require("../../../things/db");
 const { verifyToken } = require("../../../things/jwt");
-const {removeValue} = require("../../../things/helper");
+const { removeValue } = require("../../../things/helper");
 
 let deletegroupuserHandler = async (req, res) => {
     if (!req.cookies.token) {
@@ -84,7 +84,7 @@ let deletegroupuserHandler = async (req, res) => {
     });
 
 
-    
+
 }
 
 let addgroupuserHandler = async (req, res) => {
@@ -116,6 +116,7 @@ let addgroupuserHandler = async (req, res) => {
     }
     */
     let userdata = verificationResponse.data;
+    console.log(req.body);
 
     if (req.body.chatid == undefined) {
         res.status(400).json({
@@ -125,10 +126,10 @@ let addgroupuserHandler = async (req, res) => {
         return;
     }
 
-    if (req.body.targetid == undefined) {
+    if (req.body.targetids == undefined) {
         res.status(400).json({
             success: false,
-            message: "targetid not provided!"
+            message: "targetids not provided!"
         });
         return;
     }
@@ -152,13 +153,21 @@ let addgroupuserHandler = async (req, res) => {
         return;
     }
 
-    participants.push(req.body.targetid);
-    await sqlQuery(`UPDATE chats SET participants='${JSON.stringify(participants)}'`);
-    await sqlQuery(`INSERT INTO \`user-chat\` (userID, chatid) VALUES ('${req.body.targetid}','${req.body.chatid}')`);
+    for (let i in req.body.targetids) {
+        if (participants.includes(req.body.targetids[i]) == false) {
+            participants.push(req.body.targetids[i]);
+        }
+    }
+    await sqlQuery(`UPDATE chats SET participants='${JSON.stringify(participants)}' WHERE id=${req.body.chatid}`);
+    for (let i in req.body.targetids) {
+        if (participants.includes(req.body.targetids[i]) == false) {
+            await sqlQuery(`INSERT INTO \`user-chat\` (userID, chatid) VALUES ('${req.body.targetids[i]}','${req.body.chatid}')`);
+        }
+    }
     res.json({
         success: true,
-        message: "Successfully removed user from group"
+        message: "Successfully added user to group"
     });
 }
 
-module.exports = {deletegroupuserHandler, addgroupuserHandler}
+module.exports = { deletegroupuserHandler, addgroupuserHandler }

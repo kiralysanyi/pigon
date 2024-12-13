@@ -215,6 +215,12 @@ document.getElementById("newgroupbtn").addEventListener("click", () => {
     gruppModal.open();
 })
 
+document.getElementById("adduserbtn").addEventListener("click", () => {
+    let gruppModal = new modal("Add users");
+    gruppModal.contentElement.innerHTML = `<iframe src='groupuseradd.html#${selectedchat}'></iframe>`
+    gruppModal.open();
+})
+
 document.getElementById("newchatbtn").addEventListener("click", () => {
     let newModal = new modal("New chat");
     let contentElement = newModal.contentElement;
@@ -394,27 +400,31 @@ let renderChatsSB = async () => {
                     element.innerHTML += username
                     element.appendChild(img);
                     document.getElementById("chatInfo_participants").appendChild(element);
+                    document.getElementById("adduserbtn").style.display = "none";
                     if (chats[i]["groupchat"] == 1) {
-                        contextMenu(element, ["Remove"], async (selected) => {
-                            if (selected == "Remove") {
-                                console.log("Remove user from group");
-                                fetch("/api/v1/chat/groupuser", {
-                                    method: "DELETE",
-                                    body: JSON.stringify({ chatid: chats[i]["chatid"], targetid: chats[i]["participants"][x] }),
-                                    credentials: "include",
-                                    headers: {
-                                        "Content-Type": "application/json"
-                                    }
-                                }).then(async (res) => {
-                                    let response = await res.json();
-                                    if (response.success == true) {
-                                        await renderChatsSB();
-                                        console.log("chat" + chats[i]["chatid"]);
-                                        document.getElementById("chat" + chats[i]["chatid"]).click();
-                                    }
-                                });
-                            }
-                        })
+                        if (chats[i]["initiator"] == userinfo.id) {
+                            document.getElementById("adduserbtn").style.display = "block";
+                            contextMenu(element, ["Remove"], async (selected) => {
+                                if (selected == "Remove") {
+                                    console.log("Remove user from group");
+                                    fetch("/api/v1/chat/groupuser", {
+                                        method: "DELETE",
+                                        body: JSON.stringify({ chatid: chats[i]["chatid"], targetid: chats[i]["participants"][x] }),
+                                        credentials: "include",
+                                        headers: {
+                                            "Content-Type": "application/json"
+                                        }
+                                    }).then(async (res) => {
+                                        let response = await res.json();
+                                        if (response.success == true) {
+                                            await renderChatsSB();
+                                            console.log("chat" + chats[i]["chatid"]);
+                                            document.getElementById("chat" + chats[i]["chatid"]).click();
+                                        }
+                                    });
+                                }
+                            })
+                        }
                     }
                 }
             })()

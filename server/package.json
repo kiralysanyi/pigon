@@ -4,7 +4,8 @@
   "description": "Authentication + chat server, very gut and kókány",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ."
+    "dev": "nodemon .",
+    "start": "node ."
   },
   "keywords": [
     "aaaaaaaaaaaaaaa"

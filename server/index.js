@@ -33,6 +33,9 @@ const registerHandler = require("./endpoints/v1/register").registerHandler;
 
 //register endpoint
 app.post("/api/v1/auth/register", registerHandler)
+app.get("/favicon.ico", (req, res) => {
+    res.sendFile(__dirname + "/public/favicon.ico")
+})
 
 
 const loginHandler = require("./endpoints/v1/login").loginHandler;

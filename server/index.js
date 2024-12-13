@@ -37,6 +37,17 @@ app.get("/favicon.ico", (req, res) => {
     res.sendFile(__dirname + "/public/favicon.ico")
 })
 
+app.get("/manifest.json", (req, res) => {
+    res.sendFile(__dirname + "/public/manifest.json")
+})
+
+app.get("/sw.js", (req, res) => {
+    res.sendFile(__dirname + "/public/sw.js")
+})
+
+app.get("/offline.html", (req, res) => {
+    res.sendFile(__dirname + "/public/offline.html")
+})
 
 const loginHandler = require("./endpoints/v1/login").loginHandler;
 app.post("/api/v1/auth/login", loginHandler)

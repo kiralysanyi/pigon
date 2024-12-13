@@ -153,17 +153,20 @@ let addgroupuserHandler = async (req, res) => {
         return;
     }
 
+
+    for (let i in req.body.targetids) {
+        if (participants.includes(req.body.targetids[i]) == false) {
+            console.log(req.body.targetids[i], "-->", req.body.chatid)
+            await sqlQuery(`INSERT INTO \`user-chat\` (userID, chatid) VALUES ('${req.body.targetids[i]}','${req.body.chatid}')`);
+        }
+    }
+
     for (let i in req.body.targetids) {
         if (participants.includes(req.body.targetids[i]) == false) {
             participants.push(req.body.targetids[i]);
         }
     }
     await sqlQuery(`UPDATE chats SET participants='${JSON.stringify(participants)}' WHERE id=${req.body.chatid}`);
-    for (let i in req.body.targetids) {
-        if (participants.includes(req.body.targetids[i]) == false) {
-            await sqlQuery(`INSERT INTO \`user-chat\` (userID, chatid) VALUES ('${req.body.targetids[i]}','${req.body.chatid}')`);
-        }
-    }
     res.json({
         success: true,
         message: "Successfully added user to group"

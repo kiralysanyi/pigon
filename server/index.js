@@ -106,14 +106,92 @@ app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandle
 app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHandler)
 app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)
 
-const {addgroupuserHandler, deletegroupuserHandler} = require("./endpoints/v1/chat/groupthings");
+const { addgroupuserHandler, deletegroupuserHandler } = require("./endpoints/v1/chat/groupthings");
 app.post("/api/v1/chat/groupuser", addgroupuserHandler);
 app.delete("/api/v1/chat/groupuser", deletegroupuserHandler);
 
 //cdn
-const {cdnGetHandler, cdnPostHandler} = require("./endpoints/v1/chat/cdn")
+const { cdnGetHandler, cdnPostHandler } = require("./endpoints/v1/chat/cdn")
 app.get("/api/v1/chat/cdn", cdnGetHandler);
 app.post("/api/v1/chat/cdn", cdnPostHandler);
+
+//push notification service
+const webpush = require('web-push');
+
+
+const VAPID_PUB = process.env.VAPID_PUB;
+const VAPID_PRIV = process.env.VAPID_PRIV;
+
+webpush.setVapidDetails("mailto:nan@null.null", VAPID_PUB, VAPID_PRIV);
+
+app.get("/api/v1/push/pubkey", (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            pubkey: VAPID_PUB
+        }
+    });
+})
+
+const subscriptions = {}
+
+// Create route for allow client to subscribe to push notification.
+app.post('/api/v1/push/subscribe', async (req, res) => {
+
+    if (!req.cookies.token) {
+        res.status(403).json({
+            success: false,
+            message: "Failed to verify user"
+        });
+        return;
+    }
+
+    let verificationResponse = await verifyToken(req.cookies.token);
+    if (verificationResponse.success == false) {
+        res.status(403).json({
+            success: false,
+            message: "Failed to verify token"
+        });
+        return;
+    }
+    /*
+    {
+            userID: 69,
+            username: "lakatos rikárdinnyó",
+            deviceID: "aaa",
+            deviceInfo: {
+                "user-agent": "xy",
+                "deviceName": "xyz"
+            }
+    }
+    */
+    let userdata = verificationResponse.data;
+    if (subscriptions[userdata["userID"]] == undefined) {
+        subscriptions[userdata["userID"]] = [];
+    }
+
+    const subscription = req.body;
+    console.log(subscription);
+    subscriptions[userdata["userID"]].push(subscription);
+    res.status(201).json({});
+})
+
+let sendPushNotification = (target, title, message) => {
+    let payload = { title, body: message.content };
+    if (message.type != "text") {
+        payload.body = "New message"
+    }
+
+    payload = JSON.stringify(payload);
+
+    console.log(subscriptions,subscriptions[target], target);
+    for (let i in subscriptions[target]) {
+        webpush.sendNotification(subscriptions[target][i], payload).catch((err) => {
+            console.error(err);
+        });
+    }
+}
+
 
 //socket.io things
 
@@ -145,16 +223,16 @@ let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }
 
 const { sqlQuery } = require("./things/db")
 
-const {removeValue} = require("./things/helper");
+const { removeValue } = require("./things/helper");
 
 function sanitizeInput(input) {
     // Replace characters that could break JSON
     return input.replace(/\\/g, '\\\\') // Escape backslashes
-                .replace(/"/g, '\\"')   // Escape double quotes
-                .replace(/</g, '&lt;') // Escape < to prevent HTML injection
-                .replace(/>/g, '&gt;') // Escape > to prevent HTML injection
-                .replace(/&/g, '&amp;') // Escape &
-                .replace(/'/g, '&#39;'); // Escape single quotes
+        .replace(/"/g, '\\"')   // Escape double quotes
+        .replace(/</g, '&lt;') // Escape < to prevent HTML injection
+        .replace(/>/g, '&gt;') // Escape > to prevent HTML injection
+        .replace(/&/g, '&amp;') // Escape &
+        .replace(/'/g, '&#39;'); // Escape single quotes
 }
 
 io.on("connection", (socket) => {
@@ -199,7 +277,10 @@ io.on("connection", (socket) => {
             toNotify = JSON.parse(result[0]["participants"]);
 
             for (let i in toNotify) {
-                sendDataToSockets(toNotify[i], "message", JSON.stringify({ chatID, senderID, message, senderName: senderName }))
+                sendDataToSockets(toNotify[i], "message", JSON.stringify({ chatID, senderID, message, senderName: senderName }));
+                if (toNotify[i] != senderID) {
+                    sendPushNotification(toNotify[i], senderName, message);
+                }
             }
 
         } catch (error) {
@@ -211,7 +292,9 @@ io.on("connection", (socket) => {
 
 })
 
-app.post("/api/v1/chat/create", require("./endpoints/v1/chat/createchat").createChatHandler(newChatHandler))
+app.post("/api/v1/chat/create", require("./endpoints/v1/chat/createchat").createChatHandler(newChatHandler));
+
+
 
 
 server.listen(process.env.PORT, () => {

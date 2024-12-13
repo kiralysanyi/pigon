@@ -27,6 +27,16 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+self.addEventListener('push', function (e) {
+  const data = e.data.json();
+  self.registration.showNotification(
+    data.title,
+    {
+      body: data.body,
+    }
+  );
+})
+
 self.addEventListener('fetch', (event) => {
   // We only want to call event.respondWith() if this is a navigation request
   // for an HTML page.

@@ -30,6 +30,7 @@ app.use(require('sanitize').middleware);
 
 
 const registerHandler = require("./endpoints/v1/register").registerHandler;
+const {authMiddleWare} = require("./things/auth_middleware");
 
 //register endpoint
 app.post("/api/v1/auth/register", registerHandler)
@@ -53,29 +54,39 @@ const loginHandler = require("./endpoints/v1/login").loginHandler;
 app.post("/api/v1/auth/login", loginHandler)
 
 const deleteHandler = require("./endpoints/v1/delete").deleteHandler
+app.use("/api/v1/auth/delete", authMiddleWare);
 app.delete("/api/v1/auth/delete", deleteHandler)
 
 const devicesHandler = require("./endpoints/v1/devices").devicesHandler
+app.use("/api/v1/auth/devices", authMiddleWare);
 app.get("/api/v1/auth/devices", devicesHandler)
 
 const userinfoHandler = require("./endpoints/v1/userinfo").userinfoHandler
+app.use("/api/v1/auth/userinfo", authMiddleWare);
 app.get("/api/v1/auth/userinfo", userinfoHandler)
 
 const logoutHandler = require("./endpoints/v1/logout").logoutHandler;
+app.use("/api/v1/auth/logout", authMiddleWare);
 app.get("/api/v1/auth/logout", logoutHandler);
 
 const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
+app.use("/api/v1/auth/removedevice", authMiddleWare);
 app.delete("/api/v1/auth/removedevice", removedeviceHandler);
 
 const changepassHandler = require("./endpoints/v1/changepass").changepassHandler;
+app.use("/api/v1/auth/changepass", authMiddleWare);
 app.put("/api/v1/auth/changepass", changepassHandler);
 
 const { challengeHandler, webauthnRegHandler, authHandler, disablePasskeysHandler } = require("./endpoints/v1/webauthn/webauthn");
 app.get("/api/v1/auth/webauthn/challenge", challengeHandler);
+app.use("/api/v1/auth/webauthn/register", authMiddleWare);
 app.post("/api/v1/auth/webauthn/register", webauthnRegHandler);
 app.post("/api/v1/auth/webauthn/auth", authHandler);
+app.use("/api/v1/auth/webauthn/passkeys", authMiddleWare);
 app.delete("/api/v1/auth/webauthn/passkeys", disablePasskeysHandler)
 app.get("/api/v1/auth/pfp", userimage.getImageHandler);
+
+app.use("/api/v1/auth/pfp", authMiddleWare);
 app.post("/api/v1/auth/pfp", userimage.uploadHandler);
 
 
@@ -111,7 +122,8 @@ app.post("/api/v1/chat/groupuser", addgroupuserHandler);
 app.delete("/api/v1/chat/groupuser", deletegroupuserHandler);
 
 //cdn
-const { cdnGetHandler, cdnPostHandler } = require("./endpoints/v1/chat/cdn")
+const { cdnGetHandler, cdnPostHandler } = require("./endpoints/v1/chat/cdn");
+app.use("/api/v1/chat/cdn", authMiddleWare)
 app.get("/api/v1/chat/cdn", cdnGetHandler);
 app.post("/api/v1/chat/cdn", cdnPostHandler);
 
@@ -136,36 +148,11 @@ app.get("/api/v1/push/pubkey", (req, res) => {
 const subscriptions = {}
 
 // Create route for allow client to subscribe to push notification.
+app.use("/api/v1/push/subscribe", authMiddleWare)
 app.post('/api/v1/push/subscribe', async (req, res) => {
 
-    if (!req.cookies.token) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify user"
-        });
-        return;
-    }
+    let userdata = req.userdata;
 
-    let verificationResponse = await verifyToken(req.cookies.token);
-    if (verificationResponse.success == false) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify token"
-        });
-        return;
-    }
-    /*
-    {
-            userID: 69,
-            username: "lakatos rikárdinnyó",
-            deviceID: "aaa",
-            deviceInfo: {
-                "user-agent": "xy",
-                "deviceName": "xyz"
-            }
-    }
-    */
-    let userdata = verificationResponse.data;
     if (subscriptions[userdata["userID"]] == undefined) {
         subscriptions[userdata["userID"]] = {};
     }
@@ -198,99 +185,11 @@ let sendPushNotification = (target, title, message) => {
 // Authenticate socket connection
 const { socketAuthHandler } = require("./communication_handler/authenticator");
 io.use(socketAuthHandler);
+const {newChatHandler,connectionHandler,addPushCallback} = require("./communication_handler/sockethandler");
 
-const sockets = {}
+addPushCallback(sendPushNotification);
 
-/**
- * 
- * @param {int} userID 
- * @param {string} channel 
- * @param {*} data 
- */
-let sendDataToSockets = (userID, channel, data) => {
-    console.log(`Sockets for user: ${userID} `, sockets[userID])
-    for (let i in sockets[userID]) {
-        sockets[userID][i].emit(channel, data);
-    }
-}
-
-let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }) => {
-    console.log("New Chat: ", isGroupChat, chatID, chatName, participants, initiator);
-    for (let i in participants) {
-        sendDataToSockets(participants[i], "newchat", { isGroupChat, chatID, chatName, participants, initiator })
-    }
-}
-
-const { sqlQuery } = require("./things/db")
-
-const { removeValue } = require("./things/helper");
-
-function sanitizeInput(input) {
-    // Replace characters that could break JSON
-    return input.replace(/\\/g, '\\\\') // Escape backslashes
-        .replace(/"/g, '\\"')   // Escape double quotes
-        .replace(/</g, '&lt;') // Escape < to prevent HTML injection
-        .replace(/>/g, '&gt;') // Escape > to prevent HTML injection
-        .replace(/&/g, '&amp;') // Escape &
-        .replace(/'/g, '&#39;'); // Escape single quotes
-}
-
-io.on("connection", (socket) => {
-    if (socket.userInfo == undefined) {
-        return;
-    }
-    if (sockets[socket.userInfo.userID] == undefined) {
-        sockets[socket.userInfo.userID] = {}
-    }
-    sockets[socket.userInfo.userID][socket.userInfo.deviceID] = socket;
-    socket.on("disconnect", (reason) => {
-        console.log("Socket disconnected", reason);
-        delete sockets[socket.userInfo.userID][socket.userInfo.deviceID]
-    })
-
-    socket.on("message", async ({ chatID, message }) => {
-        let senderID = socket.userInfo.userID;
-        let senderName = socket.userInfo.username;
-
-        if (chatID == undefined) {
-            socket.emit("error", "No target")
-            return;
-        }
-
-        if (message.type == undefined || message.content == undefined) {
-            socket.emit("error", "Invalid message")
-            return;
-        }
-
-        try {
-            //sanitize
-            if (message.type == "text") {
-                message.content = sanitizeInput(message.content);
-            }
-
-            await sqlQuery(`INSERT INTO messages (chatid, senderid, message) VALUES ('${chatID}','${senderID}','${JSON.stringify(message)}')`);
-
-            let toNotify = []
-
-            let result = await sqlQuery(`SELECT participants FROM chats WHERE id=${chatID}`);
-
-            toNotify = JSON.parse(result[0]["participants"]);
-
-            for (let i in toNotify) {
-                sendDataToSockets(toNotify[i], "message", JSON.stringify({ chatID, senderID, message, senderName: senderName }));
-                if (toNotify[i] != senderID) {
-                    sendPushNotification(toNotify[i], senderName, message);
-                }
-            }
-
-        } catch (error) {
-            console.error(error);
-            socket.emit("error", error);
-        }
-
-    })
-
-})
+io.on("connection", connectionHandler)
 
 app.post("/api/v1/chat/create", require("./endpoints/v1/chat/createchat").createChatHandler(newChatHandler));
 

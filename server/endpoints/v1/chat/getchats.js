@@ -5,22 +5,7 @@ const {removeValue} = require("../../../things/helper");
 
 
 let getMessagesHandler = async (req, res) => {
-    if (!req.cookies.token) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify user"
-        });
-        return;
-    }
-
-    let verificationResponse = await verifyToken(req.cookies.token);
-    if (verificationResponse.success == false) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify token"
-        });
-        return;
-    }
+    
     /*
     {
             userID: 69,
@@ -32,7 +17,7 @@ let getMessagesHandler = async (req, res) => {
             }
     }
     */
-    let userdata = verificationResponse.data;
+    let userdata = req.userdata;
 
     if (req.query.chatid == undefined) {
         res.status(400).json({

@@ -3,22 +3,6 @@ const { verifyToken } = require("../../../things/jwt");
 const { removeValue } = require("../../../things/helper");
 
 let deletegroupuserHandler = async (req, res) => {
-    if (!req.cookies.token) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify user"
-        });
-        return;
-    }
-
-    let verificationResponse = await verifyToken(req.cookies.token);
-    if (verificationResponse.success == false) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify token"
-        });
-        return;
-    }
     /*
     {
             userID: 69,
@@ -30,7 +14,7 @@ let deletegroupuserHandler = async (req, res) => {
             }
     }
     */
-    let userdata = verificationResponse.data;
+    let userdata = req.userdata;
 
     if (req.body.chatid == undefined) {
         res.status(400).json({
@@ -88,22 +72,6 @@ let deletegroupuserHandler = async (req, res) => {
 }
 
 let addgroupuserHandler = async (req, res) => {
-    if (!req.cookies.token) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify user"
-        });
-        return;
-    }
-
-    let verificationResponse = await verifyToken(req.cookies.token);
-    if (verificationResponse.success == false) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify token"
-        });
-        return;
-    }
     /*
     {
             userID: 69,
@@ -115,7 +83,7 @@ let addgroupuserHandler = async (req, res) => {
             }
     }
     */
-    let userdata = verificationResponse.data;
+    let userdata = req.userdata;
     console.log(req.body);
 
     if (req.body.chatid == undefined) {

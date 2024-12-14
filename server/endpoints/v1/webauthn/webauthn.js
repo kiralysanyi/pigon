@@ -16,25 +16,7 @@ const challengeHandler = async (req, res) => {
 }
 
 const webauthnRegHandler = async (req, res) => {
-
-    if (!req.cookies.token) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify user"
-        });
-        return;
-    }
-
-    let verificationResponse = await verifyToken(req.cookies.token);
-    if (verificationResponse.success == false) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify token"
-        });
-        return;
-    }
-
-    let registration = req.body.registration;
+let registration = req.body.registration;
 
 
     if (registration == undefined) {
@@ -66,7 +48,7 @@ const webauthnRegHandler = async (req, res) => {
             }
     }
     */
-    let userdata = verificationResponse.data;
+    let userdata = req.userdata;
 
 
     const registrationParsed = await server.verifyRegistration(registration, expected)
@@ -201,22 +183,6 @@ const authHandler = async (req, res) => {
 }
 
 const disablePasskeysHandler = async (req, res) => {
-    if (!req.cookies.token) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify user"
-        });
-        return;
-    }
-
-    let verificationResponse = await verifyToken(req.cookies.token);
-    if (verificationResponse.success == false) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify token"
-        });
-        return;
-    }
     /*
     {
             userID: 69,
@@ -228,7 +194,7 @@ const disablePasskeysHandler = async (req, res) => {
             }
     }
     */
-    let userdata = verificationResponse.data;
+    let userdata = req.userdata;
 
     try {
         let query = `DELETE FROM credentials WHERE userID=${userdata["userID"]}`;

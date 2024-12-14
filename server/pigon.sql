@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 13, 2024 at 06:45 PM
+-- Generation Time: Dec 15, 2024 at 12:00 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -275,7 +275,7 @@ ALTER TABLE `devices`
 -- Constraints for table `files`
 --
 ALTER TABLE `files`
-  ADD CONSTRAINT `file-chat` FOREIGN KEY (`chatid`) REFERENCES `chats` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `file-chat` FOREIGN KEY (`chatid`) REFERENCES `chats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `messages`

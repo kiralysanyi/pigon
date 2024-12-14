@@ -306,12 +306,15 @@ let renderChatsSB = async () => {
         element.addEventListener("click", async () => {
             document.getElementById("adduserbtn").style.display = "none";
             document.getElementById("delgroupbtn").style.display = "none";
+            document.getElementById("leavebtn").style.display = "none";
             if (chats[i]["groupchat"] == 1) {
                 let ownername = (await auth.getUserInfo(chats[i]["initiator"]))["data"].username;
                 document.getElementById("ownerdisplay").innerHTML = "Owner: " + ownername;
                 if (chats[i]["initiator"] == userinfo.id) {
                     document.getElementById("adduserbtn").style.display = "block";
                     document.getElementById("delgroupbtn").style.display = "block";
+                } else {
+                    document.getElementById("leavebtn").style.display = "block";
                 }
             } else {
                 document.getElementById("ownerdisplay").innerHTML = "";
@@ -482,6 +485,11 @@ document.getElementById("sendimage").addEventListener("click", async () => {
 
 
 document.getElementById("delgroupbtn").addEventListener("click", () => {
+    let confirmed = window.confirm("Do you really want to delete this group?");
+    if (confirmed == false) {
+        return;
+    }
+
     fetch("/api/v1/chat/group",
         {
             method: "DELETE",
@@ -500,4 +508,31 @@ document.getElementById("delgroupbtn").addEventListener("click", () => {
                 location.reload();
             }
         });
+})
+
+document.getElementById("leavebtn").addEventListener("click", () => {
+    let confirmed = window.confirm("Do you really want to leave this group?");
+    if (confirmed == false) {
+        return;
+    }
+
+    fetch("/api/v1/chat/leave", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({chatid: selectedchat})
+    }).then(async (res) => {
+        let response = await res.json();
+        if (response.success == false) {
+            window.alert(response.message);
+            return;
+        }
+
+        if (response.success == true) {
+            window.alert(response.message);
+            location.reload();
+        }
+    })
 })

@@ -176,4 +176,58 @@ let deleteGroupHandler = async (req, res) => {
     });
 }
 
-module.exports = { deletegroupuserHandler, addgroupuserHandler, deleteGroupHandler }
+let leaveGroupHandler = async (req, res) => {
+    let userdata = req.userdata;
+    let chatid = req.body.chatid;
+
+    if (chatid == undefined) {
+        res.status(400).json({
+            success: false,
+            message: "chatid not provided"
+        });
+        return;
+    }
+
+    let result = await sqlQuery(`SELECT initiator FROM chats WHERE id=${chatid}`);
+    if (result.length != 1) {
+        res.status(404).json({
+            success: false,
+            message: "Chat not found"
+        });
+        return;
+    }
+
+    if (result[0]["initiator"] == userdata.userID) {
+        res.status(403).json({
+            success: false,
+            message: "You can't leave this chat because you are the owner of the group."
+        })
+        return;
+    }
+
+    //check if user is in the chat
+    result = await sqlQuery(`SELECT * FROM \`user-chat\` WHERE userID = ${userdata.userID} AND chatid = ${chatid}`);
+    if (result.length != 1) {
+        res.status(403).json({
+            success: false,
+            message: "You are not in this group"
+        })
+        return;
+    }
+
+    //remove user from group
+
+    await sqlQuery(`DELETE FROM \`user-chat\` WHERE userID=${userdata.userID} AND chatid=${chatid}`);
+
+    result = await sqlQuery(`SELECT participants FROM chats WHERE id=${chatid}`);
+    let participants = JSON.parse(result[0]["participants"]);
+    participants = removeValue(participants, userdata.userID);
+    participants = JSON.stringify(participants);
+    await sqlQuery(`UPDATE chats SET participants='${participants}' WHERE id=${chatid}`)
+    res.json({
+        success: true,
+        message: "Successfully left the chat."
+    });
+}
+
+module.exports = { deletegroupuserHandler, addgroupuserHandler, deleteGroupHandler, leaveGroupHandler }

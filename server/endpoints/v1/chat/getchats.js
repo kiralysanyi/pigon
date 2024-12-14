@@ -34,6 +34,7 @@ let getMessagesHandler = async (req, res) => {
             success: false,
             message: "You are not allowed to access messages from this chat"
         })
+        return;
     }
 
     //1 page means 50 messages

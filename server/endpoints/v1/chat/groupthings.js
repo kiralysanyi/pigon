@@ -141,4 +141,39 @@ let addgroupuserHandler = async (req, res) => {
     });
 }
 
-module.exports = { deletegroupuserHandler, addgroupuserHandler }
+let deleteGroupHandler = async (req, res) => {
+    let userdata = req.userdata;
+    let chatid = req.body.chatid;
+    if (chatid == undefined) {
+        res.status(400).json({
+            success: false,
+            message: "chatid not provided"
+        });
+        return;
+    }
+
+    let result = await sqlQuery(`SELECT initiator FROM chats WHERE id=${chatid}`);
+    if (result.length != 1) {
+        res.status(404).json({
+            success: false,
+            message: "Chat not found"
+        });
+        return;
+    }
+
+    if (result[0]["initiator"] != userdata.userID) {
+        res.status(403).json({
+            success: false,
+            message: "You are not allowed to delete this chat"
+        })
+        return;
+    }
+
+    await sqlQuery(`DELETE FROM chats WHERE id=${chatid}`);
+    res.json({
+        success: true,
+        message: "Group deleted successfully"
+    });
+}
+
+module.exports = { deletegroupuserHandler, addgroupuserHandler, deleteGroupHandler }

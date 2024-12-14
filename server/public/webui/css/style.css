@@ -530,3 +530,23 @@ nav {
 #adduserbtn:hover {
     background-color: rgb(0, 119, 255); 
 }
+
+#delgroupbtn {
+    position: absolute;
+    width: 200px;
+    height: 50px;
+    background-color: rgb(173, 0, 0);
+    color: white;
+    border-radius: 15px;
+    transition: 200ms;
+    text-align: center;
+    line-height: 50px;
+    user-select: none;
+    font-size: 18px;
+    left: calc(50% - 100px);
+    top: 570px;
+}
+
+#delgroupbtn:hover {
+    background-color: red;
+}

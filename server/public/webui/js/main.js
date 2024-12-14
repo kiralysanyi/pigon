@@ -226,7 +226,7 @@ let renderChat = (page = 1) => {
         if (page == 1) {
             currentPage = 1;
             msgcontainer.innerHTML = "";
-            for (let i = res.length-1; i >= 0; i--) {
+            for (let i = res.length - 1; i >= 0; i--) {
                 let message = JSON.parse(res[i]["message"]);
                 let senderID = res[i]["senderid"];
                 let senderName = res[i]["username"];
@@ -304,9 +304,15 @@ let renderChatsSB = async () => {
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);
         element.addEventListener("click", async () => {
+            document.getElementById("adduserbtn").style.display = "none";
+            document.getElementById("delgroupbtn").style.display = "none";
             if (chats[i]["groupchat"] == 1) {
                 let ownername = (await auth.getUserInfo(chats[i]["initiator"]))["data"].username;
                 document.getElementById("ownerdisplay").innerHTML = "Owner: " + ownername;
+                if (chats[i]["initiator"] == userinfo.id) {
+                    document.getElementById("adduserbtn").style.display = "block";
+                    document.getElementById("delgroupbtn").style.display = "block";
+                }
             } else {
                 document.getElementById("ownerdisplay").innerHTML = "";
             }
@@ -331,10 +337,8 @@ let renderChatsSB = async () => {
                     element.innerHTML += username
                     element.appendChild(img);
                     document.getElementById("chatInfo_participants").appendChild(element);
-                    document.getElementById("adduserbtn").style.display = "none";
                     if (chats[i]["groupchat"] == 1) {
                         if (chats[i]["initiator"] == userinfo.id) {
-                            document.getElementById("adduserbtn").style.display = "block";
                             contextMenu(element, ["Remove"], async (selected) => {
                                 if (selected == "Remove") {
                                     console.log("Remove user from group");
@@ -474,4 +478,26 @@ document.getElementById("sendimage").addEventListener("click", async () => {
         sendFile(fileInput.files[0], type, selectedchat);
     });
     fileInput.click();
+})
+
+
+document.getElementById("delgroupbtn").addEventListener("click", () => {
+    fetch("/api/v1/chat/group",
+        {
+            method: "DELETE",
+            credentials: "include",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({chatid: selectedchat})
+        }).then(async (res) => {
+            let response = await res.json();
+            if (response.success == false) {
+                window.alert(response.message);
+                return;
+            }
+
+            if (response.success == true) {
+                window.alert(response.message);
+                location.reload();
+            }
+        });
 })

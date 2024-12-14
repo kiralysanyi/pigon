@@ -122,10 +122,12 @@ app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandle
 app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHandler)
 app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)
 
-const { addgroupuserHandler, deletegroupuserHandler } = require("./endpoints/v1/chat/groupthings");
+const { addgroupuserHandler, deletegroupuserHandler, deleteGroupHandler } = require("./endpoints/v1/chat/groupthings");
 app.use("/api/v1/chat/groupuser", authMiddleWare);
 app.post("/api/v1/chat/groupuser", addgroupuserHandler);
 app.delete("/api/v1/chat/groupuser", deletegroupuserHandler);
+app.use("/api/v1/chat/group", authMiddleWare);
+app.delete("/api/v1/chat/group", deleteGroupHandler);
 
 //cdn
 const { cdnGetHandler, cdnPostHandler } = require("./endpoints/v1/chat/cdn");

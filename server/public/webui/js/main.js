@@ -1,7 +1,8 @@
 import * as auth from "./auth.js";
 import { modal } from "./modal.js";
 import { parseUserAgent } from "./useragent-parser.js";
-import { io } from "./socket.io.esm.min.js"
+import { removeValue, sanitizeInput, decodeHTML } from "./utils.js";
+import { addPrivateChat, sendFile, sendMessage, socket } from "./chat.js";
 
 /*
 let isLoggedIn = await auth.checkIfLoggedIn();
@@ -10,66 +11,6 @@ if (isLoggedIn == false) {
 }
     */
 
-const socket = io(location.host);
-
-socket.on("connect", () => {
-    document.getElementById("indicator").style.backgroundColor = "green";
-});
-
-socket.on("disconnect", () => {
-    document.getElementById("indicator").style.backgroundColor = "red";
-});
-
-
-
-let sendMessage = (chatID, content, type = "text") => {
-    let message = {
-        type,
-        content
-    }
-    socket.emit("message", { chatID, message });
-}
-
-
-socket.on("error", (err) => {
-    console.error("Socket:", err);
-})
-
-
-function createchat({ isGroupChat, chatName, participants }) {
-    return new Promise((resolved, rejected) => {
-        /*
-        Body
-        {
-            isGroupChat: true/false,
-            chatName: "aaa" //only required if isGroupChat = true
-            participants: [] //array of userIDs
-        }
-        */
-
-        fetch("/api/v1/chat/create", {
-            credentials: "include",
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                isGroupChat, chatName, participants
-            })
-        }).then(async (res) => {
-            let response = await res.json()
-            console.log(response);
-            if (response.success == true) {
-                resolved();
-            } else {
-                rejected(new Error(response.message));
-            }
-        }).catch((err) => {
-            rejected(err);
-        })
-    });
-
-}
 
 
 let userinfo = await auth.getUserInfo();
@@ -78,6 +19,7 @@ if (userinfo.success == false) {
 }
 
 userinfo = userinfo.data;
+window.userinfo = userinfo;
 
 console.log(userinfo);
 
@@ -172,41 +114,8 @@ document.getElementById("devicesbtn").addEventListener("click", async () => {
     devicesModal.open();
 });
 
-function searchUsers(query) {
-    return new Promise((resolved, rejected) => {
-        fetch("/api/v1/auth/search?" + new URLSearchParams({ search: query }).toString(), {
-            method: "GET",
-            credentials: "include"
-        }).then(async (response) => {
-            let res = await response.json()
-            if (res.success == false) {
-                rejected(new Error(res.message))
-                return;
-            }
-            resolved(res["data"]);
-        }).catch((error) => {
-            rejected(error)
-        })
-    });
 
-}
 
-function addPrivateChat(userid) {
-    let data = {
-        isGroupChat: false,
-        chatName: "",
-        participants: [userinfo.id, userid]
-    }
-
-    console.log(data);
-    createchat(data).then(() => {
-        //successfully created chat
-        console.log("Successfully created chat!!!!!!!!!!!");
-    }).catch((err) => {
-        console.error(err)
-        window.alert(err)
-    })
-}
 
 
 document.getElementById("newgroupbtn").addEventListener("click", () => {
@@ -237,7 +146,7 @@ document.getElementById("newchatbtn").addEventListener("click", () => {
     contentElement.appendChild(resultsDisplay);
 
     searchInput.addEventListener("keyup", async () => {
-        let results = await searchUsers(searchInput.value);
+        let results = await auth.searchUsers(searchInput.value);
         resultsDisplay.innerHTML = "";
 
         for (let i in results) {
@@ -257,16 +166,6 @@ document.getElementById("newchatbtn").addEventListener("click", () => {
 })
 
 let sbcontent = document.getElementById("sbcontent");
-
-/**
- * Removes a specific value from an array.
- * @param {Array} array - The array to modify.
- * @param {*} valueToRemove - The value to remove.
- * @returns {Array} - A new array without the specified value.
- */
-function removeValue(array, valueToRemove) {
-    return array.filter(value => value !== valueToRemove);
-}
 
 let msgcontainer = document.getElementById("msgcontainer");
 let textcontainer = document.getElementById("textcontainer");
@@ -386,6 +285,7 @@ let renderChatsSB = async () => {
             currentChatInfodiv.style.display = "block";
             textcontainer.style.display = "block";
             selectedchat = chats[i]["chatid"];
+            window.selectedchat = selectedchat;
             document.getElementById("currentPfp_menu").src = elementPfp.src;
             document.getElementById("currentChatname_menu").innerHTML = chats[i]["name"];
             (async () => {
@@ -436,22 +336,7 @@ let renderChatsSB = async () => {
 
 renderChatsSB();
 
-function sanitizeInput(input) {
-    // Replace characters that could break JSON
-    return input.replace(/\\/g, '\\\\') // Escape backslashes
-        .replace(/"/g, '\\"')   // Escape double quotes
-        .replace(/</g, '&lt;') // Escape < to prevent HTML injection
-        .replace(/>/g, '&gt;') // Escape > to prevent HTML injection
-        .replace(/&/g, '&amp;') // Escape &
-        .replace(/'/g, '&#39;'); // Escape single quotes
-}
 
-// Decode sanitized input for display
-function decodeHTML(html) {
-    const element = document.createElement('textarea');
-    element.innerHTML = html;
-    return element.value;
-}
 
 let addMessageToContainer = (chatID, senderID, name, message, type) => {
     if (chatID != selectedchat) {
@@ -533,33 +418,7 @@ msgform.addEventListener("submit", (e) => {
 
 //image sending
 
-async function sendFile(file, type) {
-    const formData = new FormData();
 
-    // Append the file to the FormData object
-    formData.append('file', file);
-    formData.append("chatid", selectedchat);
-    try {
-        // Make the POST request to your server's upload endpoint
-        const response = await fetch('/api/v1/chat/cdn', { // Replace with your server URL
-            method: 'POST',
-            credentials: "include",
-            body: formData,
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            window.alert(`File uploaded successfully: ${result.message}`);
-
-            sendMessage(selectedchat, "/api/v1/chat/cdn?filename=" + result["filename"], type);
-        } else {
-            window.alert(`Error uploading file: ${response.statusText}`);
-        }
-    } catch (error) {
-        console.error('Upload failed:', error);
-        window.alert(`Failed to upload file`);
-    }
-}
 
 document.getElementById("sendimage").addEventListener("click", async () => {
     const fileInput = document.createElement("input");
@@ -581,7 +440,7 @@ document.getElementById("sendimage").addEventListener("click", async () => {
             return;
         }
 
-        sendFile(fileInput.files[0], type);
+        sendFile(fileInput.files[0], type, selectedchat);
     });
     fileInput.click();
 })

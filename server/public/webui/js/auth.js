@@ -210,4 +210,23 @@ if (isLoggedIn == false) {
     location.replace("/app/login.html")
 }
 
-export { changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register, removeDevice, checkIfLoggedIn }
+function searchUsers(query) {
+    return new Promise((resolved, rejected) => {
+        fetch("/api/v1/auth/search?" + new URLSearchParams({ search: query }).toString(), {
+            method: "GET",
+            credentials: "include"
+        }).then(async (response) => {
+            let res = await response.json()
+            if (res.success == false) {
+                rejected(new Error(res.message))
+                return;
+            }
+            resolved(res["data"]);
+        }).catch((error) => {
+            rejected(error)
+        })
+    });
+
+}
+
+export { searchUsers, changePassword, deleteAccount, deleteCookie, getCookie, getDevices, getUserInfo, getWebAuthnChallenge, login, logout, register, removeDevice, checkIfLoggedIn }

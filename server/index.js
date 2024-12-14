@@ -191,6 +191,7 @@ addPushCallback(sendPushNotification);
 
 io.on("connection", connectionHandler)
 
+app.use("/api/v1/chat/create", authMiddleWare);
 app.post("/api/v1/chat/create", require("./endpoints/v1/chat/createchat").createChatHandler(newChatHandler));
 
 

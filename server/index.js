@@ -123,6 +123,7 @@ app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHa
 app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)
 
 const { addgroupuserHandler, deletegroupuserHandler } = require("./endpoints/v1/chat/groupthings");
+app.use("/api/v1/chat/groupuser", authMiddleWare);
 app.post("/api/v1/chat/groupuser", addgroupuserHandler);
 app.delete("/api/v1/chat/groupuser", deletegroupuserHandler);
 

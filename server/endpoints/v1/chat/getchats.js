@@ -27,6 +27,15 @@ let getMessagesHandler = async (req, res) => {
         return;
     }
 
+    //check if user is in the chat
+    let result = await sqlQuery(`SELECT * FROM \`user-chat\` WHERE userID = ${userdata.userID} AND chatid = ${req.query.chatid}`);
+    if (result.length != 1) {
+        res.status(403).json({
+            success: false,
+            message: "You are not allowed to access messages from this chat"
+        })
+    }
+
     //1 page means 50 messages
     //If you have 3 pages (150 messages) then page 1 will be the last 50 messages, page 2 will be the previous 50 messages, etc.
     //This API should not provide more than 50 messages
@@ -41,12 +50,14 @@ let getMessagesHandler = async (req, res) => {
 
     let offset = 0;
     if (page > 1) {
-        offset = 50 * page
+        offset = (50 * page) - 50;
     }
 
+    console.log(page, offset);
     try {
-        let result = await sqlQuery(`SELECT \`senderid\`, \`message\`, \`date\`, users.username FROM messages LEFT JOIN users ON messages.senderid = users.id WHERE cancelled = 0 AND chatid = ${req.query.chatid} ORDER BY \`date\` ASC LIMIT 50 OFFSET ${offset};`);
+        let result = await sqlQuery(`SELECT \`senderid\`, \`message\`, \`date\`, users.username FROM messages LEFT JOIN users ON messages.senderid = users.id WHERE cancelled = 0 AND chatid = ${req.query.chatid} ORDER BY \`date\` DESC LIMIT 50 OFFSET ${offset};`);
         res.json(result);
+        console.log(result);
     } catch (error) {
         console.error(error);
         res.status(500).json({

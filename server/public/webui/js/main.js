@@ -186,14 +186,12 @@ document.getElementById("ccm_close").addEventListener("click", () => {
 });
 
 let renderChat = (page = 1) => {
-    msgcontainer.innerHTML = "";
     fetch("/api/v1/chat/messages?chatid=" + selectedchat + "&page=" + page, {
         method: "GET",
         credentials: "include"
     }).then(async (response) => {
         let res = await response.json();
-        for (let i in res) {
-            let message = JSON.parse(res[i]["message"]);
+        let createElement = (message, senderID, senderName) => {
             let element = document.createElement("div");
             element.classList.add("msg");
             let element_namedisplay = document.createElement("div");
@@ -205,12 +203,11 @@ let renderChat = (page = 1) => {
             element.appendChild(element_namedisplay);
             element.appendChild(element_pfp);
             element.appendChild(element_msg);
-            element_namedisplay.innerHTML = res[i]["username"];
-            if (userinfo.id == res[i]["senderid"]) {
+            element_namedisplay.innerHTML = senderName;
+            if (userinfo.id == senderID) {
                 element_namedisplay.innerHTML = "You"
             }
-            element_pfp.src = "/api/v1/auth/pfp?id=" + res[i]["senderid"] + "&smol=true";
-            msgcontainer.appendChild(element);
+            element_pfp.src = "/api/v1/auth/pfp?id=" + senderID + "&smol=true";
             if (message.type == "text") {
                 element_msg.innerHTML = decodeHTML(message.content);
             }
@@ -222,16 +219,50 @@ let renderChat = (page = 1) => {
             if (message.type == "video") {
                 element_msg.innerHTML = `<video src="${message.content}" controls loop autoplay muted></video>`
             }
+
+            return element;
         }
-        setTimeout(() => {
-            msgcontainer.scrollTop = msgcontainer.scrollHeight;
-        }, 100);
+
+        if (page == 1) {
+            currentPage = 1;
+            msgcontainer.innerHTML = "";
+            for (let i = res.length-1; i >= 0; i--) {
+                let message = JSON.parse(res[i]["message"]);
+                let senderID = res[i]["senderid"];
+                let senderName = res[i]["username"];
+                msgcontainer.appendChild(createElement(message, senderID, senderName))
+            }
+            setTimeout(() => {
+                msgcontainer.scrollTop = msgcontainer.scrollHeight;
+            }, 100);
+        } else {
+            console.log(currentPage);
+            if (res.length == 0) {
+                currentPage--;
+                return;
+            }
+            for (let i in res) {
+                let message = JSON.parse(res[i]["message"]);
+                let senderID = res[i]["senderid"];
+                let senderName = res[i]["username"];
+                msgcontainer.prepend(createElement(message, senderID, senderName))
+            }
+        }
         console.log(res);
 
     }).catch((err) => {
         console.error(err);
     })
 }
+
+let currentPage = 1;
+msgcontainer.addEventListener("scroll", (e) => {
+    if (msgcontainer.scrollTop == 0) {
+        currentPage++;
+        renderChat(currentPage);
+        msgcontainer.scrollTop = 10;
+    }
+})
 
 
 import { contextMenu } from "./contextmenu.js";

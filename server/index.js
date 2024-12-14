@@ -113,6 +113,11 @@ app.get("/", (req, res) => {
     res.redirect("/app/login.html");
 })
 
+app.use("/api/v1/chat/messages", authMiddleWare);
+app.use("/api/v1/chat/chats", authMiddleWare);
+app.use("/api/v1/auth/search", authMiddleWare);
+
+
 app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandler)
 app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHandler)
 app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)

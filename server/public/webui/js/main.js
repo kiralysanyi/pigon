@@ -191,7 +191,7 @@ let renderChat = (page = 1) => {
         credentials: "include"
     }).then(async (response) => {
         let res = await response.json();
-        let createElement = (message, senderID, senderName) => {
+        let createElement = (message, senderID, senderName, date) => {
             let element = document.createElement("div");
             element.classList.add("msg");
             let element_namedisplay = document.createElement("div");
@@ -207,6 +207,7 @@ let renderChat = (page = 1) => {
             if (userinfo.id == senderID) {
                 element_namedisplay.innerHTML = "You"
             }
+            element_namedisplay.innerHTML += " at " + new Date(date).toLocaleString();
             element_pfp.src = "/api/v1/auth/pfp?id=" + senderID + "&smol=true";
             if (message.type == "text") {
                 element_msg.innerHTML = decodeHTML(message.content);
@@ -230,7 +231,7 @@ let renderChat = (page = 1) => {
                 let message = JSON.parse(res[i]["message"]);
                 let senderID = res[i]["senderid"];
                 let senderName = res[i]["username"];
-                msgcontainer.appendChild(createElement(message, senderID, senderName))
+                msgcontainer.appendChild(createElement(message, senderID, senderName, res[i]["date"]))
             }
             setTimeout(() => {
                 msgcontainer.scrollTop = msgcontainer.scrollHeight;
@@ -245,7 +246,7 @@ let renderChat = (page = 1) => {
                 let message = JSON.parse(res[i]["message"]);
                 let senderID = res[i]["senderid"];
                 let senderName = res[i]["username"];
-                msgcontainer.prepend(createElement(message, senderID, senderName))
+                msgcontainer.prepend(createElement(message, senderID, senderName, res[i]["date"]))
             }
         }
         console.log(res);
@@ -392,7 +393,7 @@ let addMessageToContainer = (chatID, senderID, name, message, type) => {
     element.appendChild(element_namedisplay);
     element.appendChild(element_pfp);
     element.appendChild(element_msg);
-    element_namedisplay.innerHTML = name;
+    element_namedisplay.innerHTML = name + " at " + new Date().toLocaleString();
     element_pfp.src = "/api/v1/auth/pfp?id=" + senderID + "&smol=true";
     msgcontainer.appendChild(element);
     console.log(msgcontainer.scrollTop, msgcontainer.scrollHeight);
@@ -494,8 +495,8 @@ document.getElementById("delgroupbtn").addEventListener("click", () => {
         {
             method: "DELETE",
             credentials: "include",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({chatid: selectedchat})
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chatid: selectedchat })
         }).then(async (res) => {
             let response = await res.json();
             if (response.success == false) {
@@ -522,7 +523,7 @@ document.getElementById("leavebtn").addEventListener("click", () => {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({chatid: selectedchat})
+        body: JSON.stringify({ chatid: selectedchat })
     }).then(async (res) => {
         let response = await res.json();
         if (response.success == false) {

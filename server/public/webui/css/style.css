@@ -346,6 +346,7 @@ nav {
     line-height: 10px;
     font-size: 15px;
     color: rgba(255, 255, 255, 0.425);
+    min-width: 240px;
 }
 
 

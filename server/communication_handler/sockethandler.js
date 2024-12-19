@@ -25,6 +25,10 @@ let sendDataToSockets = (userID, channel, data) => {
     }
 }
 
+let getSocketsForUser = (userID) => {
+    return sockets[userID]
+}
+
 let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }) => {
     console.log("New Chat: ", isGroupChat, chatID, chatName, participants, initiator);
     for (let i in participants) {
@@ -50,6 +54,13 @@ function sanitizeInput(input) {
  * 
  * @param {Socket} socket 
  */
+
+let getCallUsers = (callid) => {}
+
+let SETgetCallUsers = (fn = (callid) => {}) => {
+    getCallUsers = fn;
+}
+
 let connectionHandler = (socket) => {
     if (socket.userInfo == undefined) {
         return;
@@ -61,6 +72,32 @@ let connectionHandler = (socket) => {
     socket.on("disconnect", (reason) => {
         console.log("Socket disconnected", reason);
         delete sockets[socket.userInfo.userID][socket.userInfo.deviceID]
+    })
+
+    socket.on("call", async ({callid, username, chatid}) => {
+        console.log("New call: ", callid, username, chatid);
+        const callerID = socket.userInfo.userID;
+        console.log("CallerID: ", callerID);
+        let called = getCallUsers(callid);
+        console.log(called);
+        called = (removeValue(called, callerID))[0];
+        console.log("Called: ", called);
+        sendDataToSockets(called, "incomingcall", {callid, username, chatid});
+        let targetSockets = getSocketsForUser(called);
+        if (targetSockets == undefined) {
+            sendPushNotification(called, "Missed Call", "You missed a call from: " + username);
+            socket.emit("callresponse" + callid, {accepted: false, reason: "Not available"});
+            return;
+        }
+        for (let i in targetSockets) {
+            targetSockets[i].once("response" + callid, ({accepted, reason}) => {
+                for (let x in targetSockets) {
+                    targetSockets[x].emit("acceptedcall");
+                }
+                console.log(accepted, reason);
+                socket.emit("callresponse" + callid, {accepted, reason})
+            })
+        }
     })
 
     socket.on("message", async ({ chatID, message }) => {
@@ -107,4 +144,4 @@ let connectionHandler = (socket) => {
 
 } 
 
-module.exports = {newChatHandler, connectionHandler, addPushCallback}
+module.exports = {newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers}

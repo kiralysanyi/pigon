@@ -25,4 +25,19 @@ function decodeHTML(html) {
     return element.value;
 }
 
-export {removeValue, sanitizeInput, decodeHTML}
+let audioElement = document.createElement("audio");
+audioElement.src = "/app/pigon.mp3"
+audioElement.loop = true;
+audioElement.autoplay = false;
+audioElement.muted = false;
+
+function playRingtone() {
+    audioElement.play();
+}
+
+function stopRingtone() {
+    audioElement.pause();
+}
+
+
+export {removeValue, sanitizeInput, decodeHTML, playRingtone, stopRingtone}

@@ -5,7 +5,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server, { cookie: true });
+const io = new Server(server, { cookie: true, path: "/socketio" });
 let cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 let jsonParser = bodyParser.json;
@@ -30,7 +30,7 @@ app.use(require('sanitize').middleware);
 
 
 const registerHandler = require("./endpoints/v1/register").registerHandler;
-const {authMiddleWare} = require("./things/auth_middleware");
+const { authMiddleWare } = require("./things/auth_middleware");
 
 //register endpoint
 app.post("/api/v1/auth/register", registerHandler)
@@ -181,7 +181,7 @@ let sendPushNotification = (target, title, message) => {
 
     payload = JSON.stringify(payload);
 
-    console.log(subscriptions,subscriptions[target], target);
+    console.log(subscriptions, subscriptions[target], target);
     for (let i in subscriptions[target]) {
         webpush.sendNotification(subscriptions[target][i], payload).catch((err) => {
             console.error(err);
@@ -195,7 +195,7 @@ let sendPushNotification = (target, title, message) => {
 // Authenticate socket connection
 const { socketAuthHandler } = require("./communication_handler/authenticator");
 io.use(socketAuthHandler);
-const {newChatHandler,connectionHandler,addPushCallback} = require("./communication_handler/sockethandler");
+const { newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers } = require("./communication_handler/sockethandler");
 
 addPushCallback(sendPushNotification);
 
@@ -203,6 +203,149 @@ io.on("connection", connectionHandler)
 
 app.use("/api/v1/chat/create", authMiddleWare);
 app.post("/api/v1/chat/create", require("./endpoints/v1/chat/createchat").createChatHandler(newChatHandler));
+
+
+//call things
+const { createCallHandler, initCallJS } = require('./endpoints/v1/chat/call');
+const { removeValue } = require('./things/helper');
+
+let calls = {}
+
+initCallJS((callid, allowedIDs, chatid) => {
+    calls[callid] = {
+        users: allowedIDs,
+        chat: chatid,
+        peers: []
+    };
+    console.log(calls);
+});
+
+SETgetCallUsers((callid) => {
+    return calls[callid]["users"];
+});
+
+app.use("/api/v1/chat/getPeerIDs", authMiddleWare);
+app.use("/api/v1/chat/registerPeer", authMiddleWare);
+app.use("/api/v1/chat/callusers", authMiddleWare);
+app.get("/api/v1/chat/callusers", (req, res) => {
+    /*
+{
+    userID: 69,
+    username: "lakatos rikárdinnyó",
+    deviceID: "aaa",
+    deviceInfo: {
+        "user-agent": "xy",
+        "deviceName": "xyz"
+    }
+}
+*/
+    const userinfo = req.userdata;
+    const callid = req.query.callid;
+
+    if (callid == undefined) {
+        res.status(400).json({
+            success: false,
+            message: "callid not provided"
+        });
+        return;
+    }
+
+
+    if (calls[callid]["users"].includes(userinfo.userID) == false) {
+        res.status(403).json({
+            success: false,
+            message: "You are not allowed in this call"
+        });
+        return;
+    }
+
+    res.json({
+        success: true,
+        data: calls[callid]["users"]
+    });
+
+})
+
+app.post("/api/v1/chat/registerPeer", (req, res) => {
+    /*
+{
+        userID: 69,
+        username: "lakatos rikárdinnyó",
+        deviceID: "aaa",
+        deviceInfo: {
+            "user-agent": "xy",
+            "deviceName": "xyz"
+        }
+}
+*/
+    const userinfo = req.userdata;
+    const callid = req.body.callid;
+
+    if (callid == undefined) {
+        res.status(400).json({
+            success: false,
+            message: "callid not provided"
+        });
+        return;
+    }
+
+
+    if (calls[callid]["users"].includes(userinfo.userID) == false) {
+        res.status(403).json({
+            success: false,
+            message: "You are not allowed in this call"
+        });
+        return;
+    }
+
+    if (calls[callid]["peers"].includes(userinfo.deviceID) == true) {
+        res.json({
+            success: true,
+            message: "Device already registered"
+        });
+        return;
+    }
+    calls[callid]["peers"].push(userinfo.deviceID);
+    res.json({
+        success: true,
+        message: "Device registered"
+    });
+
+});
+
+app.get("/api/v1/chat/getPeerIDs", (req, res) => {
+    const userinfo = req.userdata;
+    const callid = req.query.callid;
+    console.log(req.userdata);
+
+
+    if (callid == undefined) {
+        res.status(400).json({
+            success: false,
+            message: "callid not provided"
+        });
+        return;
+    }
+
+    if (calls[callid]["users"].includes(userinfo.userID) == false) {
+        res.status(403).json({
+            success: false,
+            message: "You are not allowed in this call"
+        });
+        return;
+    }
+
+    let peers = calls[callid]["peers"];
+    peers = removeValue(peers, userinfo.deviceID);
+    res.json({
+        success: true,
+        data: peers
+    })
+
+})
+
+app.use("/api/v1/chat/prepareCall", authMiddleWare)
+app.post("/api/v1/chat/prepareCall", createCallHandler);
 
 
 

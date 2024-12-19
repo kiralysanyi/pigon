@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <script type="module" src="./js/callUI.js"></script>
+    <style>
+        body {
+            background-color: rgb(34, 34, 34);
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #dock {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            width: auto;
+            height: auto;
+            padding: 10px;
+            background-color: rgb(37, 37, 37);
+            border-radius: 20px;
+            transform: translate(-50%, 0%);
+        }
+
+        #dock .btn {
+            position: relative;
+            float: left;
+            width: 40px;
+            height: 40px;
+            border-radius: 100%;
+            text-align: center;
+            line-height: 40px;
+            color: white;
+        }
+
+        #calledUserImage {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            width: 120px;
+            height: 120px;
+            border-radius: 100%;
+        }
+
+        #calledUserName {
+            position: absolute;
+            top: 230px;
+            width: auto;
+            text-align: center;
+            line-height: 40px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+        }
+
+        #duration {
+            position: absolute;
+            top: 280px;
+            width: auto;
+            text-align: center;
+            line-height: 40px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+
+        }
+    </style>
+</head>
+<body>
+    <div id="callInfo">
+        <img id="calledUserImage">
+        <div id="calledUserName"></div>
+        <div id="duration"></div>
+    </div>
+    <div id="dock">
+        <div class="btn" id="closebtn" style="background-color: red;">
+            <i class="fa-solid fa-phone-slash"></i>
+        </div>
+    </div>
+</body>
+</html>

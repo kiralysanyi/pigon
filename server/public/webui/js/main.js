@@ -305,6 +305,7 @@ let renderChatsSB = async () => {
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);
         element.addEventListener("click", async () => {
+            document.getElementById("callbtn").style.display = "none";
             document.getElementById("adduserbtn").style.display = "none";
             document.getElementById("delgroupbtn").style.display = "none";
             document.getElementById("leavebtn").style.display = "none";
@@ -319,6 +320,7 @@ let renderChatsSB = async () => {
                 }
             } else {
                 document.getElementById("ownerdisplay").innerHTML = "";
+                document.getElementById("callbtn").style.display = "block";
             }
             document.getElementById("chatInfo_participants").innerHTML = "";
             currentPfp.src = elementPfp.src;

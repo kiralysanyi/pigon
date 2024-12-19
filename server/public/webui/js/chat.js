@@ -1,16 +1,34 @@
 let userinfo = window.userinfo;
 import { io } from "./socket.io.esm.min.js";
+import * as call from "./call.js"
 
 
-const socket = io(location.host);
+const socket = io(location.host, {
+    path: "/socketio"
+});
+
+document.getElementById("callbtn").addEventListener("click", () => {
+    call.call(window.selectedchat, socket)
+})
 
 socket.on("connect", () => {
-    document.getElementById("indicator").style.backgroundColor = "green";
+    console.log("Connected to socket.io host");
 });
 
 socket.on("disconnect", () => {
-    document.getElementById("indicator").style.backgroundColor = "red";
+    console.log("Disconnected from socket.io host");
 });
+
+socket.on("incomingcall", ({callid, username, chatid}) => {
+    call.incomingCallHandler(callid, username, (accepted, reason) => {
+        //send back response from popup, if true, the other peer should start opening the callui with the provided callid, if false the other peer should show a message about the declined call
+        socket.emit("response" + callid, {accepted, reason});
+    });
+})
+
+socket.on("acceptedcall", () => {
+    call.cancelCallHanlder();
+})
 
 
 

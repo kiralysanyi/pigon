@@ -86,6 +86,12 @@ for (let i in peers) {
 }
 
 peer.on("call", (mediaConnection) => {
+    mediaConnection.on("stream", (stream) => {
+        console.log("Got stream: ", stream)
+        let audioelement = new Audio();
+        audioelement.srcObject = stream;
+        audioelement.play();
+    })
     mediaConnections.push(mediaConnection);
     mediaConnection.answer(audiostream);
     mediaConnection.on("close", () => {

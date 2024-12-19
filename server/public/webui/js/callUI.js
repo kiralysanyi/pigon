@@ -72,8 +72,11 @@ async function getMicrophoneStream() {
 
 let audiostream = await getMicrophoneStream();
 
+let mediaConnections = [];
+
 for (let i in peers) {
     let mediaConnection = peer.call(peers[i], audiostream);
+    mediaConnections.push(mediaConnection);
     mediaConnection.on("stream", (stream) => {
         console.log("Got stream: ", stream)
         let audioelement = new Audio();
@@ -83,6 +86,7 @@ for (let i in peers) {
 }
 
 peer.on("call", (mediaConnection) => {
+    mediaConnections.push(mediaConnection);
     mediaConnection.answer(audiostream);
     mediaConnection.on("close", () => {
         window.close();
@@ -90,6 +94,9 @@ peer.on("call", (mediaConnection) => {
 })
 
 document.getElementById("closebtn").addEventListener("click", () => {
+    for (let i in mediaConnections) {
+        mediaConnections[i].close();
+    }
     window.close();
 })
 

@@ -58,6 +58,10 @@ let cancelCallHanlder = () => {
 }
 
 let call = async (chatID, socket) => {
+    let statusDisplay = document.createElement("div");
+    statusDisplay.classList.add("callOutStatus");
+    document.body.appendChild(statusDisplay);
+    statusDisplay.innerHTML = "Calling..."
     inCall = true;
     let response = await fetch("/api/v1/chat/prepareCall", {
         method: "POST",
@@ -87,10 +91,15 @@ let call = async (chatID, socket) => {
         console.log(response)
         if (response["accepted"] == false) {
             //remove calling display and do nothing
+            statusDisplay.innerHTML = response["reason"];
+            setTimeout(() => {
+                statusDisplay.remove();
+            }, 2000);
             return;
         }
 
         //remove calling display and open callUI.html in new page
+        statusDisplay.remove();
         window.open("/app/webui/callUI.html#" + data["callid"]);
         inCall = false;
     })

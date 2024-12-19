@@ -95,7 +95,11 @@ peer.on("call", (mediaConnection) => {
     mediaConnections.push(mediaConnection);
     mediaConnection.answer(audiostream);
     mediaConnection.on("close", () => {
-        window.close();
+        if (window.parent.window.callEnded != undefined) {
+            window.parent.window.callEnded();
+        } else {
+            window.close();
+        }
     })
 })
 
@@ -103,7 +107,11 @@ document.getElementById("closebtn").addEventListener("click", () => {
     for (let i in mediaConnections) {
         mediaConnections[i].close();
     }
-    window.close();
+    if (window.parent.window.callEnded != undefined) {
+        window.parent.window.callEnded();
+    } else {
+        window.close();
+    }
 })
 
 let users = await fetch("/api/v1/chat/callusers?" + new URLSearchParams({ callid: callid }).toString(), {

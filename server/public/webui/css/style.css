@@ -609,7 +609,7 @@ nav {
     text-align: center;
 }
 
-.callOutStatus {
+.call {
     position: fixed;
     top: 0px;
     left: 0px;
@@ -621,4 +621,31 @@ nav {
     line-height: 100%;
     font-size: 5vw;
     z-index: 99999999;
+}
+
+.call .cancel {
+    position: absolute;
+    bottom: 20px;
+    left: calc(50% - 75px);
+    width: 150px;
+    height: 50px;
+    border-radius: 30px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.096);
+    color: white;
+    transition: 200ms;
+    user-select: none;
+}
+
+.call iframe {
+    position: absolute;
+    top: 40px;
+    left: 0px;
+    width: 100%;
+    height: calc(100% - 40px);
+    border: none;
+}
+
+.call .cancel {
+    background-color: rgba(255, 255, 255, 0.199);
 }

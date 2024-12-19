@@ -1,6 +1,8 @@
-let userinfo = window.userinfo;
 import { io } from "./socket.io.esm.min.js";
-import * as call from "./call.js"
+import * as call from "./call.js";
+import { getUserInfo } from "./auth.js";
+
+let userinfo = (await getUserInfo()).data;
 
 
 const socket = io(location.host, {
@@ -20,6 +22,11 @@ socket.on("disconnect", () => {
 });
 
 socket.on("incomingcall", ({callid, username, chatid}) => {
+    socket.once("cancelledcall", (data) => {
+        if (data.callid == callid) {
+            call.cancelCallHanlder();      
+        }
+    })
     call.incomingCallHandler(callid, username, (accepted, reason) => {
         //send back response from popup, if true, the other peer should start opening the callui with the provided callid, if false the other peer should show a message about the declined call
         socket.emit("response" + callid, {accepted, reason});
@@ -81,6 +88,7 @@ function createchat({ isGroupChat, chatName, participants }) {
 }
 
 function addPrivateChat(userid) {
+    console.log(userinfo);
     let data = {
         isGroupChat: false,
         chatName: "",

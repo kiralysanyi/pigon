@@ -42,9 +42,19 @@ let incomingCallHandler = (callID, userName, cb = (accepted, reason) => { }) => 
         stopRingtone();
         cb(true, "Accepted call");
 
-        //open callUI
+        inCall = true;
+        let callDisplay = document.createElement("div");
+        callDisplay.classList.add("call");
+        document.body.appendChild(callDisplay);
 
-        window.open("./callUI.html#" + callID);
+        //open callUI in an iframe
+        callDisplay.innerHTML = `<iframe src="/app/webui/callUI.html#${callID}"></iframe>`
+        //add close function to window object
+        window.callEnded = () => {
+            callDisplay.remove();
+            window.callEnded = undefined;
+            inCall = false;
+        }
     })
 
     playRingtone();
@@ -58,10 +68,14 @@ let cancelCallHanlder = () => {
 }
 
 let call = async (chatID, socket) => {
-    let statusDisplay = document.createElement("div");
-    statusDisplay.classList.add("callOutStatus");
-    document.body.appendChild(statusDisplay);
-    statusDisplay.innerHTML = "Calling..."
+    let callDisplay = document.createElement("div");
+    callDisplay.classList.add("call");
+    document.body.appendChild(callDisplay);
+    let cancelButton = document.createElement("button");
+    cancelButton.classList.add("cancel");
+    cancelButton.innerHTML = "Cancel";
+    callDisplay.innerHTML = "Calling...";
+    callDisplay.appendChild(cancelButton);
     inCall = true;
     let response = await fetch("/api/v1/chat/prepareCall", {
         method: "POST",
@@ -69,7 +83,7 @@ let call = async (chatID, socket) => {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({chatid: chatID})
+        body: JSON.stringify({ chatid: chatID })
     })
 
     let data = await response.json();
@@ -85,23 +99,33 @@ let call = async (chatID, socket) => {
 
     socket.emit("call", data);
 
+    cancelButton.addEventListener("click", () => {
+        socket.emit("cancelcall", data)
+        callDisplay.remove();
+    })
+
     //show callui
 
     socket.once("callresponse" + data["callid"], (response) => {
         console.log(response)
         if (response["accepted"] == false) {
             //remove calling display and do nothing
-            statusDisplay.innerHTML = response["reason"];
+            callDisplay.innerHTML = response["reason"];
             setTimeout(() => {
-                statusDisplay.remove();
+                callDisplay.remove();
             }, 2000);
             return;
         }
 
-        //remove calling display and open callUI.html in new page
-        statusDisplay.remove();
-        window.open("/app/webui/callUI.html#" + data["callid"]);
-        inCall = false;
+        //open callUI in an iframe
+        inCall = true;
+        callDisplay.innerHTML = `<iframe src="/app/webui/callUI.html#${data["callid"]}"></iframe>`
+        //add close function to window object
+        window.callEnded = () => {
+            callDisplay.remove();
+            window.callEnded = undefined;
+            inCall = false;
+        }
     })
 
 }

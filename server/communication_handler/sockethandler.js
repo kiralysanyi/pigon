@@ -83,8 +83,11 @@ let connectionHandler = (socket) => {
         called = (removeValue(called, callerID))[0];
         console.log("Called: ", called);
         sendDataToSockets(called, "incomingcall", {callid, username, chatid});
+        socket.once("cancelcall", ({callid, username, chatid}) => {
+            sendDataToSockets(called, "cancelledcall", {callid, username, chatid})
+        })
         let targetSockets = getSocketsForUser(called);
-        if (targetSockets == undefined) {
+        if (targetSockets == undefined || Object.keys(targetSockets).length == 0) {
             sendPushNotification(called, "Missed Call", "You missed a call from: " + username);
             socket.emit("callresponse" + callid, {accepted: false, reason: "Not available"});
             return;

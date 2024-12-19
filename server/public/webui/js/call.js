@@ -100,6 +100,7 @@ let call = async (chatID, socket) => {
     socket.emit("call", data);
 
     cancelButton.addEventListener("click", () => {
+        inCall = false;
         socket.emit("cancelcall", data)
         callDisplay.remove();
     })

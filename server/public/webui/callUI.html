@@ -67,6 +67,42 @@
             transform: translate(-50%, 0%);
 
         }
+
+        #videocontainer {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: calc(100% - 80px);
+            background-color: black;
+            display: none;
+        }
+
+        #videocontainer video {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+        }
+
+        #closebtn {
+            display: none;
+        }
+
+        #screenbtn {
+            display: none;
+        }
+
+        .selfView {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            z-index: 10000;
+        }
     </style>
 </head>
 <body>
@@ -74,10 +110,17 @@
         <img id="calledUserImage">
         <div id="calledUserName"></div>
         <div id="duration"></div>
+        <div id="videocontainer"></div>
     </div>
     <div id="dock">
         <div class="btn" id="closebtn" style="background-color: red;">
             <i class="fa-solid fa-phone-slash"></i>
+        </div>
+        <div class="btn" id="videobtn">
+            <i class="fa-solid fa-video-slash"></i>
+        </div>
+        <div class="btn" id="screenbtn">
+            <i class="fa-solid fa-display"></i>
         </div>
     </div>
 </body>

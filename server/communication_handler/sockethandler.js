@@ -88,7 +88,7 @@ let connectionHandler = (socket) => {
         })
         let targetSockets = getSocketsForUser(called);
         if (targetSockets == undefined || Object.keys(targetSockets).length == 0) {
-            sendPushNotification(called, "Missed Call", "You missed a call from: " + username);
+            sendPushNotification(called, "Missed Call", {type: "text", content: "You missed a call from: " + username});
             socket.emit("callresponse" + callid, {accepted: false, reason: "Not available"});
             return;
         }

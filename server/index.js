@@ -152,6 +152,21 @@ app.get("/api/v1/push/pubkey", (req, res) => {
 })
 
 let subscriptions = {}
+const subscriptions_path = __dirname + "/subscriptions.json";
+
+if (fs.existsSync(subscriptions_path) == false) {
+    fs.writeFileSync(subscriptions_path, "{}");
+}
+
+try {
+    subscriptions = JSON.parse(fs.readFileSync(subscriptions_path));
+} catch (error) {
+    console.error("Failed to read saved subscriptions", error);
+}
+
+let saveSubscriptions = () => {
+    fs.writeFileSync(subscriptions_path, JSON.stringify(subscriptions));
+}
 
 // Create route for allow client to subscribe to push notification.
 app.use("/api/v1/push/subscribe", authMiddleWare)
@@ -167,6 +182,7 @@ app.post('/api/v1/push/subscribe', async (req, res) => {
     const subscription = req.body;
     console.log(subscription);
     subscriptions[userdata["userID"]][userdata.deviceID] = subscription;
+    saveSubscriptions();
     res.status(201).json({});
 })
 
@@ -190,6 +206,7 @@ let unsubscribe = (userID, deviceID) => {
     console.log("Unsubscribe: ", userID, deviceID);
     console.log(subscriptions[userID][deviceID]);
     delete subscriptions[userID][deviceID];
+    saveSubscriptions();
 }
 
 

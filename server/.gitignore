@@ -2,3 +2,4 @@ node_modules
 pfp
 chatfiles
 .env
+subscriptions.json

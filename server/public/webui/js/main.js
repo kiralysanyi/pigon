@@ -191,7 +191,7 @@ let renderChat = (page = 1) => {
         credentials: "include"
     }).then(async (response) => {
         let res = await response.json();
-        let createElement = (message, senderID, senderName, date) => {
+        let createElement = (message, senderID, senderName, date, read) => {
             let element = document.createElement("div");
             element.classList.add("msg");
             let element_namedisplay = document.createElement("div");
@@ -221,6 +221,13 @@ let renderChat = (page = 1) => {
                 element_msg.innerHTML = `<video src="${message.content}" controls loop autoplay muted></video>`
             }
 
+            if (read == false) {
+                element_msg.style.backgroundColor = "blue";
+                setTimeout(() => {
+                    element_msg.style.backgroundColor = "rgba(0, 0, 0, 0.384)";
+                }, 30*1000);
+            }
+
             return element;
         }
 
@@ -231,7 +238,7 @@ let renderChat = (page = 1) => {
                 let message = JSON.parse(res[i]["message"]);
                 let senderID = res[i]["senderid"];
                 let senderName = res[i]["username"];
-                msgcontainer.appendChild(createElement(message, senderID, senderName, res[i]["date"]))
+                msgcontainer.appendChild(createElement(message, senderID, senderName, res[i]["date"], res[i]["read"]))
             }
             setTimeout(() => {
                 msgcontainer.scrollTop = msgcontainer.scrollHeight;

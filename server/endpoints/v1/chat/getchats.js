@@ -1,11 +1,11 @@
 const { sqlQuery } = require("../../../things/db");
 const { verifyToken } = require("../../../things/jwt");
 
-const {removeValue} = require("../../../things/helper");
-
+const { removeValue } = require("../../../things/helper");
+const pageSize = 100;
 
 let getMessagesHandler = async (req, res) => {
-    
+
     /*
     {
             userID: 69,
@@ -37,9 +37,11 @@ let getMessagesHandler = async (req, res) => {
         return;
     }
 
-    //1 page means 50 messages
-    //If you have 3 pages (150 messages) then page 1 will be the last 50 messages, page 2 will be the previous 50 messages, etc.
-    //This API should not provide more than 50 messages
+    let lastReadMessage = result[0]["lastReadMessage"];
+
+    //1 page means x messages
+    //If you have 3 pages (3*x messages) then page 1 will be the last x messages, page 2 will be the previous x messages, etc.
+    //This API should not provide more than x messages
 
     let page;
 
@@ -51,12 +53,28 @@ let getMessagesHandler = async (req, res) => {
 
     let offset = 0;
     if (page > 1) {
-        offset = (50 * page) - 50;
+        offset = (pageSize * page) - pageSize;
     }
 
     console.log(page, offset);
     try {
-        let result = await sqlQuery(`SELECT \`senderid\`, \`message\`, \`date\`, users.username FROM messages LEFT JOIN users ON messages.senderid = users.id WHERE cancelled = 0 AND chatid = ${req.query.chatid} ORDER BY \`date\` DESC LIMIT 50 OFFSET ${offset};`);
+        let result = await sqlQuery(`SELECT messages.id AS messageID, \`senderid\`, \`message\`, \`date\`, users.username FROM messages LEFT JOIN users ON messages.senderid = users.id WHERE cancelled = 0 AND chatid = ${req.query.chatid} ORDER BY \`date\` DESC LIMIT ${pageSize} OFFSET ${offset};`);
+        if (page == 1) {
+            let latestmessage = 0;
+            for (let i in result) {
+                if (result[i]["messageID"] > latestmessage) {
+                    latestmessage = result[i]["messageID"];
+                }
+                if (result[i]["messageID"] > lastReadMessage) {
+                    result[i]["read"] = false;
+                } else {
+                    result[i]["read"] = true;
+                }
+            };
+            await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${latestmessage} WHERE userID=${userdata.userID} AND chatid=${req.query.chatid}`);
+
+        }
+
         res.json(result);
         console.log(result);
     } catch (error) {

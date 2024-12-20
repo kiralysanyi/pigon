@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 15, 2024 at 12:00 AM
+-- Generation Time: Dec 20, 2024 at 03:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -112,7 +112,8 @@ CREATE TABLE `messages` (
 
 CREATE TABLE `user-chat` (
   `userID` int(10) NOT NULL,
-  `chatid` int(10) NOT NULL
+  `chatid` int(10) NOT NULL,
+  `lastReadMessage` int(255) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

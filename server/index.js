@@ -65,10 +65,6 @@ const userinfoHandler = require("./endpoints/v1/userinfo").userinfoHandler
 app.use("/api/v1/auth/userinfo", authMiddleWare);
 app.get("/api/v1/auth/userinfo", userinfoHandler)
 
-const logoutHandler = require("./endpoints/v1/logout").logoutHandler;
-app.use("/api/v1/auth/logout", authMiddleWare);
-app.get("/api/v1/auth/logout", logoutHandler);
-
 const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
 app.use("/api/v1/auth/removedevice", authMiddleWare);
 app.delete("/api/v1/auth/removedevice", removedeviceHandler);
@@ -155,11 +151,12 @@ app.get("/api/v1/push/pubkey", (req, res) => {
     });
 })
 
-const subscriptions = {}
+let subscriptions = {}
 
 // Create route for allow client to subscribe to push notification.
 app.use("/api/v1/push/subscribe", authMiddleWare)
 app.post('/api/v1/push/subscribe', async (req, res) => {
+    console.log("Subscribe: ", req.userdata);
 
     let userdata = req.userdata;
 
@@ -188,6 +185,24 @@ let sendPushNotification = (target, title, message) => {
         });
     }
 }
+
+let unsubscribe = (userID, deviceID) => {
+    console.log("Unsubscribe: ", userID, deviceID);
+    console.log(subscriptions[userID][deviceID]);
+    delete subscriptions[userID][deviceID];
+}
+
+
+app.use("/api/v1/auth/logout", authMiddleWare);
+
+app.use("/api/v1/auth/logout", (req, res, next) => {
+    let userdata = req.userdata;
+    unsubscribe(userdata.userID, userdata.deviceID);
+    next();
+})
+
+const logoutHandler = require("./endpoints/v1/logout").logoutHandler;
+app.get("/api/v1/auth/logout", logoutHandler);
 
 
 //socket.io things

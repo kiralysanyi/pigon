@@ -33,6 +33,8 @@ self.addEventListener('push', function (e) {
     data.title,
     {
       body: data.body,
+      badge: "/app/favicon.ico",
+      icon: "/app/pigonicon.png"
     }
   );
 })

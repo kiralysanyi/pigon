@@ -308,10 +308,16 @@ let renderChatsSB = async () => {
         if (chats[i]["groupchat"] == 1) {
             elementPfp.src = "group.png"
         }
+
+        if (chats[i]["hasUnreadMessages"] == true) {
+            element.style.backgroundColor = "blue";
+        }
+
         element.innerHTML = chats[i]["name"];
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);
         element.addEventListener("click", async () => {
+            element.style.backgroundColor = "rgba(255, 255, 255, 0.151)";
             document.getElementById("callbtn").style.display = "none";
             document.getElementById("adduserbtn").style.display = "none";
             document.getElementById("delgroupbtn").style.display = "none";
@@ -436,6 +442,14 @@ socket.on("message", (data) => {
 
     if (selectedchat == data["chatID"]) {
         addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], data["message"]["content"], data["message"]["type"]);
+        socket.emit("setLastRead", {
+            chatID: data["chatID"],
+            messageID: data["messageID"]
+        })
+    }
+
+    if (selectedchat != data["chatID"] && data["senderID"] != userinfo["id"]) {
+        document.getElementById("chat" + data["chatID"]).style.backgroundColor = "blue";
     }
 })
 

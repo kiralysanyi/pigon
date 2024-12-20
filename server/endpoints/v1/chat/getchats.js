@@ -117,10 +117,23 @@ let getChatsHandler = async (req, res) => {
     let userdata = verificationResponse.data;
 
     try {
-        let result = await sqlQuery(`SELECT chatid, name, participants, groupchat, initiator FROM \`chats\` INNER JOIN \`user-chat\` ON \`chats\`.\`id\`=\`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=${userdata.userID}`);
-
+        let result = await sqlQuery(`SELECT \`user-chat\`.\`lastReadMessage\` AS latestRead, chatid, name, participants, groupchat, initiator FROM \`chats\` INNER JOIN \`user-chat\` ON \`chats\`.\`id\`=\`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=${userdata.userID}`);
         for (let i in result) {
+
             result[i].participants = JSON.parse(result[i]["participants"]);
+            let latestmessageinchat = await sqlQuery(`SELECT id FROM messages WHERE chatid=${result[i]["chatid"]} ORDER BY id DESC LIMIT 1`);
+            if (latestmessageinchat.length > 0) {
+                latestmessageinchat = latestmessageinchat[0]["id"];
+                console.log("Latest:", latestmessageinchat);
+                if (latestmessageinchat > result[i]["latestRead"]) {
+                    result[i]["hasUnreadMessages"] = true;
+                } else {
+                    result[i]["hasUnreadMessages"] = false;
+                }
+            } else {
+                result[i]["hasUnreadMessages"] = false;
+            }
+
             if (result[i].groupchat == 0) {
                 let id = removeValue(result[i].participants, userdata.userID)[0];
                 let displayName;

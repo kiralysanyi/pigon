@@ -101,6 +101,23 @@ let connectionHandler = (socket) => {
                 socket.emit("callresponse" + callid, {accepted, reason})
             })
         }
+    });
+
+    socket.on("setLastRead", async ({chatID,messageID}) => {
+        let userID = socket.userInfo.userID;
+        console.log(userID, " read ", messageID);
+        setTimeout(async () => {
+            try {
+                await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${messageID} WHERE userID=${userID} AND chatid=${chatID}`);
+            } catch (error) {
+                console.log("Probabbly deadlock again for fuck's sake, anyway, lets try again xD");
+                try {
+                    await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${messageID} WHERE userID=${userID} AND chatid=${chatID}`);
+                } catch (error) {
+                    console.log("I give up");
+                }
+            }
+        }, 1000);
     })
 
     socket.on("message", async ({ chatID, message }) => {
@@ -125,6 +142,15 @@ let connectionHandler = (socket) => {
 
             await sqlQuery(`INSERT INTO messages (chatid, senderid, message) VALUES ('${chatID}','${senderID}','${JSON.stringify(message)}')`);
 
+            let latestmessageinchat = await sqlQuery(`SELECT id FROM messages WHERE chatid=${chatID} ORDER BY id DESC LIMIT 1`);
+            if (latestmessageinchat.length > 0) {
+                latestmessageinchat = latestmessageinchat[0]["id"];
+                await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${latestmessageinchat} WHERE userID=${senderID} AND chatid=${chatID}`);
+            } else {
+                latestmessageinchat = 0;
+            }
+
+
             let toNotify = []
 
             let result = await sqlQuery(`SELECT participants FROM chats WHERE id=${chatID}`);
@@ -132,7 +158,7 @@ let connectionHandler = (socket) => {
             toNotify = JSON.parse(result[0]["participants"]);
 
             for (let i in toNotify) {
-                sendDataToSockets(toNotify[i], "message", JSON.stringify({ chatID, senderID, message, senderName: senderName }));
+                sendDataToSockets(toNotify[i], "message", JSON.stringify({ chatID, senderID, message, senderName: senderName, messageID: latestmessageinchat }));
                 if (toNotify[i] != senderID) {
                     sendPushNotification(toNotify[i], senderName, message);
                 }

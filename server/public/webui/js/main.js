@@ -1,7 +1,7 @@
 import * as auth from "./auth.js";
 import { modal } from "./modal.js";
 import { parseUserAgent } from "./useragent-parser.js";
-import { removeValue, sanitizeInput, decodeHTML } from "./utils.js";
+import { removeValue, sanitizeInput, decodeHTML, escapeJsonControlCharacters } from "./utils.js";
 import { addPrivateChat, sendFile, sendMessage, socket } from "./chat.js";
 
 /*
@@ -235,7 +235,7 @@ let renderChat = (page = 1) => {
             currentPage = 1;
             msgcontainer.innerHTML = "";
             for (let i = res.length - 1; i >= 0; i--) {
-                let message = JSON.parse(res[i]["message"]);
+                let message = JSON.parse(escapeJsonControlCharacters(res[i]["message"]));
                 let senderID = res[i]["senderid"];
                 let senderName = res[i]["username"];
                 msgcontainer.appendChild(createElement(message, senderID, senderName, res[i]["date"], res[i]["read"]))
@@ -417,7 +417,6 @@ let addMessageToContainer = (chatID, senderID, name, message, type) => {
     }
 
     if (type == "text") {
-        message = sanitizeInput(message);
         element_msg.innerHTML = decodeHTML(message);
     }
 

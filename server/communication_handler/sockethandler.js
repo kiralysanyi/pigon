@@ -38,7 +38,7 @@ let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }
 
 const { sqlQuery } = require("../things/db")
 
-const { removeValue } = require("../things/helper");
+const { removeValue, escapeJsonControlCharacters } = require("../things/helper");
 
 function sanitizeInput(input) {
     // Replace characters that could break JSON
@@ -137,10 +137,14 @@ let connectionHandler = (socket) => {
             return;
         }
 
+        let rawMessage = message.content;
+
         try {
             //sanitize
+            
             if (message.type == "text") {
                 message.content = sanitizeInput(message.content);
+                message.content = escapeJsonControlCharacters(message.content);
             }
 
             await sqlQuery(`INSERT INTO messages (chatid, senderid, message) VALUES ('${chatID}','${senderID}','${JSON.stringify(message)}')`);
@@ -163,6 +167,9 @@ let connectionHandler = (socket) => {
             for (let i in toNotify) {
                 sendDataToSockets(toNotify[i], "message", JSON.stringify({ chatID, senderID, message, senderName: senderName, messageID: latestmessageinchat }));
                 if (toNotify[i] != senderID) {
+                    if (message.type == "text") {
+                        message.content = rawMessage;
+                    }
                     sendPushNotification(toNotify[i], senderName, message);
                 }
             }

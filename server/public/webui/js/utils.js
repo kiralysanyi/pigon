@@ -39,5 +39,19 @@ function stopRingtone() {
     audioElement.pause();
 }
 
+function escapeJsonControlCharacters(jsonString) {
+    return jsonString.replace(/[\n\r\t\b\f\v]/g, match => {
+        switch (match) {
+            case '\n': return '\\n';
+            case '\r': return '\\r';
+            case '\t': return '\\t';
+            case '\b': return '\\b';
+            case '\f': return '\\f';
+            case '\v': return '\\v';
+            default: return match;
+        }
+    });
+}
 
-export {removeValue, sanitizeInput, decodeHTML, playRingtone, stopRingtone}
+
+export {removeValue, sanitizeInput, decodeHTML, playRingtone, stopRingtone, escapeJsonControlCharacters}

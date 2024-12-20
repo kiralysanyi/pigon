@@ -106,6 +106,9 @@ let connectionHandler = (socket) => {
     socket.on("setLastRead", async ({chatID,messageID}) => {
         let userID = socket.userInfo.userID;
         console.log(userID, " read ", messageID);
+        //TODO: productionből kivenni a logolást mert ha ezt meglátja valamelyik nagyokos falnak megy
+
+        //Trying to evade deadlock
         setTimeout(async () => {
             try {
                 await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${messageID} WHERE userID=${userID} AND chatid=${chatID}`);

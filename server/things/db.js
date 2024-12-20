@@ -19,6 +19,7 @@ const pool = mysql.createPool({
 
 
 //TODO: ez így szuboptimális, de jóvanazúgy egyelőre, majd fixeljük
+//NOTE: nem fogjuk...
 
 const sqlQuery = async (query) => {
     return new Promise((resolved, reject) => {

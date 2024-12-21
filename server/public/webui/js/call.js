@@ -110,6 +110,7 @@ let call = async (chatID, socket) => {
     socket.once("callresponse" + data["callid"], (response) => {
         console.log(response)
         if (response["accepted"] == false) {
+            inCall = false;
             //remove calling display and do nothing
             callDisplay.innerHTML = response["reason"];
             setTimeout(() => {

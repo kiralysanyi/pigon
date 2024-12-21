@@ -98,6 +98,9 @@ let connectionHandler = (socket) => {
             socket.emit("callresponse" + callid, {accepted: false, reason: "Not available"});
             return;
         }
+
+        let targetSockets = getSocketsForUser(called)
+
         for (let i in targetSockets) {
             targetSockets[i].once("response" + callid, ({accepted, reason}) => {
                 for (let x in targetSockets) {

@@ -454,6 +454,20 @@ socket.on("message", (data) => {
             chatID: data["chatID"],
             messageID: data["messageID"]
         })
+    } else {
+        let notification = new Notification(data["senderName"], {badge: "/favicon.ico", icon: "/app/webui/pigonicon.png", body: data["message"]["content"]});
+        notification.addEventListener("click", () => {
+            document.getElementById("chat" + data["chatID"]).click();
+            window.focus();
+        })
+    }
+
+    if (document.hasFocus() == false) {
+        let notification = new Notification(data["senderName"], {badge: "/favicon.ico", icon: "/app/webui/pigonicon.png", body: data["message"]["content"]});
+        notification.addEventListener("click", () => {
+            document.getElementById("chat" + data["chatID"]).click();
+            window.focus();
+        })
     }
 
     if (selectedchat != data["chatID"] && data["senderID"] != userinfo["id"]) {

@@ -177,7 +177,7 @@ let connectionHandler = (socket) => {
                         message.content = rawMessage;
                     }
                     if (isUserOnline(toNotify[i]) == false) {
-                        sendPushNotification(toNotify[i], senderName, message);
+                        sendPushNotification(toNotify[i], senderName, message, "/app/webui/index.html#" + chatID);
                     }
                 }
             }

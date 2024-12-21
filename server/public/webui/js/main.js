@@ -12,7 +12,6 @@ if (isLoggedIn == false) {
     */
 
 
-
 let userinfo = await auth.getUserInfo();
 if (userinfo.success == false) {
     location.href = "/app/login.html"
@@ -225,7 +224,7 @@ let renderChat = (page = 1) => {
                 element_msg.style.backgroundColor = "blue";
                 setTimeout(() => {
                     element_msg.style.backgroundColor = "rgba(0, 0, 0, 0.384)";
-                }, 30*1000);
+                }, 30 * 1000);
             }
 
             return element;
@@ -386,6 +385,16 @@ let renderChatsSB = async () => {
         })
     }
 
+    //open a chat if defined in the location.hash
+    let chatToOpen = location.hash.substring(1);
+    if (chatToOpen != "") {
+        try {
+            document.getElementById("chat" + chatToOpen).click();
+        } catch (error) {
+            console.error("Chat not found: ", chatToOpen)
+            location.hash = "";
+        }
+    }
 };
 
 renderChatsSB();

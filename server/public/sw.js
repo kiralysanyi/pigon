@@ -29,15 +29,36 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('push', function (e) {
   const data = e.data.json();
-  self.registration.showNotification(
-    data.title,
-    {
-      body: data.body,
-      badge: "/app/favicon.ico",
-      icon: "/app/pigonicon.png"
+  self.registration.showNotification(data.title, {
+    body: data.body,
+    badge: "/app/favicon.ico",
+    icon: "/app/pigonicon.png",
+    data: {
+      url: data.url // Add a custom property to hold the URL
     }
-  );
-})
+  });
+});
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close(); // Close the notification when clicked
+  const url = event.notification.data.url;
+  if (url) {
+    event.waitUntil(
+      clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+        // Check if the URL is already open
+        for (const client of clientList) {
+          if (client.url === url && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // If the URL is not open, open a new tab
+        if (clients.openWindow) {
+          return clients.openWindow(url);
+        }
+      })
+    );
+  }
+});
 
 self.addEventListener('fetch', (event) => {
   // We only want to call event.respondWith() if this is a navigation request

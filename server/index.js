@@ -186,17 +186,21 @@ app.post('/api/v1/push/subscribe', async (req, res) => {
     res.status(201).json({});
 })
 
-let sendPushNotification = (target, title, message) => {
+let sendPushNotification = (target, title, message, url) => {
     let payload = { title, body: message.content };
     if (message.type != "text") {
-        payload.body = "New message"
+        payload.body = "New message";
+    }
+
+    if (url != undefined) {
+        payload.url = url;
     }
 
     payload = JSON.stringify(payload);
 
     console.log(subscriptions, subscriptions[target], target);
     for (let i in subscriptions[target]) {
-        webpush.sendNotification(subscriptions[target][i], payload).catch((err) => {
+        webpush.sendNotification(subscriptions[target][i], payload, {urgency: "high"}).catch((err) => {
             console.error(err);
         });
     }

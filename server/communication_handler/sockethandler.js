@@ -25,6 +25,18 @@ let sendDataToSockets = (userID, channel, data) => {
     }
 }
 
+let isUserOnline = (userID) => {
+    if (sockets[userID] == undefined) {
+        return false;
+    }
+
+    if (Object.keys(sockets[userID]).length > 0) {
+        return true;
+    } else {
+        return false;
+    }
+} 
+
 let getSocketsForUser = (userID) => {
     return sockets[userID]
 }
@@ -49,11 +61,6 @@ function sanitizeInput(input) {
         .replace(/&/g, '&amp;') // Escape &
         .replace(/'/g, '&#39;'); // Escape single quotes
 }
-
-/**
- * 
- * @param {Socket} socket 
- */
 
 let getCallUsers = (callid) => {}
 
@@ -86,8 +93,7 @@ let connectionHandler = (socket) => {
         socket.once("cancelcall", ({callid, username, chatid}) => {
             sendDataToSockets(called, "cancelledcall", {callid, username, chatid})
         })
-        let targetSockets = getSocketsForUser(called);
-        if (targetSockets == undefined || Object.keys(targetSockets).length == 0) {
+        if (isUserOnline(called) == false) {
             sendPushNotification(called, "Missed Call", {type: "text", content: "You missed a call from: " + username});
             socket.emit("callresponse" + callid, {accepted: false, reason: "Not available"});
             return;
@@ -133,7 +139,7 @@ let connectionHandler = (socket) => {
         }
 
         if (message.type == undefined || message.content == undefined) {
-            socket.emit("error", "Invalid message")
+            socket.emit("error", "Invalid message format. Expected: {type, content}")
             return;
         }
 
@@ -170,7 +176,9 @@ let connectionHandler = (socket) => {
                     if (message.type == "text") {
                         message.content = rawMessage;
                     }
-                    sendPushNotification(toNotify[i], senderName, message);
+                    if (isUserOnline(toNotify[i]) == false) {
+                        sendPushNotification(toNotify[i], senderName, message);
+                    }
                 }
             }
 

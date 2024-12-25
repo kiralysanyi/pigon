@@ -1,0 +1,55 @@
+.loadingScreen {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.822);
+    backdrop-filter: blur(4px);
+    z-index: 100000000000;
+}
+
+.loadingScreen .content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    background-color: rgb(34, 34, 34);
+}
+
+@keyframes loaderSpin {
+    0% {
+        transform: rotate(0deg)
+    }
+
+    0% {
+        transform: rotate(-360deg)
+    }
+}
+
+.loadingScreen .spinner {
+    width: 100px;
+    height: 100px;
+    background-color: transparent;
+    border-radius: 100%;
+    border: 10px solid transparent;
+    border-top: 10px solid rgb(0, 59, 148);
+    animation: 1s linear infinite loaderSpin;
+    position: absolute;
+    top: 20px;
+    left: calc(50% - 60px);
+}
+
+.loadingScreen .content span {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+}
+

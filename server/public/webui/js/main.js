@@ -1,3 +1,5 @@
+import { showLoadingScreen, hideLoadingScreen } from "./loadingScreen.js";
+showLoadingScreen("Loading application...");
 import * as auth from "./auth.js";
 import { modal } from "./modal.js";
 import { parseUserAgent } from "./useragent-parser.js";
@@ -255,10 +257,12 @@ let renderChat = (page = 1) => {
                 msgcontainer.prepend(createElement(message, senderID, senderName, res[i]["date"]))
             }
         }
+        hideLoadingScreen();
         console.log(res);
 
     }).catch((err) => {
         console.error(err);
+        hideLoadingScreen();
     })
 }
 
@@ -316,6 +320,8 @@ let renderChatsSB = async () => {
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);
         element.addEventListener("click", async () => {
+            showLoadingScreen("Loading chat...")
+            closeSidebar();
             element.style.backgroundColor = "rgba(255, 255, 255, 0.151)";
             document.getElementById("callbtn").style.display = "none";
             document.getElementById("adduserbtn").style.display = "none";
@@ -395,6 +401,7 @@ let renderChatsSB = async () => {
             location.hash = "";
         }
     }
+    hideLoadingScreen();
 };
 
 renderChatsSB();
@@ -582,3 +589,4 @@ document.getElementById("leavebtn").addEventListener("click", () => {
         }
     })
 })
+

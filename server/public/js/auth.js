@@ -93,7 +93,7 @@ async function getUserInfo(userID = null) {
     if (data.success) {
         console.log('User info retrieved', data.data);
     } else {
-        console.error('Failed to retrieve user info', data.data.message);
+        console.error('Failed to retrieve user info', data.message);
     }
     return data;
 }

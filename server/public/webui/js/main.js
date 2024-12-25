@@ -349,44 +349,57 @@ let renderChatsSB = async () => {
             window.selectedchat = selectedchat;
             document.getElementById("currentPfp_menu").src = elementPfp.src;
             document.getElementById("currentChatname_menu").innerHTML = chats[i]["name"];
-            (async () => {
-                for (let x in chats[i]["participants"]) {
-                    let pfpurl = "/api/v1/auth/pfp?id=" + chats[i]["participants"][x];
-                    let username = (await auth.getUserInfo(chats[i]["participants"][x])).data.username;
+            document.getElementById("chatInfo_participants").style.display = "none";
+            document.getElementById("chatInfo_userinfo").style.display = "none";
+            if (chats[i]["groupchat"] == 1) {
+                //render groupchat participants and user add/remove things;
+                document.getElementById("chatInfo_participants").style.display = "block";
+                (async () => {
+                    for (let x in chats[i]["participants"]) {
+                        let pfpurl = "/api/v1/auth/pfp?id=" + chats[i]["participants"][x];
+                        let username = (await auth.getUserInfo(chats[i]["participants"][x])).data.username;
 
-                    let element = document.createElement("div");
-                    element.classList.add("user");
-                    let img = document.createElement("img")
-                    img.src = pfpurl;
-                    element.innerHTML += username
-                    element.appendChild(img);
-                    document.getElementById("chatInfo_participants").appendChild(element);
-                    if (chats[i]["groupchat"] == 1) {
-                        if (chats[i]["initiator"] == userinfo.id) {
-                            contextMenu(element, ["Remove"], async (selected) => {
-                                if (selected == "Remove") {
-                                    console.log("Remove user from group");
-                                    fetch("/api/v1/chat/groupuser", {
-                                        method: "DELETE",
-                                        body: JSON.stringify({ chatid: chats[i]["chatid"], targetid: chats[i]["participants"][x] }),
-                                        credentials: "include",
-                                        headers: {
-                                            "Content-Type": "application/json"
-                                        }
-                                    }).then(async (res) => {
-                                        let response = await res.json();
-                                        if (response.success == true) {
-                                            await renderChatsSB();
-                                            console.log("chat" + chats[i]["chatid"]);
-                                            document.getElementById("chat" + chats[i]["chatid"]).click();
-                                        }
-                                    });
-                                }
-                            })
+                        let element = document.createElement("div");
+                        element.classList.add("user");
+                        let img = document.createElement("img")
+                        img.src = pfpurl;
+                        element.innerHTML += username
+                        element.appendChild(img);
+                        document.getElementById("chatInfo_participants").appendChild(element);
+                        if (chats[i]["groupchat"] == 1) {
+                            if (chats[i]["initiator"] == userinfo.id) {
+                                contextMenu(element, ["Remove"], async (selected) => {
+                                    if (selected == "Remove") {
+                                        console.log("Remove user from group");
+                                        fetch("/api/v1/chat/groupuser", {
+                                            method: "DELETE",
+                                            body: JSON.stringify({ chatid: chats[i]["chatid"], targetid: chats[i]["participants"][x] }),
+                                            credentials: "include",
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            }
+                                        }).then(async (res) => {
+                                            let response = await res.json();
+                                            if (response.success == true) {
+                                                await renderChatsSB();
+                                                console.log("chat" + chats[i]["chatid"]);
+                                                document.getElementById("chat" + chats[i]["chatid"]).click();
+                                            }
+                                        });
+                                    }
+                                })
+                            }
                         }
                     }
-                }
-            })()
+                })()
+            } else {
+                //show userinfo in private chats
+                document.getElementById("chatInfo_userinfo").style.display = "block";
+                let userid = (removeValue(chats[i]["participants"], userinfo["id"]))[0];
+                document.getElementById("chatInfo_userinfo").src = "userinfo.html#" + userid;
+
+            }
+
             renderChat();
         })
     }
@@ -462,7 +475,7 @@ socket.on("message", (data) => {
             messageID: data["messageID"]
         })
     } else {
-        let notification = new Notification(data["senderName"], {badge: "/favicon.ico", icon: "/app/webui/pigonicon.png", body: data["message"]["content"]});
+        let notification = new Notification(data["senderName"], { badge: "/favicon.ico", icon: "/app/webui/pigonicon.png", body: data["message"]["content"] });
         notification.addEventListener("click", () => {
             document.getElementById("chat" + data["chatID"]).click();
             window.focus();
@@ -470,7 +483,7 @@ socket.on("message", (data) => {
     }
 
     if (document.hasFocus() == false) {
-        let notification = new Notification(data["senderName"], {badge: "/favicon.ico", icon: "/app/webui/pigonicon.png", body: data["message"]["content"]});
+        let notification = new Notification(data["senderName"], { badge: "/favicon.ico", icon: "/app/webui/pigonicon.png", body: data["message"]["content"] });
         notification.addEventListener("click", () => {
             document.getElementById("chat" + data["chatID"]).click();
             window.focus();

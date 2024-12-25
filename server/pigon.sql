@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 20, 2024 at 03:38 PM
+-- Generation Time: Dec 25, 2024 at 06:01 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,7 +47,8 @@ CREATE TABLE `chats` (
   `name` varchar(255) NOT NULL,
   `participants` mediumtext NOT NULL,
   `initiator` int(10) NOT NULL,
-  `groupchat` tinyint(1) NOT NULL
+  `groupchat` tinyint(1) NOT NULL,
+  `lastInteraction` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -130,6 +131,19 @@ CREATE TABLE `userconfig` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `userinfo_extra`
+--
+
+CREATE TABLE `userinfo_extra` (
+  `userID` int(10) NOT NULL,
+  `fullname` varchar(255) NOT NULL,
+  `bio` longtext NOT NULL,
+  `chatbot` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -197,6 +211,13 @@ ALTER TABLE `user-chat`
 --
 ALTER TABLE `userconfig`
   ADD PRIMARY KEY (`userID`);
+
+--
+-- Indexes for table `userinfo_extra`
+--
+ALTER TABLE `userinfo_extra`
+  ADD UNIQUE KEY `userID_2` (`userID`),
+  ADD KEY `userID` (`userID`);
 
 --
 -- Indexes for table `users`
@@ -296,6 +317,12 @@ ALTER TABLE `user-chat`
 --
 ALTER TABLE `userconfig`
   ADD CONSTRAINT `user-config` FOREIGN KEY (`userID`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `userinfo_extra`
+--
+ALTER TABLE `userinfo_extra`
+  ADD CONSTRAINT `usrid` FOREIGN KEY (`userID`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

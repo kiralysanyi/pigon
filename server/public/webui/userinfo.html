@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Userinfo</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: rgb(39, 39, 39);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            row-gap: 30px;
+        }
+
+        #userimage {
+            width: 100px;
+            height: 100px;
+            border-radius: 100%;
+        }
+
+        .space {
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="space"></div>
+    <img id="userimage">
+    <h2 id="username">johnny</h2>
+    <p id="bio"></p>
+</body>
+<script type="module">
+    let userid = location.hash.substring(1);
+    let res = await fetch("/api/v1/auth/userinfo?userID=" + userid, {
+        credentials: "include"
+    })
+
+    let userinfo = await res.json();
+
+    document.getElementById("userimage").src = "/api/v1/auth/pfp?id=" + userid + "&smol=true";
+    document.getElementById("username").innerHTML = userinfo.data.username;
+
+    res = await fetch("/api/v1/auth/extrainfo?userID=" + userid, { credentials: "include" });
+    let userinfo_extra = await res.json();
+    if (userinfo_extra.success == true) {
+        document.getElementById("username").innerHTML = `${userinfo_extra["data"]["fullname"]} (${userinfo["data"]["username"]})`;
+        document.getElementById("bio").innerHTML = userinfo_extra["data"]["bio"];
+    }
+</script>
+
+</html>

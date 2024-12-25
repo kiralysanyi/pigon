@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User info - Settings</title>
+    <style>
+        body {
+            background-color: rgb(32, 32, 32);
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #container {
+            position: fixed;
+            top: 0px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            width: 700px;
+            padding: 10px;
+            background-color: rgb(61, 61, 61);
+            height: 100%;
+            overflow: auto;
+        }
+
+        .settings_group {
+            position: relative;
+            width: calc(100% - 50px);
+            height: auto;
+            margin-top: 10px;
+            margin-left: 10px;
+            background-color: rgb(31, 31, 31);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0px 0px 5px 5px rgb(68, 68, 68);
+
+        }
+
+        @media only screen and (max-width: 700px) {
+            #container {
+                width: 100%;
+            }
+        }
+
+        #goback {
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            padding: 0px;
+            user-select: none;
+            width: calc(100% - 20px);
+            transition: 200ms;
+        }
+
+        #goback:hover {
+            background-color: rgb(53, 53, 53);
+        }
+
+        button {
+            position: relative;
+            color: white;
+            border: none;
+            height: 40px;
+            border-radius: 15px;
+            transition: 200ms;
+            width: 140px;
+            background-color: rgb(0, 119, 255);
+        }
+
+        button:hover {
+            filter: saturate(4);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div onclick="location.href = 'index.html'" class="settings_group" id="goback">
+            <h2>Go back</h2>
+        </div>
+        <div class="settings_group">
+            <h1>Full name</h1>
+            <p>Your full name</p>
+            <input type="text" name="fullname" id="fullname">
+        </div>
+        <div class="settings_group">
+            <h1>Bio</h1>
+            <p>Your biography</p>
+            <textarea style="width: 100%; max-width: 100%; min-width: 100%;" name="bio" id="bio"></textarea>
+        </div>
+        <div class="settings_group">
+            <button id="submit">Update information</button>
+        </div>
+
+
+    </div>
+</body>
+<script type="module">
+    import { getUserInfo } from "./js/auth.js";
+    let userinfo = (await getUserInfo()).data;
+
+    let info = await fetch("/api/v1/auth/extrainfo?userID=" + userinfo["id"], { credentials: "include" })
+    info = await info.json();
+    console.log(info);
+    if (info.success == true) {
+        //load info to inputs
+        info = info.data;
+        console.log(info);
+        document.getElementById("fullname").value = info.fullname;
+        document.getElementById("bio").value = info.bio;
+    }
+
+    document.getElementById("submit").addEventListener("click", () => {
+        //send info to server
+        fetch("/api/v1/auth/extrainfo", {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify({
+                data: {
+                    fullname: document.getElementById("fullname").value,
+                    bio: document.getElementById("bio").value
+                }
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(async (res) => {
+            res = await res.json();
+            if (res.success == true) {
+                window.alert("Updated information successfuly.")
+            } else {
+                window.alert("Failed to update information");
+                console.error(res);
+            }
+        }).catch((err) => {
+            console.error(err);
+            window.alert("Failed to update information");
+        })
+    })
+</script>
+
+</html>

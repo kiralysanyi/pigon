@@ -58,11 +58,11 @@
             background-color: rgb(133, 0, 0);
         }
 
-        #webauthn, #changepass {
+        #webauthn, #changepass, #extra {
             background-color: rgb(0, 119, 255);
         }
 
-        #webauthn:hover, #changepass:hover {
+        #webauthn:hover, #changepass:hover, #extra:hover {
             background-color: rgb(0, 162, 255);
         }
 
@@ -78,6 +78,7 @@
     <div id="buttons">
         <button id="webauthn">Passkeys</button>
         <button id="changepass">Change password</button>
+        <button id="extra">Update user info</button>
         <button  id="deleteacc">Delete Account</button>
     </div>
 </body>
@@ -89,6 +90,10 @@
 
     document.getElementById("webauthn").addEventListener("click", () => {
         window.parent.location.href = "webauthn.html"
+    });
+
+    document.getElementById("extra").addEventListener("click", () => {
+        window.parent.location.href = "settings_extra.html"
     });
 
     document.getElementById("deleteacc").addEventListener("click", () => {

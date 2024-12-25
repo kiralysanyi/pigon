@@ -32,6 +32,20 @@ const sqlQuery = async (query) => {
     })
 }
 
+const rowExists = async (key, value, table, isValNumber = false) => {
+    console.log(key, value, table, isValNumber)
+    let query = `SELECT * FROM \`${table}\` WHERE \`${key}\`=\`${value}\` LIMIT 1`;
+    if (isValNumber == true) {
+        query = `SELECT * FROM \`${table}\` WHERE \`${key}\`=${value} LIMIT 1`
+    }
+    let result = await sqlQuery(query);
+    if (result.length == 1) {
+        return true;
+    } else {
+        return false
+    }
+}
+
 const userExists = (username) => {
     return new Promise(async (resolved) => {
         let response = await sqlQuery(`SELECT username FROM users WHERE username='${username}'`);
@@ -156,4 +170,4 @@ const checkIfUserInChat = async (chatid, userid) => {
     }
 }
 
-module.exports = { checkIfUserInChat, registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID }
+module.exports = { checkIfUserInChat, registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID, rowExists }

@@ -471,6 +471,19 @@ nav {
     background-color: rgba(255, 255, 255, 0.247);
 }
 
+#chatInfo_userinfo {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    width: 300px;
+    background-color: transparent;
+    height: 600px;
+    transform: translate(-50%, 0%);
+    overflow-y: auto;
+    border: none;
+    border-radius: 20px;
+}
+
 #chatInfo_participants {
     position: absolute;
     top: 100px;
@@ -480,6 +493,7 @@ nav {
     height: 400px;
     transform: translate(-50%, 0%);
     overflow-y: auto;
+    border-radius: 20px;
 }
 
 #chatInfo_participants .user {

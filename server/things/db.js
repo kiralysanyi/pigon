@@ -1,6 +1,5 @@
 const mysql = require("mysql2");
 const hashPass = require("./password").hashPass;
-const fs = require("fs");
 
 // Create the connection pool. The pool-specific settings are the defaults
 const pool = mysql.createPool({
@@ -15,30 +14,34 @@ const pool = mysql.createPool({
     queueLimit: 0,
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
-});
+    namedPlaceholders: true
+}).promise();
 
+
+const sqlQuery2 = async (query, fields) => {
+    return new Promise(async (resolved, reject) => {
+        try {
+            let result = await pool.query(query, fields);
+            console.log("BAZDMEGANYÁD", result);
+            resolved(result[0])
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 
 //TODO: ez így szuboptimális, de jóvanazúgy egyelőre, majd fixeljük
 //NOTE: nem fogjuk...
 
 const sqlQuery = async (query) => {
-    return new Promise((resolved, reject) => {
-        pool.query(query, (err, result) => {
-            if (err) {
-                reject(err);
-            }
-            resolved(result);
-        });
-    })
+    let result = await pool.query(query);
+    return result[0];
 }
 
-const rowExists = async (key, value, table, isValNumber = false) => {
-    console.log(key, value, table, isValNumber)
-    let query = `SELECT * FROM \`${table}\` WHERE \`${key}\`=\`${value}\` LIMIT 1`;
-    if (isValNumber == true) {
-        query = `SELECT * FROM \`${table}\` WHERE \`${key}\`=${value} LIMIT 1`
-    }
-    let result = await sqlQuery(query);
+
+const rowExists = async (key, value, table) => {
+    console.log(key, value, table)
+    let result = await sqlQuery2(`SELECT * FROM \`${table}\` WHERE \`${key}\`=?`, [value]);
     if (result.length == 1) {
         return true;
     } else {
@@ -170,4 +173,4 @@ const checkIfUserInChat = async (chatid, userid) => {
     }
 }
 
-module.exports = { checkIfUserInChat, registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID, rowExists }
+module.exports = { checkIfUserInChat, registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID, rowExists, sqlQuery2 }

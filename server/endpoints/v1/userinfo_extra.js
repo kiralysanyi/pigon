@@ -1,4 +1,4 @@
-const { sqlQuery, rowExists } = require("../../things/db")
+const { sqlQuery, rowExists, sqlQuery2 } = require("../../things/db")
 
 let getExtraInfoHandler = async (req, res) => {
     let targetID = req.query.userID;
@@ -55,17 +55,15 @@ let postExtraInfoHandler = async (req, res) => {
         return;
     }
 
-    let query;
-    if (await rowExists("userID", userdata.userID, "userinfo_extra", true) == true) {
+    if (await rowExists("userID", userdata.userID, "userinfo_extra") == true) {
         //update query
-        query = `UPDATE \`userinfo_extra\` SET fullname = '${data.fullname}', bio = '${data.bio}' WHERE userID = ${userdata.userID}`
+        await sqlQuery2(`UPDATE \`userinfo_extra\` SET fullname = ?, bio = ? WHERE userID = ?`, [data.fullname, data.bio, userdata.userID])
     } else {
         //insert query
-        query = `INSERT INTO \`userinfo_extra\` (userID, fullname, bio) VALUES ('${userdata.userID}', '${data.fullname}', \`${data.bio}\`)`;
+        await sqlQuery2(`INSERT INTO \`userinfo_extra\` (userID, fullname, bio) VALUES (?, ?, ?)`, [userdata.userID, data.fullname, data.bio]);
     }
 
     try {
-        await sqlQuery(query);
         res.json({
             success: true,
             message: "Successfuly updated information"

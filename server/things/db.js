@@ -22,7 +22,6 @@ const sqlQuery2 = async (query, fields) => {
     return new Promise(async (resolved, reject) => {
         try {
             let result = await pool.query(query, fields);
-            console.log("BAZDMEGANYÁD", result);
             resolved(result[0])
         } catch (error) {
             reject(error)

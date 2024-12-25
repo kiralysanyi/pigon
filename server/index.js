@@ -244,6 +244,7 @@ app.post("/api/v1/chat/create", require("./endpoints/v1/chat/createchat").create
 //call things
 const { createCallHandler, initCallJS } = require('./endpoints/v1/chat/call');
 const { removeValue } = require('./things/helper');
+const { versionHandler } = require('./endpoints/v1/cacheversion');
 
 let calls = {}
 
@@ -383,7 +384,7 @@ app.get("/api/v1/chat/getPeerIDs", (req, res) => {
 app.use("/api/v1/chat/prepareCall", authMiddleWare)
 app.post("/api/v1/chat/prepareCall", createCallHandler);
 
-
+app.get("/api/v1/cacheversion", versionHandler);
 
 
 server.listen(process.env.PORT, () => {

@@ -76,7 +76,6 @@ let getMessagesHandler = async (req, res) => {
         }
 
         res.json(result);
-        console.log(result);
     } catch (error) {
         console.error(error);
         res.status(500).json({

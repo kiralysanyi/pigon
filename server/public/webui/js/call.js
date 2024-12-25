@@ -44,16 +44,40 @@ let incomingCallHandler = (callID, userName, cb = (accepted, reason) => { }) => 
 
         inCall = true;
         let callDisplay = document.createElement("div");
+        callDisplay.id = "callDisplay"
         callDisplay.classList.add("call");
         document.body.appendChild(callDisplay);
 
         //open callUI in an iframe
-        callDisplay.innerHTML = `<iframe src="/app/webui/callUI.html#${callID}"></iframe>`
+        let frame = document.createElement("iframe");
+        frame.src = `/app/webui/callUI.html#${callID}`;
+        callDisplay.appendChild(frame);
+        //add minimize button
+        let minimizetogglebtn = document.createElement("div");
+        minimizetogglebtn.classList.add("minimizetogglebtn");
+        document.body.appendChild(minimizetogglebtn);
+        minimizetogglebtn.innerHTML = `<i class="fa-solid fa-down-left-and-up-right-to-center"></i>`;
+        let minimized = false
+        minimizetogglebtn.addEventListener("click", () => {
+            if (minimized == false) {
+                minimized = true;
+            } else {
+                minimized = false;
+            }
+            callDisplay.classList.toggle("callDisplay_minimized");
+            if (minimized == false) {
+                minimizetogglebtn.innerHTML = `<i class="fa-solid fa-down-left-and-up-right-to-center"></i>`;
+            } else {
+                minimizetogglebtn.innerHTML = `<i class="fa-solid fa-up-right-and-down-left-from-center"></i>`
+            }
+        })
+
         //add close function to window object
         window.callEnded = () => {
             callDisplay.remove();
             window.callEnded = undefined;
             inCall = false;
+            minimizetogglebtn.remove();
         }
     })
 
@@ -69,6 +93,7 @@ let cancelCallHanlder = () => {
 
 let call = async (chatID, socket) => {
     let callDisplay = document.createElement("div");
+    callDisplay.id = "callDisplay";
     callDisplay.classList.add("call");
     document.body.appendChild(callDisplay);
     let cancelButton = document.createElement("button");
@@ -121,12 +146,37 @@ let call = async (chatID, socket) => {
 
         //open callUI in an iframe
         inCall = true;
-        callDisplay.innerHTML = `<iframe src="/app/webui/callUI.html#${data["callid"]}"></iframe>`
+        callDisplay.innerHTML = "";
+        let frame = document.createElement("iframe");
+        frame.src = `/app/webui/callUI.html#${data["callid"]}`;
+        callDisplay.appendChild(frame);
+        //add minimize button
+        let minimizetogglebtn = document.createElement("div");
+        minimizetogglebtn.classList.add("minimizetogglebtn");
+        document.body.appendChild(minimizetogglebtn);
+        minimizetogglebtn.innerHTML = `<i class="fa-solid fa-down-left-and-up-right-to-center"></i>`;
+        let minimized = false
+        minimizetogglebtn.addEventListener("click", () => {
+            if (minimized == false) {
+                minimized = true;
+            } else {
+                minimized = false;
+            }
+            callDisplay.classList.toggle("callDisplay_minimized");
+            if (minimized == false) {
+                minimizetogglebtn.innerHTML = `<i class="fa-solid fa-down-left-and-up-right-to-center"></i>`;
+            } else {
+                minimizetogglebtn.innerHTML = `<i class="fa-solid fa-up-right-and-down-left-from-center"></i>`
+            }
+        })
+        
+
         //add close function to window object
         window.callEnded = () => {
             callDisplay.remove();
             window.callEnded = undefined;
             inCall = false;
+            minimizetogglebtn.remove();
         }
     })
 

@@ -621,6 +621,7 @@ nav {
     line-height: 100%;
     font-size: 5vw;
     z-index: 99999999;
+    transition: 500ms;
 }
 
 .call .cancel {
@@ -648,4 +649,24 @@ nav {
 
 .call .cancel {
     background-color: rgba(255, 255, 255, 0.199);
+}
+
+.minimizetogglebtn {
+    position: fixed;
+    top: 2.5px;
+    right: 2.5px;
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+    background-color: rgb(0, 190, 0);
+    z-index: 9999999999999;
+    text-align: center;
+    line-height: 35px;
+    user-select: none;
+}
+
+.callDisplay_minimized {
+    top: -50%;
+    left: 100%;
+    transform: scale(0,0);
 }

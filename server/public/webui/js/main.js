@@ -460,6 +460,7 @@ let addMessageToContainer = (chatID, senderID, name, message, type) => {
 }
 
 socket.on("message", (data) => {
+    renderChatsSB();
     //data:{"chatID":66,"senderID":17,"message":{"type":"text","content":"Sznia"}}
     data = JSON.parse(data);
     if (data["senderID"] == userinfo["id"]) {
@@ -516,6 +517,9 @@ msgform.addEventListener("submit", (e) => {
     msginput.value = "";
 
     sendMessage(selectedchat, message.content, message.type);
+    setTimeout(() => {
+        renderChatsSB();
+    }, 1000);
 
     console.log(message);
 })

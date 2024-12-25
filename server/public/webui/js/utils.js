@@ -53,5 +53,21 @@ function escapeJsonControlCharacters(jsonString) {
     });
 }
 
+/**
+ * Moves a specified value to the start of the array.
+ * If the value doesn't exist in the array, the array remains unchanged.
+ *
+ * @param {Array} array - The array to modify.
+ * @param {*} value - The value to move to the start.
+ * @returns {Array} - The modified array with the value at the start.
+ */
+function moveToStart(array, value) {
+    const index = array.indexOf(value);
+    if (index > -1) {
+        array.splice(index, 1); // Remove the value from its current position
+        array.unshift(value);  // Add the value to the start of the array
+    }
+    return array;
+}
 
-export {removeValue, sanitizeInput, decodeHTML, playRingtone, stopRingtone, escapeJsonControlCharacters}
+export {removeValue, sanitizeInput, decodeHTML, playRingtone, stopRingtone, escapeJsonControlCharacters, moveToStart}

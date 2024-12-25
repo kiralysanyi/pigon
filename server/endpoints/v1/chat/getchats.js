@@ -116,7 +116,7 @@ let getChatsHandler = async (req, res) => {
     let userdata = verificationResponse.data;
 
     try {
-        let result = await sqlQuery(`SELECT \`user-chat\`.\`lastReadMessage\` AS latestRead, chatid, name, participants, groupchat, initiator FROM \`chats\` INNER JOIN \`user-chat\` ON \`chats\`.\`id\`=\`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=${userdata.userID}`);
+        let result = await sqlQuery(`SELECT \`user-chat\`.\`lastReadMessage\` AS latestRead, chatid, name, participants, groupchat, initiator, lastInteraction FROM \`chats\` INNER JOIN \`user-chat\` ON \`chats\`.\`id\`=\`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=${userdata.userID} ORDER BY lastInteraction DESC`);
         for (let i in result) {
 
             result[i].participants = JSON.parse(result[i]["participants"]);

@@ -185,6 +185,7 @@ let connectionHandler = (socket) => {
                 }
             }
 
+            await sqlQuery(`UPDATE chats SET lastInteraction='${new Date().toISOString()}' WHERE id=${chatID}`);
         } catch (error) {
             console.error(error);
             socket.emit("error", error);

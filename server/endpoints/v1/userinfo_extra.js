@@ -61,7 +61,7 @@ let postExtraInfoHandler = async (req, res) => {
         query = `UPDATE \`userinfo_extra\` SET fullname = '${data.fullname}', bio = '${data.bio}' WHERE userID = ${userdata.userID}`
     } else {
         //insert query
-        query = `INSERT INTO \`userinfo_extra\` (fullname, bio) VALUES ('${data.fullname}', '${data.bio}')`;
+        query = `INSERT INTO \`userinfo_extra\` (userID, fullname, bio) VALUES ('${userdata.userID}', '${data.fullname}', '${data.bio}')`;
     }
 
     try {

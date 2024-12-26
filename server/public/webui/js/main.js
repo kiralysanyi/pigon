@@ -194,6 +194,12 @@ onvideopaste((file) => {
     }
 });
 
+onmediadrop((file, type) => {
+    if (selectedchat != undefined) {
+        sendFile(file, type, selectedchat);
+    }
+})
+
 
 currentChatInfodiv.addEventListener("click", () => {
     currentChatMenu.classList.remove("chatMenuClosed");
@@ -296,7 +302,7 @@ msgcontainer.addEventListener("scroll", (e) => {
 
 
 import { contextMenu } from "./contextmenu.js";
-import { onimagepaste, onvideopaste } from "./clipboard.js";
+import { onimagepaste, onmediadrop, onvideopaste } from "./clipboard.js";
 
 let renderChatsSB = async () => {
     sbcontent.innerHTML = "";

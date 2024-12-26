@@ -2,6 +2,7 @@ const {sqlQuery} = require("../../things/db")
 
 const devicesHandler = async (req, res) => {
     let userdata = req.userdata;
+    let currentDevID = userdata.deviceID;
     let userID = userdata["userID"];
     let devices = await sqlQuery(`SELECT deviceID, deviceInfo, registerDate FROM devices WHERE userID=?`, [userID]);
     if (devices.length == 0) {

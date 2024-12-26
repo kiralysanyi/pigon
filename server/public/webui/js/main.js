@@ -396,8 +396,10 @@ let renderChatsSB = async () => {
                 //show userinfo in private chats
                 document.getElementById("chatInfo_userinfo").style.display = "block";
                 let userid = (removeValue(chats[i]["participants"], userinfo["id"]))[0];
-                document.getElementById("chatInfo_userinfo").src = "userinfo.html#" + userid;
-
+                document.getElementById("chatInfo_userinfo").src = "";
+                setTimeout(() => {
+                    document.getElementById("chatInfo_userinfo").src = "userinfo.html#" + userid;
+                }, 500);
             }
 
             renderChat();

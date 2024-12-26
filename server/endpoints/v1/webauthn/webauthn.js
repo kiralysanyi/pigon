@@ -56,10 +56,8 @@ let registration = req.body.registration;
     let credentialString = JSON.stringify(credential);
     let userID = userdata["userID"];
     try {
-        let query = `INSERT INTO credentials (userID, credential, credentialID) VALUES ('${userID}','${credentialString}', '${credential["id"]}')`;
-        console.log(query);
-        await sqlQuery(query);
-        await sqlQuery(`UPDATE userconfig SET passkey = 1 WHERE userID = ${userID}`);
+        await sqlQuery(`INSERT INTO credentials (userID, credential, credentialID) VALUES (?,?,?)`, [userID, credentialString, credential["id"]]);
+        await sqlQuery(`UPDATE userconfig SET passkey = 1 WHERE userID = ?`, [userID]);
         res.json({
             success: true,
             message: "Added passkey succesfully"
@@ -103,7 +101,7 @@ const authHandler = async (req, res) => {
             return;
         }
     */
-    let response = await sqlQuery(`SELECT userID, credential FROM credentials WHERE credentialID = '${credentialID}'`);
+    let response = await sqlQuery(`SELECT userID, credential FROM credentials WHERE credentialID = ?`, [credentialID]);
 
     if (response.length == 0) {
         res.json({
@@ -197,11 +195,9 @@ const disablePasskeysHandler = async (req, res) => {
     let userdata = req.userdata;
 
     try {
-        let query = `DELETE FROM credentials WHERE userID=${userdata["userID"]}`;
-        let sqlResponse = await sqlQuery(query);
+        let sqlResponse = await sqlQuery(`DELETE FROM credentials WHERE userID=?`, [userdata["userID"]]);
 
-        query = `UPDATE userconfig SET passkey=0 WHERE userID=${userdata["userID"]}`;
-        sqlResponse = await sqlQuery(query);
+        sqlResponse = await sqlQuery(`UPDATE userconfig SET passkey=0 WHERE userID=?`, [userdata["userID"]]);
         res.json({
             success: true,
             message: "Successfully disabled passkeys"

@@ -68,7 +68,7 @@ const devicesHandler = async (req, res) => {
     }
 
     let userID = decoded["data"]["userID"];
-    let devices = await sqlQuery(`SELECT deviceID, deviceInfo, registerDate FROM devices WHERE userID='${userID}'`);
+    let devices = await sqlQuery(`SELECT deviceID, deviceInfo, registerDate FROM devices WHERE userID=?`, [userID]);
     if (devices.length == 0) {
         res.status(500).json({
             success: false,

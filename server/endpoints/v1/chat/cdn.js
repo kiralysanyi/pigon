@@ -42,7 +42,7 @@ const cdnPostHandler = async (req, res) => {
     let fileExtension = path.extname(file.name)
     let filename = uuidv4() + fileExtension;
 
-    await sqlQuery(`INSERT INTO files (chatid, filename) VALUES ('${req.body.chatid}','${filename}')`);
+    await sqlQuery(`INSERT INTO files (chatid, filename) VALUES (?,?)`, [req.body.chatid, filename]);
 
     await file.mv(uploaddir + filename);
     res.json({
@@ -76,7 +76,7 @@ const cdnGetHandler = async (req, res) => {
         return;
     }
 
-    let result = await sqlQuery(`SELECT chatid, filename FROM files WHERE filename='${req.query.filename}'`)
+    let result = await sqlQuery(`SELECT chatid, filename FROM files WHERE filename=?`, [req.query.filename])
     if (result.length != 1) {
         res.status(404).json({
             success: false,

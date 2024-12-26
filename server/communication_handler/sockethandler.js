@@ -120,11 +120,11 @@ let connectionHandler = (socket) => {
         //Trying to evade deadlock
         setTimeout(async () => {
             try {
-                await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${messageID} WHERE userID=${userID} AND chatid=${chatID}`);
+                await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=? WHERE userID=? AND chatid=?`, [messageID, userID, chatID]);
             } catch (error) {
                 console.log("Probabbly deadlock again for fuck's sake, anyway, lets try again xD");
                 try {
-                    await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${messageID} WHERE userID=${userID} AND chatid=${chatID}`);
+                    await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=? WHERE userID=? AND chatid=?`, [messageID, userID, chatID]);
                 } catch (error) {
                     console.log("I give up");
                 }
@@ -156,12 +156,12 @@ let connectionHandler = (socket) => {
                 message.content = escapeJsonControlCharacters(message.content);
             }
 
-            await sqlQuery(`INSERT INTO messages (chatid, senderid, message) VALUES ('${chatID}','${senderID}','${JSON.stringify(message)}')`);
+            await sqlQuery(`INSERT INTO messages (chatid, senderid, message) VALUES (?,?,?)`, [chatID, senderID, JSON.stringify(message)]);
 
-            let latestmessageinchat = await sqlQuery(`SELECT id FROM messages WHERE chatid=${chatID} ORDER BY id DESC LIMIT 1`);
+            let latestmessageinchat = await sqlQuery(`SELECT id FROM messages WHERE chatid=? ORDER BY id DESC LIMIT 1`, [chatID]);
             if (latestmessageinchat.length > 0) {
                 latestmessageinchat = latestmessageinchat[0]["id"];
-                await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${latestmessageinchat} WHERE userID=${senderID} AND chatid=${chatID}`);
+                await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=? WHERE userID=? AND chatid=?`, [latestmessageinchat, senderID, chatID]);
             } else {
                 latestmessageinchat = 0;
             }
@@ -169,7 +169,7 @@ let connectionHandler = (socket) => {
 
             let toNotify = []
 
-            let result = await sqlQuery(`SELECT participants FROM chats WHERE id=${chatID}`);
+            let result = await sqlQuery(`SELECT participants FROM chats WHERE id=?`, [chatID]);
 
             toNotify = JSON.parse(result[0]["participants"]);
 
@@ -185,7 +185,7 @@ let connectionHandler = (socket) => {
                 }
             }
 
-            await sqlQuery(`UPDATE chats SET lastInteraction=CURRENT_TIMESTAMP() WHERE id=${chatID}`);
+            await sqlQuery(`UPDATE chats SET lastInteraction=CURRENT_TIMESTAMP() WHERE id=?`, [chatID]);
         } catch (error) {
             console.error(error);
             socket.emit("error", error);

@@ -18,7 +18,7 @@ const pool = mysql.createPool({
 }).promise();
 
 
-const sqlQuery2 = async (query, fields) => {
+const sqlQuery = async (query, fields) => {
     return new Promise(async (resolved, reject) => {
         try {
             let result = await pool.query(query, fields);
@@ -29,18 +29,10 @@ const sqlQuery2 = async (query, fields) => {
     })
 }
 
-//TODO: ez így szuboptimális, de jóvanazúgy egyelőre, majd fixeljük
-//NOTE: nem fogjuk...
-
-const sqlQuery = async (query) => {
-    let result = await pool.query(query);
-    return result[0];
-}
-
 
 const rowExists = async (key, value, table) => {
     console.log(key, value, table)
-    let result = await sqlQuery2(`SELECT * FROM \`${table}\` WHERE \`${key}\`=?`, [value]);
+    let result = await sqlQuery(`SELECT * FROM \`${table}\` WHERE \`${key}\`=?`, [value]);
     if (result.length == 1) {
         return true;
     } else {
@@ -172,4 +164,4 @@ const checkIfUserInChat = async (chatid, userid) => {
     }
 }
 
-module.exports = { checkIfUserInChat, registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID, rowExists, sqlQuery2 }
+module.exports = { checkIfUserInChat, registerDevice, createUser, userExists, sqlQuery, verifyPass, updatePass, getUserFromID, rowExists }

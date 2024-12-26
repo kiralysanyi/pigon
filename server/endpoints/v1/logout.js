@@ -69,7 +69,7 @@ const logoutHandler = async (req, res) => {
     let deviceID = decoded["data"]["deviceID"];
 
     try {
-        await sqlQuery(`DELETE FROM devices WHERE deviceID = '${deviceID}'`);
+        await sqlQuery(`DELETE FROM devices WHERE deviceID = ?`, [deviceID]);
         res.json({
             success: true,
             data: {

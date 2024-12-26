@@ -26,7 +26,7 @@ const verifyToken = (token) => {
             })
             return;
         }
-        let res = await sqlQuery(`SELECT 1 FROM devices WHERE deviceID = '${decoded["deviceID"]}'`);
+        let res = await sqlQuery(`SELECT 1 FROM devices WHERE deviceID = ?`, [decoded["deviceID"]]);
         if (res.length == 0) {
             resolved({
                 success: false,

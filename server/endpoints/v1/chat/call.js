@@ -35,7 +35,7 @@ let createCallHandler = async (req, res) => {
     }
 
     //check if user is in the chat
-    let result = await sqlQuery(`SELECT * FROM \`user-chat\` WHERE userID = ${userdata.userID} AND chatid = ${chatid}`);
+    let result = await sqlQuery(`SELECT * FROM \`user-chat\` WHERE userID = ? AND chatid = ?`, [userdata.userID, chatid]);
     if (result.length != 1) {
         res.status(403).json({
             success: false,
@@ -44,7 +44,7 @@ let createCallHandler = async (req, res) => {
         return;
     }
 
-    result = await sqlQuery(`SELECT participants FROM chats WHERE id = ${chatid}`);
+    result = await sqlQuery(`SELECT participants FROM chats WHERE id = ?`, [chatid]);
     if (result.length != 1) {
         res.status(404).json({
             succes: false,

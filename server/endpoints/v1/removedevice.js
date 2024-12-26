@@ -78,7 +78,7 @@ const removedeviceHandler = async (req, res) => {
     }
 
     try {
-        await sqlQuery(`DELETE FROM devices WHERE deviceID = '${deviceID}'`);
+        await sqlQuery(`DELETE FROM devices WHERE deviceID = ?`, [deviceID]);
         res.json({
             success: true,
             data: {

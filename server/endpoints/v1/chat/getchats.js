@@ -28,7 +28,7 @@ let getMessagesHandler = async (req, res) => {
     }
 
     //check if user is in the chat
-    let result = await sqlQuery(`SELECT * FROM \`user-chat\` WHERE userID = ${userdata.userID} AND chatid = ${req.query.chatid}`);
+    let result = await sqlQuery(`SELECT * FROM \`user-chat\` WHERE userID = ? AND chatid = ?`, [userdata.userID, req.query.chatid]);
     if (result.length != 1) {
         res.status(403).json({
             success: false,
@@ -58,7 +58,7 @@ let getMessagesHandler = async (req, res) => {
 
     console.log(page, offset);
     try {
-        let result = await sqlQuery(`SELECT messages.id AS messageID, \`senderid\`, \`message\`, \`date\`, users.username FROM messages LEFT JOIN users ON messages.senderid = users.id WHERE cancelled = 0 AND chatid = ${req.query.chatid} ORDER BY \`date\` DESC LIMIT ${pageSize} OFFSET ${offset};`);
+        let result = await sqlQuery(`SELECT messages.id AS messageID, \`senderid\`, \`message\`, \`date\`, users.username FROM messages LEFT JOIN users ON messages.senderid = users.id WHERE cancelled = 0 AND chatid = ? ORDER BY \`date\` DESC LIMIT ? OFFSET ?;`, [req.query.chatid, pageSize, offset]);
         if (page == 1) {
             let latestmessage = 0;
             for (let i in result) {
@@ -71,7 +71,7 @@ let getMessagesHandler = async (req, res) => {
                     result[i]["read"] = true;
                 }
             };
-            await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=${latestmessage} WHERE userID=${userdata.userID} AND chatid=${req.query.chatid}`);
+            await sqlQuery(`UPDATE \`user-chat\` SET lastReadMessage=? WHERE userID=? AND chatid=?`, [latestmessage, userdata.userID, req.query.chatid]);
 
         }
 
@@ -116,11 +116,11 @@ let getChatsHandler = async (req, res) => {
     let userdata = verificationResponse.data;
 
     try {
-        let result = await sqlQuery(`SELECT \`user-chat\`.\`lastReadMessage\` AS latestRead, chatid, name, participants, groupchat, initiator, lastInteraction FROM \`chats\` INNER JOIN \`user-chat\` ON \`chats\`.\`id\`=\`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=${userdata.userID} ORDER BY lastInteraction DESC`);
+        let result = await sqlQuery(`SELECT \`user-chat\`.\`lastReadMessage\` AS latestRead, chatid, name, participants, groupchat, initiator, lastInteraction FROM \`chats\` INNER JOIN \`user-chat\` ON \`chats\`.\`id\`=\`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=? ORDER BY lastInteraction DESC`, [userdata.userID]);
         for (let i in result) {
 
             result[i].participants = JSON.parse(result[i]["participants"]);
-            let latestmessageinchat = await sqlQuery(`SELECT id FROM messages WHERE chatid=${result[i]["chatid"]} ORDER BY id DESC LIMIT 1`);
+            let latestmessageinchat = await sqlQuery(`SELECT id FROM messages WHERE chatid=? ORDER BY id DESC LIMIT 1`, [result[i]["chatid"]]);
             if (latestmessageinchat.length > 0) {
                 latestmessageinchat = latestmessageinchat[0]["id"];
                 console.log("Latest:", latestmessageinchat);
@@ -137,7 +137,7 @@ let getChatsHandler = async (req, res) => {
                 let id = removeValue(result[i].participants, userdata.userID)[0];
                 let displayName;
                 try {
-                    displayName = (await sqlQuery(`SELECT username FROM users WHERE id=${id}`))[0]["username"];
+                    displayName = (await sqlQuery(`SELECT username FROM users WHERE id=?`, [id]))[0]["username"];
                 } catch (error) {
                     displayName = "Deleted user"
                 }

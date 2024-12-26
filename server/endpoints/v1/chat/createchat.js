@@ -95,7 +95,7 @@ let createChatHandler = (newChatHandler = ({ isGroupChat, chatID, chatName, part
 
             //check if private chat exists with same participants
             if (req.body.isGroupChat == false) {
-                let result = await sqlQuery(`SELECT 1 FROM chats WHERE \`participants\`='${JSON.stringify(req.body.participants.sort())}'`);
+                let result = await sqlQuery(`SELECT 1 FROM chats WHERE \`participants\`=?`, [JSON.stringify(req.body.participants.sort())]);
                 if (result.length != 0) {
                     res.status(400).json({
                         success: false,
@@ -105,12 +105,12 @@ let createChatHandler = (newChatHandler = ({ isGroupChat, chatID, chatName, part
                 }
             }
 
-            await sqlQuery(`INSERT INTO chats (name, participants, initiator, groupchat) VALUES ('${chatname}', '${JSON.stringify(req.body.participants.sort())}', '${userdata.userID}', '${groupchat}')`);
+            await sqlQuery(`INSERT INTO chats (name, participants, initiator, groupchat) VALUES (?, ?, ?, ?)`, [chatname, JSON.stringify(req.body.participants.sort()), userdata.userID, groupchat]);
             let chatid = (await sqlQuery("SELECT LAST_INSERT_ID();"))[0]["LAST_INSERT_ID()"];
 
 
             for (let i in req.body.participants) {
-                await sqlQuery(`INSERT INTO \`user-chat\` (userID, chatid) VALUES ('${req.body.participants[i]}', '${chatid}')`);
+                await sqlQuery(`INSERT INTO \`user-chat\` (userID, chatid) VALUES (?, ?)`, [req.body.participants[0], chatid]);
             }
 
             newChatHandler({ chatID: chatid, chatName: chatname, initiator: userdata.userID, isGroupChat: req.body.isGroupChat, participants: req.body.participants });

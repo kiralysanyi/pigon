@@ -20,25 +20,25 @@ const deleteHandler = async (req, res) => {
 
     if (await verifyPass(username, password)) {
         try {
-            let response = await sqlQuery(`SELECT id FROM users WHERE username = '${username}'`);
+            let response = await sqlQuery(`SELECT id FROM users WHERE username = ?`, [username]);
             let userID = response[0]["id"];
 
             //remove from chats
-            let chats = await sqlQuery(`SELECT id, participants FROM chats INNER JOIN \`user-chat\` ON chats.id = \`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=${userID}`);
+            let chats = await sqlQuery(`SELECT id, participants FROM chats INNER JOIN \`user-chat\` ON chats.id = \`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=?`, [userID]);
             console.log(chats);
             for (let i in chats) {
                 chats[i]["participants"] = removeValue(JSON.parse(chats[i]["participants"]), userID)
             }
 
             for (let i in chats) {
-                await sqlQuery(`UPDATE chats SET participants='${JSON.stringify(chats[i]["participants"])}' WHERE id=${chats[i]["id"]}`)
+                await sqlQuery(`UPDATE chats SET participants=? WHERE id=?`, [JSON.stringify(chats[i]["participants"]), chats[i]["id"]])
             }
 
             //delete chat connections
-            await sqlQuery(`DELETE FROM \`user-chat\` WHERE userID=${userID}`);
+            await sqlQuery(`DELETE FROM \`user-chat\` WHERE userID=?`, [userID]);
 
 
-            await sqlQuery(`DELETE FROM users WHERE id = '${userID}'`);
+            await sqlQuery(`DELETE FROM users WHERE id = ?`, [userID]);
             deletePFP(userID);
 
             res.json({

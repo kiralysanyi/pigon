@@ -34,7 +34,7 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
 
 
 
-    let response = await sqlQuery(`SELECT id, username FROM users WHERE username='${username}'`)
+    let response = await sqlQuery(`SELECT id, username FROM users WHERE username=?`, [username])
     //id, username;
     let userInfo = response[0];
     let deviceName = "N/A"

@@ -72,7 +72,7 @@ const userinfoHandler = async (req, res) => {
 
     if (searchedID == undefined) {
         //no userID provided by the client so we respond with the requestor's information
-        let response = await sqlQuery(`SELECT id, username, registerDate FROM users WHERE id = '${loggedinuserID}'`);
+        let response = await sqlQuery(`SELECT id, username, registerDate FROM users WHERE id = ?`, [loggedinuserID]);
 
         res.json({
             success: true,
@@ -82,7 +82,7 @@ const userinfoHandler = async (req, res) => {
     }
 
     //the user has provided a userID so we search for it and send it back to the client
-    let response = await sqlQuery(`SELECT username, registerDate FROM users WHERE id = '${searchedID}'`);
+    let response = await sqlQuery(`SELECT username, registerDate FROM users WHERE id = ?`, [searchedID]);
 
     if (response.length == 0) {
         res.json({

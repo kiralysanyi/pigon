@@ -1,6 +1,5 @@
 const {sqlQuery, checkIfUserInChat} = require("../../../things/db");
 const uuidv4 = require("uuid").v4;
-const { verifyToken } = require("../../../things/jwt");
 const path = require("path");
 const fs = require("fs");
 

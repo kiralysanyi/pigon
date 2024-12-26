@@ -1,4 +1,3 @@
-const { verifyToken } = require("../../things/jwt");
 const path = require('path');
 
 const fs = require("fs");
@@ -53,18 +52,7 @@ const getImageHandler = (req, res) => {
 }
 
 const uploadHandler = async (req, res) => {
-    if (!req.cookies.token) {
-        res.status(400).json({
-            success: false,
-            message: "No token provided."
-        });
-        return;
-    }
-    let verifyResult = await verifyToken(req.cookies.token);
-    if (verifyResult.success == false) {
-        res.status(400).json(verifyResult);
-        return;
-    }
+    let userdata = req.userdata;
 
     if (!req.files.image) {
         res.status(400).json({
@@ -75,7 +63,7 @@ const uploadHandler = async (req, res) => {
     }
 
     let file = req.files.image;
-    let userID = verifyResult.data.userID;
+    let userID = userdata.userID;
     console.log(userID, file.name, file.mimetype);
 
     if (file.mimetype != "image/png" && file.mimetype != "image/jpg" && file.mimetype != "image/jpeg") {

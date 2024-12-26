@@ -1,5 +1,4 @@
 const { sqlQuery } = require("../../../things/db");
-const { verifyToken } = require("../../../things/jwt");
 const { removeValue } = require("../../../things/helper");
 
 let deletegroupuserHandler = async (req, res) => {

@@ -1,7 +1,6 @@
 const { sqlQuery } = require("../../../things/db");
 
 let uuidv4 = require("uuid").v4
-const { verifyToken } = require("../../../things/jwt");
 
 function hasDuplicateValue(array) {
     const seen = new Set();

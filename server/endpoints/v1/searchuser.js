@@ -1,23 +1,6 @@
 const { sqlQuery } = require("../../things/db");
-const { verifyToken } = require("../../things/jwt");
 
 let searchHandler = async (req, res) => {
-    if (!req.cookies.token) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify user"
-        });
-        return;
-    }
-
-    let verificationResponse = await verifyToken(req.cookies.token);
-    if (verificationResponse.success == false) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify token"
-        });
-        return;
-    }
     /*
     {
             userID: 69,
@@ -29,7 +12,7 @@ let searchHandler = async (req, res) => {
             }
     }
     */
-    let userdata = verificationResponse.data;
+    let userdata = req.userdata;
 
     let searchQuery = req.query.search;
 

@@ -1,5 +1,4 @@
 const { sqlQuery } = require("../../../things/db");
-const { verifyToken } = require("../../../things/jwt");
 
 const { removeValue } = require("../../../things/helper");
 const pageSize = 100;
@@ -86,34 +85,7 @@ let getMessagesHandler = async (req, res) => {
 }
 
 let getChatsHandler = async (req, res) => {
-    if (!req.cookies.token) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify user"
-        });
-        return;
-    }
-
-    let verificationResponse = await verifyToken(req.cookies.token);
-    if (verificationResponse.success == false) {
-        res.status(403).json({
-            success: false,
-            message: "Failed to verify token"
-        });
-        return;
-    }
-    /*
-    {
-            userID: 69,
-            username: "lakatos rikárdinnyó",
-            deviceID: "aaa",
-            deviceInfo: {
-                "user-agent": "xy",
-                "deviceName": "xyz"
-            }
-    }
-    */
-    let userdata = verificationResponse.data;
+    let userdata = req.userdata;
 
     try {
         let result = await sqlQuery(`SELECT \`user-chat\`.\`lastReadMessage\` AS latestRead, chatid, name, participants, groupchat, initiator, lastInteraction FROM \`chats\` INNER JOIN \`user-chat\` ON \`chats\`.\`id\`=\`user-chat\`.\`chatid\` WHERE \`user-chat\`.\`userID\`=? ORDER BY lastInteraction DESC`, [userdata.userID]);

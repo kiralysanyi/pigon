@@ -1,36 +1,6 @@
 const {updatePass} = require("../../things/db");
-const {verifyToken} = require("../../things/jwt");
 
 const changepassHandler = async (req, res) => {
-    let token;
-    try {
-        token = req.cookies.token
-    } catch (error) {
-        res.status(400)
-            .json(
-                {
-                    success: false,
-                    data: {
-                        message: "Token was not provided"
-                    }
-                }
-            );
-        return;
-    }
-    //Authorization: 'Bearer TOKEN'
-    if (!token) {
-        res.status(400)
-            .json(
-                {
-                    success: false,
-                    data: {
-                        message: "Token was not provided"
-                    }
-                }
-            );
-        return;
-    }
-
     //verifying token
     /*
     {
@@ -43,27 +13,7 @@ const changepassHandler = async (req, res) => {
         }
     }
 */
-    let decoded;
-    try {
-        decoded = await verifyToken(token);
-    } catch (error) {
-        res.status(200).json({
-            success: false,
-            data: {
-                message: "Failed to verify token"
-            }
-        })
-        return;
-    }
-    if (decoded.success == false) {
-        res.status(200).json({
-            success: false,
-            data: {
-                message: decoded.message
-            }
-        })
-        return;
-    }
+    let userdata = req.userdata;
 
     if (req.body.oldpass == undefined || req.body.newpass == undefined) {
         res.json({
@@ -75,8 +25,8 @@ const changepassHandler = async (req, res) => {
         return;
     }
 
-    let username = decoded["data"]["username"];
-    let userID = decoded["data"]["userID"]
+    let username = userdata["username"];
+    let userID = userdata["userID"]
     res.json(await updatePass(username, userID, req.body.oldpass, req.body.newpass));
 }
 

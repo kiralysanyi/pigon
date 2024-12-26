@@ -1,6 +1,5 @@
 const { server } = require("@passwordless-id/webauthn");
 const { verifyPass, userExists, sqlQuery, registerDevice, getUserFromID } = require("../../../things/db");
-const { verifyToken } = require("../../../things/jwt");
 const jwt = require("jsonwebtoken");
 const uid = require("uuid").v4;
 const fs = require("fs");

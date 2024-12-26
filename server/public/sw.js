@@ -166,3 +166,11 @@ setInterval(() => {
   self.registration.update();
   console.log("Update finished");
 }, 1000 * 60 * 10);
+
+//cache pfp
+let pfpCache = async () => {
+  let cache = await caches.open("PFP");
+  await cache.add("/api/v1/auth/pfp");
+}
+
+pfpCache();

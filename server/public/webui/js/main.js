@@ -303,25 +303,31 @@ msgcontainer.addEventListener("scroll", (e) => {
 
 import { contextMenu } from "./contextmenu.js";
 import { onimagepaste, onmediadrop, onvideopaste } from "./clipboard.js";
+let chats = [];
 
-let renderChatsSB = async () => {
+function reorderChatsByLastInteraction() {
+    chats = chats.sort((a, b) => new Date(b.lastInteraction) - new Date(a.lastInteraction));
+    console.log("Sorted: ", chats);
+}
+
+let renderChatsSB = async (renderFromSaved = false) => {
     sbcontent.innerHTML = "";
-    let chats = {};
-
     try {
-        let response = await fetch("/api/v1/chat/chats", {
-            method: "GET",
-            credentials: "include"
-        });
-
-        response = await response.json();
-        console.log(response);
-
-        if (response.success == true) {
-            chats = response["data"];
-        } else {
-            console.error(response)
-            window.alert(response.message);
+        if (renderFromSaved == false) {
+            let response = await fetch("/api/v1/chat/chats", {
+                method: "GET",
+                credentials: "include"
+            });
+    
+            response = await response.json();
+            console.log(response);
+    
+            if (response.success == true) {
+                chats = response["data"];
+            } else {
+                console.error(response)
+                window.alert(response.message);
+            }
         }
     } catch (error) {
         console.error(error);
@@ -488,9 +494,13 @@ let addMessageToContainer = (chatID, senderID, name, message, type) => {
 }
 
 socket.on("message", (data) => {
-    renderChatsSB();
     //data:{"chatID":66,"senderID":17,"message":{"type":"text","content":"Sznia"}}
     data = JSON.parse(data);
+
+    let arrayIndex = chats.findIndex(chat => chat.chatid === data.chatID);
+    chats[arrayIndex].lastInteraction = new Date().toISOString();
+    reorderChatsByLastInteraction();
+    renderChatsSB(true);
     if (data["senderID"] == userinfo["id"]) {
         data["senderName"] = "You"
     }
@@ -545,10 +555,6 @@ msgform.addEventListener("submit", (e) => {
     msginput.value = "";
 
     sendMessage(selectedchat, message.content, message.type);
-    setTimeout(() => {
-        renderChatsSB();
-    }, 1000);
-
     console.log(message);
 })
 

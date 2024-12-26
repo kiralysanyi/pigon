@@ -121,8 +121,6 @@ async function sendFile(file, type, chatid) {
 
         if (response.ok) {
             const result = await response.json();
-            window.alert(`File uploaded successfully: ${result.message}`);
-
             sendMessage(chatid, "/api/v1/chat/cdn?filename=" + result["filename"], type);
         } else {
             window.alert(`Error uploading file: ${response.statusText}`);

@@ -14,6 +14,8 @@ if (isLoggedIn == false) {
     */
 
 
+
+
 let userinfo = await auth.getUserInfo();
 if (userinfo.success == false) {
     location.href = "/app/login.html"
@@ -176,6 +178,23 @@ let currentChatname = document.getElementById("currentChatname");
 let selectedchat = undefined;
 let currentChatMenu = document.getElementById("currentChatMenu")
 
+onimagepaste((file) => {
+    if (selectedchat != undefined) {
+        if (window.confirm("Do you want to send the image from your clipboard?")) {
+            sendFile(file, "image", selectedchat);
+        }
+    }
+});
+
+onvideopaste((file) => {
+    if (selectedchat != undefined) {
+        if (window.confirm("Do you want to send the video from your clipboard?")) {
+            sendFile(file, "video", selectedchat);
+        }
+    }
+});
+
+
 currentChatInfodiv.addEventListener("click", () => {
     currentChatMenu.classList.remove("chatMenuClosed");
     currentChatMenu.classList.add("chatMenuOpen");
@@ -277,6 +296,7 @@ msgcontainer.addEventListener("scroll", (e) => {
 
 
 import { contextMenu } from "./contextmenu.js";
+import { onimagepaste, onvideopaste } from "./clipboard.js";
 
 let renderChatsSB = async () => {
     sbcontent.innerHTML = "";

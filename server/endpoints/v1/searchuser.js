@@ -33,7 +33,7 @@ let searchHandler = async (req, res) => {
 
     let searchQuery = req.query.search;
 
-    let results = await sqlQuery(`SELECT id, username, registerDate FROM users WHERE username LIKE '%?%'`, [searchQuery]);
+    let results = await sqlQuery(`SELECT id, username, registerDate FROM users WHERE username LIKE ?`, [`%${searchQuery}%`]);
 
 
     res.json({

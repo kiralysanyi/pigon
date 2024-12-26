@@ -109,7 +109,7 @@ let createChatHandler = (newChatHandler = ({ isGroupChat, chatID, chatName, part
 
 
             for (let i in req.body.participants) {
-                await sqlQuery(`INSERT INTO \`user-chat\` (userID, chatid) VALUES (?, ?)`, [req.body.participants[0], chatid]);
+                await sqlQuery(`INSERT INTO \`user-chat\` (userID, chatid) VALUES (?, ?)`, [req.body.participants[i], chatid]);
             }
 
             newChatHandler({ chatID: chatid, chatName: chatname, initiator: userdata.userID, isGroupChat: req.body.isGroupChat, participants: req.body.participants });

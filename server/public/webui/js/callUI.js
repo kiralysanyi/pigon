@@ -25,6 +25,16 @@ const peer = new Peer(deviceID, { 'iceServers': [{ 'urls': 'stun:stun.l.google.c
 const vpeer = new Peer("video" + deviceID, { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }], 'sdpSemantics': 'unified-plan' });
 const speer = new Peer("screen" + deviceID, { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }], 'sdpSemantics': 'unified-plan' });
 
+peer.on('connection', (conn) => {
+    conn.on('data', (data) => {
+      console.log('Received:', data); // Expects 'ping'
+      if (data === 'ping') {
+        setTimeout(() => {
+            conn.send('pong');
+        }, 1000);
+      }
+    });
+  });
 
 await fetch("/api/v1/chat/registerPeer", {
     method: "POST",
@@ -87,6 +97,34 @@ let audiostream = await getMicrophoneStream();
 let mediaConnections = [];
 
 for (let i in peers) {
+
+    let connection = peer.connect(peers[i]);
+
+    connection.on('open', () => {
+        connection.send('ping');
+        console.log("Ping");
+    });
+
+    let timeout;
+
+    connection.on('data', (data) => {
+        if (data == "pong") {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                console.log("Peer disconnected");
+                if (window.parent.window.callEnded != undefined) {
+                    window.parent.window.callEnded();
+                } else {
+                    window.close();
+                }
+            }, 5000);
+            console.log("Pong");
+            setTimeout(() => {
+                connection.send('ping');  
+            }, 1000);  
+        }
+    });
+
     let mediaConnection = peer.call(peers[i], audiostream);
     mediaConnections.push(mediaConnection);
     mediaConnection.on("stream", (stream) => {
@@ -325,7 +363,7 @@ speer.on("call", (mediaConnection) => {
 /**
  * Returns a function to stop the video streaming
  */
-let startsVideoStream = async (streamendCallback = () => {}) => {
+let startsVideoStream = async (streamendCallback = () => { }) => {
     let selfView = document.createElement("video");
     selfView.classList.add("selfView");
     selfView.autoplay = true;
@@ -337,7 +375,7 @@ let startsVideoStream = async (streamendCallback = () => {}) => {
 
     let connections = [];
     for (let i in peers) {
-        let mediaConnection = speer.call("video" + peers[i], stream);
+        let mediaConnection = speer.call("screen" + peers[i], stream);
         connections.push(mediaConnection);
     }
 
@@ -351,7 +389,7 @@ let startsVideoStream = async (streamendCallback = () => {}) => {
 
     let track = stream.getTracks()[0];
     track.onended = () => {
-      streamendCallback();
+        streamendCallback();
     }
 
     return stopFunction;

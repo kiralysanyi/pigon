@@ -666,10 +666,10 @@ nav {
 
 .call iframe {
     position: absolute;
-    top: 40px;
+    top: 0px;
     left: 0px;
     width: 100%;
-    height: calc(100% - 40px);
+    height: 100%;
     border: none;
 }
 

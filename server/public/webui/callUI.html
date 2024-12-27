@@ -22,7 +22,8 @@
             width: auto;
             height: auto;
             padding: 10px;
-            background-color: rgb(37, 37, 37);
+            background-color: rgba(31, 31, 31, 0.678);
+            backdrop-filter: blur(8px);
             border-radius: 20px;
             transform: translate(-50%, 0%);
         }
@@ -40,17 +41,17 @@
 
         #calledUserImage {
             position: absolute;
-            top: 100px;
+            top: 5vh;
             left: 50%;
             transform: translate(-50%, 0%);
-            width: 120px;
-            height: 120px;
+            width: 10vh;
+            height: 10vh;
             border-radius: 100%;
         }
 
         #calledUserName {
             position: absolute;
-            top: 230px;
+            top: calc(15vh + 10px);
             width: auto;
             text-align: center;
             line-height: 40px;
@@ -60,7 +61,7 @@
 
         #duration {
             position: absolute;
-            top: 280px;
+            top: calc(15vh + 60px);
             width: auto;
             text-align: center;
             line-height: 40px;
@@ -74,7 +75,7 @@
             top: 0px;
             left: 0px;
             width: 100%;
-            height: calc(100% - 80px);
+            height: 100%;
             background-color: black;
             display: none;
         }

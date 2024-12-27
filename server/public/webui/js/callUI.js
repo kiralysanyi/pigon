@@ -44,16 +44,6 @@ let response = await fetch("/api/v1/chat/getPeerIDs?" + new URLSearchParams({ ca
 peers = await response.json();
 peers = peers["data"]
 
-while (peers.length == 0) {
-    response = await fetch("/api/v1/chat/getPeerIDs?" + new URLSearchParams({ callid: callid }).toString(), {
-        method: "GET",
-        credentials: "include"
-    });
-    peers = await response.json();
-    peers = peers["data"]
-}
-
-
 console.log("Peers to call: ", peers);
 
 /**
@@ -290,6 +280,7 @@ async function captureScreen() {
     try {
         const mediaStream = await navigator.mediaDevices.getDisplayMedia({
             video: true,
+            audio: true
         });
         return mediaStream;
     } catch (error) {

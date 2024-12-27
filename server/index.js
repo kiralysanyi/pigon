@@ -200,7 +200,7 @@ let sendPushNotification = (target, title, message, url) => {
 
     console.log(subscriptions, subscriptions[target], target);
     for (let i in subscriptions[target]) {
-        webpush.sendNotification(subscriptions[target][i], payload, {urgency: "high"}).catch((err) => {
+        webpush.sendNotification(subscriptions[target][i], payload, { urgency: "high" }).catch((err) => {
             console.error(err);
         });
     }
@@ -365,6 +365,13 @@ app.get("/api/v1/chat/getPeerIDs", (req, res) => {
         return;
     }
 
+    if (calls[callid] == undefined) {
+        res.status(404).json({
+            success: false,
+            message: "Call not initialized."
+        })
+    }
+
     if (calls[callid]["users"].includes(userinfo.userID) == false) {
         res.status(403).json({
             success: false,
@@ -373,12 +380,23 @@ app.get("/api/v1/chat/getPeerIDs", (req, res) => {
         return;
     }
 
-    let peers = calls[callid]["peers"];
-    peers = removeValue(peers, userinfo.deviceID);
-    res.json({
-        success: true,
-        data: peers
-    })
+    let getpeers = () => {
+        let peers = calls[callid]["peers"];
+        peers = removeValue(peers, userinfo.deviceID);
+        if (peers.length == 0) {
+            setTimeout(() => {
+                getpeers();
+            }, 1000);
+            return;
+        }
+
+        res.json({
+            success: true,
+            data: peers
+        })
+    }
+
+    getpeers();
 
 })
 

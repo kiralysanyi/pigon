@@ -65,10 +65,6 @@ const userinfoHandler = require("./endpoints/v1/userinfo").userinfoHandler
 app.use("/api/v1/auth/userinfo", authMiddleWare);
 app.get("/api/v1/auth/userinfo", userinfoHandler)
 
-const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
-app.use("/api/v1/auth/removedevice", authMiddleWare);
-app.delete("/api/v1/auth/removedevice", removedeviceHandler);
-
 const changepassHandler = require("./endpoints/v1/changepass").changepassHandler;
 app.use("/api/v1/auth/changepass", authMiddleWare);
 app.put("/api/v1/auth/changepass", changepassHandler);
@@ -208,11 +204,24 @@ let sendPushNotification = (target, title, message, url) => {
 
 let unsubscribe = (userID, deviceID) => {
     console.log("Unsubscribe: ", userID, deviceID);
-    console.log(subscriptions[userID][deviceID]);
-    delete subscriptions[userID][deviceID];
-    saveSubscriptions();
+    try {
+        console.log(subscriptions[userID][deviceID]);
+        delete subscriptions[userID][deviceID];
+        saveSubscriptions();
+    } catch (error) {
+        console.error("Unsubscribe: ", error);
+    }
+
 }
 
+
+const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
+app.use("/api/v1/auth/removedevice", authMiddleWare);
+app.use("/api/v1/auth/removedevice", (req, res, next) => {
+    req.unsubscribe = unsubscribe;
+    next();
+})
+app.delete("/api/v1/auth/removedevice", removedeviceHandler);
 
 app.use("/api/v1/auth/logout", authMiddleWare);
 

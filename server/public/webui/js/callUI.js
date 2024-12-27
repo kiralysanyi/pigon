@@ -248,7 +248,9 @@ let toggleVideo = async () => {
     }
 
     stopVideoStream();
-    document.getElementById("screenbtn").style.display = "block";
+    if (canCaptureScreen() == true) {
+        document.getElementById("screenbtn").style.display = "block";
+    }
     document.getElementById("videobtn").innerHTML = '<i class="fa-solid fa-video-slash"></i>';
     stopVideoStream = null;
 }

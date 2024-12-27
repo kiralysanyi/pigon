@@ -27,7 +27,6 @@ const speer = new Peer("screen" + deviceID, { 'iceServers': [{ 'urls': 'stun:stu
 
 peer.on('connection', (conn) => {
     conn.on('data', (data) => {
-        console.log('Received:', data); // Expects 'ping'
         if (data === 'ping') {
             setTimeout(() => {
                 conn.send('pong');
@@ -102,7 +101,6 @@ for (let i in peers) {
 
     connection.on('open', () => {
         connection.send('ping');
-        console.log("Ping");
     });
 
     let timeout;
@@ -118,7 +116,6 @@ for (let i in peers) {
                     window.close();
                 }
             }, 5000);
-            console.log("Pong");
             setTimeout(() => {
                 connection.send('ping');
             }, 1000);

@@ -103,7 +103,6 @@ peer.on("call", (mediaConnection) => {
         let audioelement = new Audio();
         audioelement.srcObject = stream;
         audioelement.play();
-        hideLoadingScreen();
     })
     mediaConnections.push(mediaConnection);
     mediaConnection.answer(audiostream);
@@ -114,6 +113,7 @@ peer.on("call", (mediaConnection) => {
             window.close();
         }
     })
+    hideLoadingScreen();
 })
 
 document.getElementById("closebtn").addEventListener("click", () => {

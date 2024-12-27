@@ -27,14 +27,14 @@ const speer = new Peer("screen" + deviceID, { 'iceServers': [{ 'urls': 'stun:stu
 
 peer.on('connection', (conn) => {
     conn.on('data', (data) => {
-      console.log('Received:', data); // Expects 'ping'
-      if (data === 'ping') {
-        setTimeout(() => {
-            conn.send('pong');
-        }, 1000);
-      }
+        console.log('Received:', data); // Expects 'ping'
+        if (data === 'ping') {
+            setTimeout(() => {
+                conn.send('pong');
+            }, 1000);
+        }
     });
-  });
+});
 
 await fetch("/api/v1/chat/registerPeer", {
     method: "POST",
@@ -120,8 +120,8 @@ for (let i in peers) {
             }, 5000);
             console.log("Pong");
             setTimeout(() => {
-                connection.send('ping');  
-            }, 1000);  
+                connection.send('ping');
+            }, 1000);
         }
     });
 
@@ -225,6 +225,31 @@ function stopMediaStream(mediaStream) {
 
 //handle incoming video stream
 let videoStreamCount = 0;
+let dockHideTimeout;
+let mmovelistener = () => {
+    document.getElementById("dock").style.bottom = "10px";
+    clearTimeout(dockHideTimeout)
+    dockHideTimeout = setTimeout(() => {
+        document.getElementById("dock").style.bottom = "-60px";
+    }, 2000);
+}
+
+let enableDockAutoHide = () => {
+
+    document.body.addEventListener("mousemove", mmovelistener);
+    document.body.addEventListener("touchstart", mmovelistener);
+    dockHideTimeout = setTimeout(() => {
+        document.getElementById("dock").style.bottom = "-60px";
+    }, 2000);
+}
+
+let disableDockAutoHide = () => {
+    clearTimeout(dockHideTimeout);
+    document.body.removeEventListener("mousemove", mmovelistener);
+    document.body.removeEventListener("touchstart", mmovelistener);
+    document.getElementById("dock").style.bottom = "10px";
+
+}
 
 vpeer.on("call", (mediaConnection) => {
     mediaConnection.on("stream", (stream) => {
@@ -347,10 +372,12 @@ speer.on("call", (mediaConnection) => {
         videoElement.srcObject = stream;
         document.getElementById("videocontainer").appendChild(videoElement);
         document.getElementById("videocontainer").style.display = "block";
+        enableDockAutoHide();
 
         mediaConnection.on("close", () => {
             svideoStreamCount--;
             videoElement.remove();
+            disableDockAutoHide();
             if (svideoStreamCount == 0) {
                 document.getElementById("videocontainer").style.display = "none";
             }

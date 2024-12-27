@@ -2,6 +2,8 @@ import { Peer } from "https://esm.sh/peerjs@1.5.4?bundle-deps";
 import { getDevices } from "./auth.js";
 import { removeValue } from "./utils.js";
 import * as auth from "./auth.js";
+import { hideLoadingScreen, showLoadingScreen } from "./loadingScreen.js";
+showLoadingScreen("Connecting...");
 
 let userinfo = (await auth.getUserInfo()).data;
 
@@ -101,6 +103,7 @@ peer.on("call", (mediaConnection) => {
         let audioelement = new Audio();
         audioelement.srcObject = stream;
         audioelement.play();
+        hideLoadingScreen();
     })
     mediaConnections.push(mediaConnection);
     mediaConnection.answer(audiostream);

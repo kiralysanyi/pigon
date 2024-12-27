@@ -321,12 +321,13 @@ speer.on("call", (mediaConnection) => {
 /**
  * Returns a function to stop the video streaming
  */
-let startsVideoStream = async () => {
+let startsVideoStream = async (streamendCallback = () => {}) => {
     let selfView = document.createElement("video");
     selfView.classList.add("selfView");
     selfView.autoplay = true;
     selfView.muted = true;
     let stream = await captureScreen();
+
     selfView.srcObject = stream;
     document.body.appendChild(selfView);
 
@@ -336,29 +337,44 @@ let startsVideoStream = async () => {
         connections.push(mediaConnection);
     }
 
-    return () => {
+    let stopFunction = () => {
         for (let i in connections) {
             connections[i].close();
             stopMediaStream(stream);
             selfView.remove();
         }
     }
+
+    let track = stream.getTracks()[0];
+    track.onended = () => {
+      streamendCallback();
+    }
+
+    return stopFunction;
 }
 
 
 let stopsVideoStream = null;
 let togglesVideo = async () => {
+
+    let disSvideo = () => {
+        stopsVideoStream();
+        document.getElementById("videobtn").style.display = "block";
+        document.getElementById("screenbtn").style.backgroundColor = "transparent";
+        stopsVideoStream = null;
+    }
+
+
     if (stopsVideoStream == null) {
         document.getElementById("videobtn").style.display = "none";
         document.getElementById("screenbtn").style.backgroundColor = "red";
-        stopsVideoStream = await startsVideoStream();
+        stopsVideoStream = await startsVideoStream(() => {
+            disSvideo();
+        });
         return;
     }
 
-    stopsVideoStream();
-    document.getElementById("videobtn").style.display = "block";
-    document.getElementById("screenbtn").style.backgroundColor = "transparent";
-    stopsVideoStream = null;
+    disSvideo();
 }
 
 document.getElementById("screenbtn").addEventListener("click", () => {

@@ -113,7 +113,6 @@ peer.on("call", (mediaConnection) => {
             window.close();
         }
     })
-    hideLoadingScreen();
 })
 
 document.getElementById("closebtn").addEventListener("click", () => {
@@ -393,3 +392,6 @@ try {
 } catch (err) {
     console.error(`Failed to acquire wake lock: ${err.message}`);
 }
+
+
+hideLoadingScreen();

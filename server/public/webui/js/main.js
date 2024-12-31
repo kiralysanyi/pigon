@@ -353,6 +353,7 @@ let renderChatsSB = async (renderFromSaved = false) => {
         sbcontent.appendChild(element);
         element.addEventListener("click", async () => {
             showLoadingScreen("Loading chat...")
+            location.hash = "#" + chats[i]["chatid"]
             closeSidebar();
             element.style.backgroundColor = "rgba(255, 255, 255, 0.151)";
             document.getElementById("callbtn").style.display = "none";

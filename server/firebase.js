@@ -29,6 +29,7 @@ const registerFirebaseClient = (userID, deviceID, registrationToken) => {
 }
 
 const sendNotification = (userID, title, body) => {
+    console.log("Firebase: ", userID, title, body, subs[userID]);
     let registrationTokens = [];
     if (subs[userID] == undefined) {
         console.log("Firebase: userid not found ", userID)
@@ -37,7 +38,7 @@ const sendNotification = (userID, title, body) => {
     for (let i in subs[userID]) {
         registrationTokens.push(subs[userID][i])
     }
-    
+
     if (registrationTokens.length == 0) {
         return;
     }

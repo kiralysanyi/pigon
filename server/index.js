@@ -182,7 +182,33 @@ app.post('/api/v1/push/subscribe', async (req, res) => {
     res.status(201).json({});
 })
 
+//check if firebase enabled
+let firebaseNotify, firebaseRegisterClient;
+if (fs.existsSync("./firebase.json")) {
+    let {sendNotification, registerFirebaseClient} = require("./firebase")
+    firebaseNotify = sendNotification;
+    app.use("/api/v1/firebase/register", authMiddleWare)
+    app.post("/api/v1/firebase/register", (req, res) => {
+        if (req.body.registrationToken == undefined) {
+            res.status(400).json({
+                success: false,
+                message: "registrationToken not provided"
+            })
+            return;
+        }
+        registerFirebaseClient(req.userdata.userID, req.body.registrationToken)
+        res.json({
+            success: true,
+            message: "Added client to service"
+        });
+    })
+}
+
+
 let sendPushNotification = (target, title, message, url) => {
+    if (firebaseNotify != undefined) {
+        firebaseNotify(target, title, message.content);
+    }
     let payload = { title, body: message.content };
     if (message.type != "text") {
         payload.body = "New message";

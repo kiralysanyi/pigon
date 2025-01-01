@@ -3,3 +3,5 @@ pfp
 chatfiles
 .env
 subscriptions.json
+firebase.json
+firebase_subs.json

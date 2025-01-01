@@ -19,7 +19,6 @@ const sockets = {}
  * @param {*} data 
  */
 let sendDataToSockets = (userID, channel, data) => {
-    console.log(`Sockets for user: ${userID} `, sockets[userID])
     for (let i in sockets[userID]) {
         sockets[userID][i].emit(channel, data);
     }

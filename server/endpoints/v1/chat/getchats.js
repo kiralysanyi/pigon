@@ -95,7 +95,7 @@ let getChatsHandler = async (req, res) => {
             let latestmessageinchat = await sqlQuery(`SELECT id FROM messages WHERE chatid=? ORDER BY id DESC LIMIT 1`, [result[i]["chatid"]]);
             if (latestmessageinchat.length > 0) {
                 latestmessageinchat = latestmessageinchat[0]["id"];
-                console.log("Latest:", latestmessageinchat);
+                
                 if (latestmessageinchat > result[i]["latestRead"]) {
                     result[i]["hasUnreadMessages"] = true;
                 } else {
@@ -117,7 +117,7 @@ let getChatsHandler = async (req, res) => {
             }
 
         }
-        console.log(result)
+        
         res.json({
             success: true,
             data: result

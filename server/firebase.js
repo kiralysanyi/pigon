@@ -19,12 +19,13 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
-const registerFirebaseClient = (userID, registrationToken) => {
+const registerFirebaseClient = (userID, deviceID, registrationToken) => {
     if (subs[userID] == undefined) {
-        subs[userID] = []
+        subs[userID] = {}
     }
 
-    subs[userID].push(registrationToken)
+    subs[userID][deviceID] = registrationToken
+    fs.writeFileSync("./firebase_subs.json", JSON.stringify(subs))
 }
 
 const sendNotification = (userID, title, body) => {

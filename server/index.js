@@ -183,7 +183,7 @@ app.post('/api/v1/push/subscribe', async (req, res) => {
 })
 
 //check if firebase enabled
-let firebaseNotify, firebaseRegisterClient;
+let firebaseNotify;
 if (fs.existsSync("./firebase.json")) {
     let {sendNotification, registerFirebaseClient} = require("./firebase")
     firebaseNotify = sendNotification;
@@ -196,7 +196,7 @@ if (fs.existsSync("./firebase.json")) {
             })
             return;
         }
-        registerFirebaseClient(req.userdata.userID, req.body.registrationToken)
+        registerFirebaseClient(req.userdata.userID, req.userdata.deviceID, req.body.registrationToken)
         res.json({
             success: true,
             message: "Added client to service"

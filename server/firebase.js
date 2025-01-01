@@ -42,21 +42,22 @@ const sendNotification = (userID, title, body) => {
     if (registrationTokens.length == 0) {
         return;
     }
-    const message = {
-        data: {
-            title: title,
-            body: body
-        },
-        tokens: registrationTokens
-    };
+    
 
-    admin.messaging().sendMulticast(message)
-        .then((response) => {
-            console.log('Multicast notification sent:', response);
+    for (let i in registrationTokens) {
+        let message = {
+            data: {
+                title: title,
+                body: body
+            },
+            token: registrationTokens[i]
+        };
+        admin.messaging().send(message).then((result) => {
+            console.log("Firebase send: ", result)
+        }).catch((err) => {
+            console.error("Firebase err: ", err)
         })
-        .catch((error) => {
-            console.error('Error sending multicast notification:', error);
-        });
+    }
 
 }
 

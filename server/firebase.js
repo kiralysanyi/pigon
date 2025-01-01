@@ -46,7 +46,7 @@ const sendNotification = (userID, title, body) => {
 
     for (let i in registrationTokens) {
         let message = {
-            data: {
+            notification: {
                 title: title,
                 body: body
             },

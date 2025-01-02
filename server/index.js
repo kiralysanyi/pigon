@@ -128,11 +128,12 @@ app.use("/api/v1/chat/cdn", authMiddleWare)
 app.get("/api/v1/chat/cdn", cdnGetHandler);
 app.post("/api/v1/chat/cdn", cdnPostHandler);
 
+const notificationService = require("./notificationservice")
 
 const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
 app.use("/api/v1/auth/removedevice", authMiddleWare);
 app.use("/api/v1/auth/removedevice", (req, res, next) => {
-    req.unsubscribe = unsubscribe;
+    req.unsubscribe = notificationService.unsubscribe();
     next();
 })
 app.delete("/api/v1/auth/removedevice", removedeviceHandler);
@@ -141,7 +142,7 @@ app.use("/api/v1/auth/logout", authMiddleWare);
 
 app.use("/api/v1/auth/logout", (req, res, next) => {
     let userdata = req.userdata;
-    unsubscribe(userdata.userID, userdata.deviceID);
+    notificationService.unsubscribe(userdata.userID, userdata.deviceID);
     next();
 })
 
@@ -156,7 +157,7 @@ const { socketAuthHandler } = require("./communication_handler/authenticator");
 io.use(socketAuthHandler);
 const { newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers } = require("./communication_handler/sockethandler");
 
-const notificationService = require("./notificationservice")
+
 
 notificationService.addRoute(app)
 

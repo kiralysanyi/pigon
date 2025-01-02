@@ -95,7 +95,7 @@ const sendNotification = (userID, title, body, messageID, imageUrl = undefined) 
         }
 
         if (imageUrl != undefined) {
-            msg.imageUrl = imageUrl;
+            msg.notification.imageUrl = imageUrl;
         }
 
         admin.messaging().send(msg).then((result) => {

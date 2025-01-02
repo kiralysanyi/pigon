@@ -66,6 +66,12 @@ let getMessagesHandler = async (req, res) => {
                 }
                 if (result[i]["messageID"] > lastReadMessage) {
                     result[i]["read"] = false;
+                    try {
+                        req.cancelNotification(userdata.userID, result[i]["messageID"])
+                    } catch (error) {
+                        console.error("Failed to unsend notification", error)
+                    }
+
                 } else {
                     result[i]["read"] = true;
                 }

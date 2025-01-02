@@ -1,13 +1,17 @@
 const { Socket } = require("socket.io");
 
-let sendPushNotification;
+let sendPushNotification, cancelNotification;
 
 /**
  * 
  * @param {()=>{}} pushcallback 
+ * @param {()=>{}} cancelcallback
  */
-let addPushCallback = (pushcallback) => {
+let addPushCallback = (pushcallback, cancelcallback) => {
     sendPushNotification = pushcallback;
+    if (cancelcallback != undefined) {
+        cancelNotification = cancelcallback;
+    }
 }
 
 const sockets = {}

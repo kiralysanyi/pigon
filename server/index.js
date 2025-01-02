@@ -112,7 +112,6 @@ app.use("/api/v1/auth/search", authMiddleWare);
 
 app.get("/api/v1/auth/search", require("./endpoints/v1/searchuser").searchHandler)
 app.get("/api/v1/chat/chats", require("./endpoints/v1/chat/getchats").getChatsHandler)
-app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)
 
 const { addgroupuserHandler, deletegroupuserHandler, deleteGroupHandler, leaveGroupHandler } = require("./endpoints/v1/chat/groupthings");
 app.use("/api/v1/chat/groupuser", authMiddleWare);
@@ -128,117 +127,6 @@ const { cdnGetHandler, cdnPostHandler } = require("./endpoints/v1/chat/cdn");
 app.use("/api/v1/chat/cdn", authMiddleWare)
 app.get("/api/v1/chat/cdn", cdnGetHandler);
 app.post("/api/v1/chat/cdn", cdnPostHandler);
-
-//push notification service
-const webpush = require('web-push');
-
-
-const VAPID_PUB = process.env.VAPID_PUB;
-const VAPID_PRIV = process.env.VAPID_PRIV;
-
-webpush.setVapidDetails("mailto:nan@null.null", VAPID_PUB, VAPID_PRIV);
-
-app.get("/api/v1/push/pubkey", (req, res) => {
-    res.json({
-        success: true,
-        data: {
-            pubkey: VAPID_PUB
-        }
-    });
-})
-
-let subscriptions = {}
-const subscriptions_path = __dirname + "/subscriptions.json";
-
-if (fs.existsSync(subscriptions_path) == false) {
-    fs.writeFileSync(subscriptions_path, "{}");
-}
-
-try {
-    subscriptions = JSON.parse(fs.readFileSync(subscriptions_path));
-} catch (error) {
-    console.error("Failed to read saved subscriptions", error);
-}
-
-let saveSubscriptions = () => {
-    fs.writeFileSync(subscriptions_path, JSON.stringify(subscriptions));
-}
-
-// Create route for allow client to subscribe to push notification.
-app.use("/api/v1/push/subscribe", authMiddleWare)
-app.post('/api/v1/push/subscribe', async (req, res) => {
-    console.log("Subscribe: ", req.userdata);
-
-    let userdata = req.userdata;
-
-    if (subscriptions[userdata["userID"]] == undefined) {
-        subscriptions[userdata["userID"]] = {};
-    }
-
-    const subscription = req.body;
-    console.log(subscription);
-    subscriptions[userdata["userID"]][userdata.deviceID] = subscription;
-    saveSubscriptions();
-    res.status(201).json({});
-})
-
-//check if firebase enabled
-let firebaseNotify;
-if (fs.existsSync("./firebase.json")) {
-    let {sendNotification, registerFirebaseClient} = require("./firebase")
-    firebaseNotify = sendNotification;
-    app.use("/api/v1/firebase/register", authMiddleWare)
-    app.post("/api/v1/firebase/register", (req, res) => {
-        if (req.body.registrationToken == undefined) {
-            res.status(400).json({
-                success: false,
-                message: "registrationToken not provided"
-            })
-            return;
-        }
-        registerFirebaseClient(req.userdata.userID, req.userdata.deviceID, req.body.registrationToken)
-        res.json({
-            success: true,
-            message: "Added client to service"
-        });
-    })
-}
-
-
-let sendPushNotification = (target, title, message, url) => {
-    if (firebaseNotify != undefined) {
-        firebaseNotify(target, title, message.content);
-    }
-    let payload = { title, body: message.content };
-    if (message.type != "text") {
-        payload.body = "New message";
-    }
-
-    if (url != undefined) {
-        payload.url = url;
-    }
-
-    payload = JSON.stringify(payload);
-
-    console.log(subscriptions, subscriptions[target], target);
-    for (let i in subscriptions[target]) {
-        webpush.sendNotification(subscriptions[target][i], payload, { urgency: "high" }).catch((err) => {
-            console.error(err);
-        });
-    }
-}
-
-let unsubscribe = (userID, deviceID) => {
-    console.log("Unsubscribe: ", userID, deviceID);
-    try {
-        console.log(subscriptions[userID][deviceID]);
-        delete subscriptions[userID][deviceID];
-        saveSubscriptions();
-    } catch (error) {
-        console.error("Unsubscribe: ", error);
-    }
-
-}
 
 
 const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
@@ -268,7 +156,26 @@ const { socketAuthHandler } = require("./communication_handler/authenticator");
 io.use(socketAuthHandler);
 const { newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers } = require("./communication_handler/sockethandler");
 
-addPushCallback(sendPushNotification);
+const notificationService = require("./notificationservice")
+
+notificationService.addRoute(app)
+
+if (notificationService.cancelNotification == undefined || notificationService.cancelNotification == null) {
+    addPushCallback(notificationService.sendPushNotification);
+} else {
+    addPushCallback(notificationService.sendPushNotification, notificationService.cancelNotification)
+}
+
+app.use("/api/v1/chat/messages", (req, res, next) => {
+    if (notificationService.cancelNotification != undefined || notificationService.cancelNotification != null) {
+        req.cancelNotification = notificationService.cancelNotification;
+    } else {
+        req.cancelNotification = () => {};
+    }
+
+    next();
+})
+app.get("/api/v1/chat/messages", require("./endpoints/v1/chat/getchats").getMessagesHandler)
 
 io.on("connection", connectionHandler)
 
@@ -443,6 +350,8 @@ app.get("/api/v1/auth/extrainfo", getExtraInfoHandler);
 app.post("/api/v1/auth/extrainfo", postExtraInfoHandler);
 
 app.get("/api/v1/cacheversion", versionHandler);
+
+
 
 
 server.listen(process.env.PORT, () => {

@@ -14,14 +14,15 @@ const removedeviceHandler = async (req, res) => {
     }
 
     try {
-        req.unsubscribe(userdata.userID, deviceID)
         await sqlQuery(`DELETE FROM devices WHERE deviceID = ?`, [deviceID]);
+        req.unsubscribe(userdata.userID, deviceID)
         res.json({
             success: true,
             data: {
                 message: "Device removed"
             }
         });
+        
     } catch (error) {
         res.status(500).json({
             success: false,

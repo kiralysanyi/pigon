@@ -101,7 +101,6 @@ let sendPushNotification = (target, title, message, url, messageID) => {
 let unsubscribe = (userID, deviceID) => {
     console.log("Unsubscribe: ", userID, deviceID);
     try {
-        console.log(subscriptions[userID][deviceID]);
         if (subscriptions[userID] != undefined && subscriptions[userID][deviceID] != undefined) {
             delete subscriptions[userID][deviceID];
             saveSubscriptions();
@@ -114,7 +113,7 @@ let unsubscribe = (userID, deviceID) => {
     try {
         fbunsubscribe(userID, deviceID)
     } catch (error) {
-        console.error(error)
+        console.error("Fb unsubscribe: ",error)
     }
 
 }

@@ -133,7 +133,7 @@ const notificationService = require("./notificationservice")
 const removedeviceHandler = require("./endpoints/v1/removedevice").removedeviceHandler;
 app.use("/api/v1/auth/removedevice", authMiddleWare);
 app.use("/api/v1/auth/removedevice", (req, res, next) => {
-    req.unsubscribe = notificationService.unsubscribe();
+    req.unsubscribe = notificationService.unsubscribe;
     next();
 })
 app.delete("/api/v1/auth/removedevice", removedeviceHandler);

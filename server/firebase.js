@@ -98,16 +98,16 @@ const sendNotification = (userID, title, body, messageID, imageUrl = undefined) 
 }
 
 let fbunsubscribe = (userID, deviceID) => {
-    console.log("Unsubscribe: ", userID, deviceID);
+    console.log("FB Unsubscribe: ", userID, deviceID);
     try {
-        console.log(subs[userID][deviceID]);
+        
         if (subs[userID] != undefined && subs[userID][deviceID] != undefined) {
             delete subs[userID][deviceID];
             fs.writeFileSync("./firebase_subs.json", JSON.stringify(subs))
         }
 
     } catch (error) {
-        console.error("Unsubscribe: ", error);
+        console.error("FB Unsubscribe: ", error);
     }
 
 }

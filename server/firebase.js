@@ -47,7 +47,7 @@ const sendCancelNotification = (userID, messageID) => {
         let msg = {
             data: {
                 type: "cancel",
-                messageID: messageID
+                messageID: messageID.toString()
             },
             token: registrationTokens[i]
         }
@@ -88,8 +88,8 @@ const sendNotification = (userID, title, body, messageID, imageUrl = undefined) 
             },
             data: {
                 type: "message",
-                messageID: messageID,
-                date: new Date().toISOString()
+                messageID: messageID.toString(),
+                date: new Date().toISOString().toString()
             },
             token: registrationTokens[i]
         }

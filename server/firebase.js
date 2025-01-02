@@ -29,7 +29,6 @@ const registerFirebaseClient = (userID, deviceID, registrationToken) => {
 }
 
 const sendCancelNotification = (userID, messageID) => {
-    console.log("Firebase: ", userID, title, body, subs[userID]);
     let registrationTokens = [];
     if (subs[userID] == undefined) {
         console.log("Firebase: userid not found ", userID)

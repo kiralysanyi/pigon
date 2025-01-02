@@ -52,10 +52,6 @@ const sendCancelNotification = (userID, messageID) => {
             token: registrationTokens[i]
         }
 
-        if (imageUrl != undefined) {
-            msg.imageUrl = imageUrl;
-        }
-
         admin.messaging().send(msg).then((result) => {
             console.log("Firebase send: ", result)
         }).catch((err) => {

@@ -159,22 +159,17 @@ app.get("/api/v1/auth/logout", logoutHandler);
 
 
 
-
-
-
 notificationService.addRoute(app)
 
-if (notificationService.cancelNotification == undefined || notificationService.cancelNotification == null) {
-    addPushCallback(notificationService.sendPushNotification);
-} else {
-    addPushCallback(notificationService.sendPushNotification, notificationService.cancelNotification)
-}
+
+addPushCallback(notificationService.sendPushNotification, notificationService.cancelNotification)
+
 
 app.use("/api/v1/chat/messages", (req, res, next) => {
     if (notificationService.cancelNotification != undefined || notificationService.cancelNotification != null) {
         req.cancelNotification = notificationService.cancelNotification;
     } else {
-        req.cancelNotification = () => {};
+        req.cancelNotification = () => { };
     }
 
     next();

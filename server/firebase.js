@@ -103,7 +103,7 @@ const sendNotification = (userID, title, body, messageID, imageUrl = undefined) 
 
 }
 
-let unsubscribe = (userID, deviceID) => {
+let fbunsubscribe = (userID, deviceID) => {
     console.log("Unsubscribe: ", userID, deviceID);
     try {
         console.log(subs[userID][deviceID]);
@@ -118,4 +118,4 @@ let unsubscribe = (userID, deviceID) => {
 
 }
 
-module.exports = { sendNotification, registerFirebaseClient, unsubscribe, sendCancelNotification }
+module.exports = { sendNotification, registerFirebaseClient, fbunsubscribe, sendCancelNotification }

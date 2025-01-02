@@ -26,8 +26,8 @@ try {
 let saveSubscriptions = () => {
     fs.writeFileSync(subscriptions_path, JSON.stringify(subscriptions));
 }
-
-let firebaseNotify, firebaseUnsubscribe, cancelNotification;
+let { sendNotification, registerFirebaseClient, fbunsubscribe, sendCancelNotification } = require("./firebase");
+const cancelNotification = sendCancelNotification;
 let addRoute = (app) => {
     // Create route for allow client to subscribe to push notification.
 
@@ -57,36 +57,27 @@ let addRoute = (app) => {
         res.status(201).json({});
     })
 
-    //check if firebase enabled
+    app.use("/api/v1/firebase/register", authMiddleWare)
+    app.post("/api/v1/firebase/register", (req, res) => {
+        if (req.body.registrationToken == undefined) {
+            res.status(400).json({
+                success: false,
+                message: "registrationToken not provided"
+            })
+            return;
+        }
+        registerFirebaseClient(req.userdata.userID, req.userdata.deviceID, req.body.registrationToken)
+        res.json({
+            success: true,
+            message: "Added client to service"
+        });
+    })
 
-    if (fs.existsSync("./firebase.json")) {
-        let { sendNotification, registerFirebaseClient, unsubscribe, sendCancelNotification } = require("./firebase");
-        firebaseUnsubscribe = unsubscribe;
-        firebaseNotify = sendNotification;
-        cancelNotification = sendCancelNotification;
-        app.use("/api/v1/firebase/register", authMiddleWare)
-        app.post("/api/v1/firebase/register", (req, res) => {
-            if (req.body.registrationToken == undefined) {
-                res.status(400).json({
-                    success: false,
-                    message: "registrationToken not provided"
-                })
-                return;
-            }
-            registerFirebaseClient(req.userdata.userID, req.userdata.deviceID, req.body.registrationToken)
-            res.json({
-                success: true,
-                message: "Added client to service"
-            });
-        })
-    }
 }
 
 
 let sendPushNotification = (target, title, message, url, messageID) => {
-    if (firebaseNotify != undefined) {
-        firebaseNotify(target, title, message.content, messageID, url);
-    }
+    sendNotification(target, title, message.content, messageID, url);
     let payload = { title, body: message.content };
     if (message.type != "text") {
         payload.body = "New message";
@@ -121,9 +112,7 @@ let unsubscribe = (userID, deviceID) => {
     }
 
     try {
-        if (firebaseUnsubscribe != undefined) {
-            firebaseUnsubscribe(userID, deviceID)
-        }
+        fbunsubscribe(userID, deviceID)
     } catch (error) {
         console.error(error)
     }

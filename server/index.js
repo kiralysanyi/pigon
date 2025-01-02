@@ -140,6 +140,8 @@ app.delete("/api/v1/auth/removedevice", removedeviceHandler);
 
 app.use("/api/v1/auth/logout", authMiddleWare);
 
+socketLogoutHandler(app);
+
 app.use("/api/v1/auth/logout", (req, res, next) => {
     let userdata = req.userdata;
     notificationService.unsubscribe(userdata.userID, userdata.deviceID);
@@ -155,7 +157,7 @@ app.get("/api/v1/auth/logout", logoutHandler);
 // Authenticate socket connection
 const { socketAuthHandler } = require("./communication_handler/authenticator");
 io.use(socketAuthHandler);
-const { newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers } = require("./communication_handler/sockethandler");
+const { newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers, socketLogoutHandler } = require("./communication_handler/sockethandler");
 
 
 

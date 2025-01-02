@@ -71,6 +71,19 @@ let SETgetCallUsers = (fn = (callid) => {}) => {
     getCallUsers = fn;
 }
 
+let socketLogoutHandler = (app) => {
+    app.use("/api/v1/auth/logout", (req, res, next) => {
+        try {
+            sockets[req.userdata.userID][req.userdata.deviceID].disconnect(true);
+            delete sockets[req.userdata.userID][req.userdata.deviceID]
+        } catch (error) {
+            console.error("Socket logout handler: ", error)
+        }
+
+        next();
+    })
+}
+
 let connectionHandler = (socket) => {
     if (socket.userInfo == undefined) {
         return;
@@ -198,4 +211,4 @@ let connectionHandler = (socket) => {
 
 } 
 
-module.exports = {newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers}
+module.exports = {newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers, socketLogoutHandler}

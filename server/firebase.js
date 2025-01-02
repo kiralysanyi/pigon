@@ -78,11 +78,9 @@ const sendNotification = (userID, title, body, messageID, imageUrl = undefined) 
 
     for (let i in registrationTokens) {
         let msg = {
-            notification: {
+            data: {
                 title: title,
                 body: body,
-            },
-            data: {
                 type: "message",
                 messageID: messageID.toString(),
                 date: new Date().toISOString().toString()

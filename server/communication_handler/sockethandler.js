@@ -97,7 +97,7 @@ let connectionHandler = (socket) => {
             sendDataToSockets(called, "cancelledcall", {callid, username, chatid})
         })
         if (isUserOnline(called) == false) {
-            sendPushNotification(called, "Missed Call", {type: "text", content: "You missed a call from: " + username});
+            sendPushNotification(called, "Missed Call", {type: "text", content: "You missed a call from: " + username}, 0);
             socket.emit("callresponse" + callid, {accepted: false, reason: "Not available"});
             return;
         }
@@ -183,7 +183,7 @@ let connectionHandler = (socket) => {
                         message.content = rawMessage;
                     }
                     if (isUserOnline(toNotify[i]) == false) {
-                        sendPushNotification(toNotify[i], senderName, message, "/app/webui/index.html#" + chatID);
+                        sendPushNotification(toNotify[i], senderName, message, "/app/webui/index.html#" + chatID, latestmessageinchat);
                     }
                 }
             }

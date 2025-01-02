@@ -83,9 +83,9 @@ let addRoute = (app) => {
 }
 
 
-let sendPushNotification = (target, title, message, url) => {
+let sendPushNotification = (target, title, message, url, messageID) => {
     if (firebaseNotify != undefined) {
-        firebaseNotify(target, title, message.content);
+        firebaseNotify(target, title, message.content, messageID, url);
     }
     let payload = { title, body: message.content };
     if (message.type != "text") {

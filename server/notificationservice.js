@@ -122,7 +122,7 @@ let unsubscribe = (userID, deviceID) => {
 
     try {
         if (firebaseUnsubscribe != undefined) {
-            firebaseUnsubscribe()
+            firebaseUnsubscribe(userID, deviceID)
         }
     } catch (error) {
         console.error(error)

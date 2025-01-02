@@ -94,10 +94,6 @@ const sendNotification = (userID, title, body, messageID, imageUrl = undefined) 
             token: registrationTokens[i]
         }
 
-        if (imageUrl != undefined) {
-            msg.notification.imageUrl = imageUrl;
-        }
-
         admin.messaging().send(msg).then((result) => {
             console.log("Firebase send: ", result)
         }).catch((err) => {

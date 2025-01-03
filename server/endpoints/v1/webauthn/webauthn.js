@@ -1,12 +1,13 @@
-const { server } = require("@passwordless-id/webauthn");
+const {server} = require("@passwordless-id/webauthn");
 const { verifyPass, userExists, sqlQuery, registerDevice, getUserFromID } = require("../../../things/db");
 const jwt = require("jsonwebtoken");
 const uid = require("uuid").v4;
 const fs = require("fs");
 
-
 let challenges = [];
 const origin = process.env.ORIGIN;
+
+const allowedOrigins = [origin, "android:apk-key-hash:8gym9SvvYCvHtXdlJaOKguZ6LGEJt5jY7IZL6jB32gc"]
 
 const challengeHandler = async (req, res) => {
     const challenge = server.randomChallenge();
@@ -76,6 +77,8 @@ const authHandler = async (req, res) => {
     let credentialID = authentication["id"];
     let deviceName = req.body.deviceName;
 
+    console.log("Request body: ", req.body)
+
     if (deviceName == undefined) {
         deviceName = "N/A"
     }
@@ -128,11 +131,13 @@ const authHandler = async (req, res) => {
     //console.log(credential);
     const expected = {
         challenge: challenge,
-        origin: origin
+        origin: (origin) => allowedOrigins.includes(origin)
     }
 
     try {
-        const authenticationParsed = await server.verifyAuthentication(authentication, credential, expected)
+        console.log(authentication, credential, expected)
+        
+        const authenticationParsed = await server.verifyAuthentication(authentication, credential, expected, new URL(origin).hostname)
         console.log(authenticationParsed);
         let deviceID = uid();
         let deviceInfo = {

@@ -13,7 +13,7 @@
   "author": "Király Sándor, Kis Attila",
   "license": "ISC",
   "dependencies": {
-    "@passwordless-id/webauthn": "^2.1.1",
+    "@passwordless-id/webauthn": "file:webauthn",
     "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

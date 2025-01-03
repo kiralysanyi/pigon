@@ -1,0 +1,3 @@
+[submodule "server/webauthn"]
+	path = server/webauthn
+	url = https://github.com/kiralysanyi/webauthn.git

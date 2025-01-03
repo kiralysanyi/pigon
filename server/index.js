@@ -353,7 +353,7 @@ app.get("/api/v1/cacheversion", versionHandler);
 
 //well known thing
 app.get("/.well-known/assetlinks.json", (req, res) => {
-    res.send(__dirname + "/assetlinks.json")
+    res.sendFile(__dirname + "/assetlinks.json")
 })
 
 server.listen(process.env.PORT, () => {

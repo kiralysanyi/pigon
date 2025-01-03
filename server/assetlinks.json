@@ -1,0 +1,15 @@
+[
+    {
+      "relation" : [
+        "delegate_permission/common.handle_all_urls",
+        "delegate_permission/common.get_login_creds"
+      ],
+      "target" : {
+        "namespace" : "android_app",
+        "package_name" : "com.trashworks.pigon",
+        "sha256_cert_fingerprints" : [
+          "F2:0C:A6:F5:2B:EF:60:2B:C7:B5:77:65:25:A3:8A:82:E6:7A:2C:61:09:B7:98:D8:EC:86:4B:EA:30:77:DA:07"
+        ]
+      }
+    }
+  ]

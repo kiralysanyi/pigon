@@ -351,7 +351,10 @@ app.post("/api/v1/auth/extrainfo", postExtraInfoHandler);
 app.get("/api/v1/cacheversion", versionHandler);
 
 
-
+//well known thing
+app.get("/.well-known/assetlinks.json", (req, res) => {
+    res.send(__dirname + "/assetlinks.json")
+})
 
 server.listen(process.env.PORT, () => {
     console.log(`Listening on port:${process.env.PORT}`);

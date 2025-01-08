@@ -38,7 +38,7 @@ let isUserOnline = (userID) => {
     } else {
         return false;
     }
-} 
+}
 
 let getSocketsForUser = (userID) => {
     return sockets[userID]
@@ -65,9 +65,9 @@ function sanitizeInput(input) {
         .replace(/'/g, '&#39;'); // Escape single quotes
 }
 
-let getCallUsers = (callid) => {}
+let getCallUsers = (callid) => { }
 
-let SETgetCallUsers = (fn = (callid) => {}) => {
+let SETgetCallUsers = (fn = (callid) => { }) => {
     getCallUsers = fn;
 }
 
@@ -97,7 +97,7 @@ let connectionHandler = (socket) => {
         delete sockets[socket.userInfo.userID][socket.userInfo.deviceID]
     })
 
-    socket.on("call", async ({callid, username, chatid}) => {
+    socket.on("call", async ({ callid, username, chatid }) => {
         console.log("New call: ", callid, username, chatid);
         const callerID = socket.userInfo.userID;
         console.log("CallerID: ", callerID);
@@ -105,30 +105,30 @@ let connectionHandler = (socket) => {
         console.log(called);
         called = (removeValue(called, callerID))[0];
         console.log("Called: ", called);
-        sendDataToSockets(called, "incomingcall", {callid, username, chatid});
-        socket.once("cancelcall", ({callid, username, chatid}) => {
-            sendDataToSockets(called, "cancelledcall", {callid, username, chatid})
+        sendDataToSockets(called, "incomingcall", { callid, username, chatid });
+        socket.once("cancelcall", ({ callid, username, chatid }) => {
+            sendDataToSockets(called, "cancelledcall", { callid, username, chatid })
         })
         if (isUserOnline(called) == false) {
-            sendPushNotification(called, "Missed Call", {type: "text", content: "You missed a call from: " + username}, 0);
-            socket.emit("callresponse" + callid, {accepted: false, reason: "Not available"});
+            sendPushNotification(called, "Missed Call", { type: "text", content: "You missed a call from: " + username }, 0);
+            socket.emit("callresponse" + callid, { accepted: false, reason: "Not available" });
             return;
         }
 
         let targetSockets = getSocketsForUser(called)
 
         for (let i in targetSockets) {
-            targetSockets[i].once("response" + callid, ({accepted, reason}) => {
+            targetSockets[i].once("response" + callid, ({ accepted, reason }) => {
                 for (let x in targetSockets) {
                     targetSockets[x].emit("acceptedcall");
                 }
                 console.log(accepted, reason);
-                socket.emit("callresponse" + callid, {accepted, reason})
+                socket.emit("callresponse" + callid, { accepted, reason })
             })
         }
     });
 
-    socket.on("setLastRead", async ({chatID,messageID}) => {
+    socket.on("setLastRead", async ({ chatID, messageID }) => {
         let userID = socket.userInfo.userID;
         console.log(userID, " read ", messageID);
         //TODO: productionből kivenni a logolást mert ha ezt meglátja valamelyik nagyokos falnak megy
@@ -166,7 +166,7 @@ let connectionHandler = (socket) => {
 
         try {
             //sanitize
-            
+
             if (message.type == "text") {
                 message.content = sanitizeInput(message.content);
                 message.content = escapeJsonControlCharacters(message.content);
@@ -195,9 +195,7 @@ let connectionHandler = (socket) => {
                     if (message.type == "text") {
                         message.content = rawMessage;
                     }
-                    if (isUserOnline(toNotify[i]) == false) {
-                        sendPushNotification(toNotify[i], senderName, message, "/app/webui/index.html#" + chatID, latestmessageinchat);
-                    }
+                    sendPushNotification(toNotify[i], senderName, message, "/app/webui/index.html#" + chatID, latestmessageinchat);
                 }
             }
 
@@ -209,6 +207,6 @@ let connectionHandler = (socket) => {
 
     })
 
-} 
+}
 
-module.exports = {newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers, socketLogoutHandler}
+module.exports = { newChatHandler, connectionHandler, addPushCallback, SETgetCallUsers, socketLogoutHandler }

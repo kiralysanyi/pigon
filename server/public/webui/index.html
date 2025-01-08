@@ -19,31 +19,6 @@
 
             if ("serviceWorker" in navigator) {
                 const register = await navigator.serviceWorker.register("/sw.js");
-
-                let publicVapidKey;
-
-                let res = await fetch("/api/v1/push/pubkey", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    }
-                });
-
-                publicVapidKey = (await res.json())["data"]["pubkey"];
-
-                const subscription = await register.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: publicVapidKey
-                });
-
-                await fetch("/api/v1/push/subscribe", {
-                    method: "POST",
-                    body: JSON.stringify(subscription),
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                    }
-                })
             }
         };
     </script>

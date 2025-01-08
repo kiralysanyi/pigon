@@ -1,7 +1,7 @@
 {
-  "name": "mivan-server",
+  "name": "pigon-server",
   "version": "1.0.0",
-  "description": "Authentication + chat server, very gut and kókány",
+  "description": "Server for pigon.",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --ext js index.js",

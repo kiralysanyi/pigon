@@ -2,11 +2,6 @@
 const { authMiddleWare } = require('./things/auth_middleware');
 const fs = require("fs");
 
-
-
-let saveSubscriptions = () => {
-    fs.writeFileSync(subscriptions_path, JSON.stringify(subscriptions));
-}
 let { sendNotification, registerFirebaseClient, fbunsubscribe, sendCancelNotification } = require("./firebase");
 const cancelNotification = sendCancelNotification;
 let addRoute = (app) => {

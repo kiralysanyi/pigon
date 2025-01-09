@@ -190,11 +190,12 @@ const { getExtraInfoHandler, postExtraInfoHandler } = require('./endpoints/v1/us
 
 let calls = {}
 
-initCallJS((callid, allowedIDs, chatid) => {
+initCallJS((callid, allowedIDs, chatid, initiator) => {
     calls[callid] = {
         users: allowedIDs,
         chat: chatid,
-        peers: []
+        peers: [],
+        initiator
     };
     console.log(calls);
 });
@@ -333,7 +334,10 @@ app.get("/api/v1/chat/getPeerIDs", (req, res) => {
 
         res.json({
             success: true,
-            data: peers
+            data: {
+                peers,
+                initiator: calls[callid]["initiator"]
+            }
         })
     }
 

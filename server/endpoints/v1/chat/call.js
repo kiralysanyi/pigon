@@ -57,7 +57,7 @@ let createCallHandler = async (req, res) => {
 
     const callid = uuidv4();
 
-    callCb(callid, allowedIDs, chatid);
+    callCb(callid, allowedIDs, chatid, userdata.deviceID);
     setTimeout(() => {
         res.json({
             succes: true,
@@ -66,6 +66,7 @@ let createCallHandler = async (req, res) => {
                 username: userdata.username,
                 callid: callid,
                 chatid: chatid
+                
             }
         });
     }, 500);

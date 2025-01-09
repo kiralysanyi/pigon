@@ -85,10 +85,15 @@ let incomingCallHandler = (callID, userName, cb = (accepted, reason) => { }) => 
 
 }
 
-let cancelCallHanlder = () => {
+let cancelCallHandler = () => {
     inCall = false;
     stopRingtone();
-    document.getElementById("callpopup").remove();
+    try {
+        document.getElementById("callpopup").remove();
+    } catch (error) {
+        
+    }
+    
 }
 
 let call = async (chatID, socket) => {
@@ -182,4 +187,4 @@ let call = async (chatID, socket) => {
 
 }
 
-export { incomingCallHandler, cancelCallHanlder, call }
+export { incomingCallHandler, cancelCallHandler, call }

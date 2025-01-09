@@ -14,7 +14,8 @@ let addPushCallback = (pushcallback, cancelcallback) => {
     }
 }
 
-const sockets = {}
+const sockets = {};
+const socket_userid = {};
 
 /**
  * 
@@ -76,6 +77,7 @@ let socketLogoutHandler = (app) => {
         try {
             sockets[req.userdata.userID][req.userdata.deviceID].disconnect(true);
             delete sockets[req.userdata.userID][req.userdata.deviceID]
+            delete socket_userid[req.userdata.deviceID]
         } catch (error) {
             console.error("Socket logout handler: ", error)
         }
@@ -92,9 +94,22 @@ let connectionHandler = (socket) => {
         sockets[socket.userInfo.userID] = {}
     }
     sockets[socket.userInfo.userID][socket.userInfo.deviceID] = socket;
+    socket_userid[socket.userInfo.deviceID] = socket.userInfo.userID;
     socket.on("disconnect", (reason) => {
         console.log("Socket disconnected", reason);
         delete sockets[socket.userInfo.userID][socket.userInfo.deviceID]
+    })
+
+    //relay data between sockets
+    socket.on("relay", ({deviceID, data}) => {
+        try {
+            const targetUserID = socket_userid[deviceID];
+            sockets[targetUserID][deviceID].emit("relay", {senderID: socket.userInfo.deviceID, data})
+        } catch (error) {
+            console.error(error)
+            socket.emit("error", error)
+        }
+        
     })
 
     socket.on("call", async ({ callid, username, chatid }) => {

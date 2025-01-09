@@ -9,6 +9,8 @@ const socket = io(location.host, {
     path: "/socketio"
 });
 
+window.socket = socket;
+
 document.getElementById("callbtn").addEventListener("click", () => {
     call.call(window.selectedchat, socket)
 })
@@ -24,7 +26,7 @@ socket.on("disconnect", () => {
 socket.on("incomingcall", ({callid, username, chatid}) => {
     socket.once("cancelledcall", (data) => {
         if (data.callid == callid) {
-            call.cancelCallHanlder();      
+            call.cancelCallHandler();      
         }
     })
     call.incomingCallHandler(callid, username, (accepted, reason) => {
@@ -34,7 +36,7 @@ socket.on("incomingcall", ({callid, username, chatid}) => {
 })
 
 socket.on("acceptedcall", () => {
-    call.cancelCallHanlder();
+    call.cancelCallHandler();
 })
 
 

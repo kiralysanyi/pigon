@@ -20,21 +20,6 @@ for (let i in devices) {
 const callid = location.hash.substring(1);
 
 
-// TODO: host our own peerjs server and add it's config here
-const peer = new Peer(deviceID, { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }], 'sdpSemantics': 'unified-plan' });
-const vpeer = new Peer("video" + deviceID, { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }], 'sdpSemantics': 'unified-plan' });
-const speer = new Peer("screen" + deviceID, { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }], 'sdpSemantics': 'unified-plan' });
-
-peer.on('connection', (conn) => {
-    conn.on('data', (data) => {
-        if (data === 'ping') {
-            setTimeout(() => {
-                conn.send('pong');
-            }, 1000);
-        }
-    });
-});
-
 await fetch("/api/v1/chat/registerPeer", {
     method: "POST",
     credentials: "include",
@@ -53,9 +38,82 @@ let response = await fetch("/api/v1/chat/getPeerIDs?" + new URLSearchParams({ ca
     credentials: "include"
 });
 peers = await response.json();
-peers = peers["data"]
+const initiator = peers["data"]["initiator"]
+const isInitiator = deviceID == initiator;
+peers = peers["data"]["peers"];
+
 
 console.log("Peers to call: ", peers);
+
+const socket = window.parent.window.socket;
+
+socket.on("relay", (data) => {
+    console.log("Relay", JSON.stringify(data))
+})
+
+let timeout;
+if (isInitiator) {
+    let pingpong = () => {
+        socket.emit("relay", { deviceID: peers[0], data: { type: "ping" } })
+        socket.once("relay", (data) => {
+            if (data.data.type == "pong") {
+                if (timeout) {
+                    clearTimeout(timeout)
+                }
+
+                timeout = setTimeout(() => {
+                    timeout = setTimeout(() => {
+                        if (window.parent.window.callEnded != undefined) {
+                            window.parent.window.callEnded();
+                        } else {
+                            window.close();
+                        }
+                    }, 2000);
+                    pingpong();
+                }, 1000);
+            }
+        })
+    }
+
+    pingpong();
+} else {
+    socket.on("relay", (data) => {
+        if (data.data.type == "ping") {
+            if (timeout) {
+                clearTimeout(timeout)
+            }
+            timeout = setTimeout(() => {
+                if (window.parent.window.callEnded != undefined) {
+                    window.parent.window.callEnded();
+                } else {
+                    window.close();
+                }
+            }, 2000);
+
+            socket.emit("relay", {
+                deviceID: data.senderID, data: {
+                    type: "pong"
+                }
+            })
+        }
+    })
+}
+
+const configuration = {
+    iceServers: [
+        {
+            urls: 'stun:stun.l.google.com:19302' // Google's public STUN server
+        }
+    ]
+};
+
+const peerConnection = new RTCPeerConnection(configuration);
+
+peerConnection.addEventListener("connectionstatechange", (e) => {
+    console.log("Connection state: ", e)
+})
+
+
 
 /**
  * Requests microphone access and returns a MediaStream.
@@ -92,68 +150,112 @@ async function getCameraStream() {
 }
 
 let audiostream = await getMicrophoneStream();
+const audioTrack = audiostream.getAudioTracks()[0]
 
-let mediaConnections = [];
 
-for (let i in peers) {
+peerConnection.addTrack(audioTrack);
 
-    let connection = peer.connect(peers[i]);
+//add event listeners
 
-    connection.on('open', () => {
-        connection.send('ping');
-    });
+const videoPlayer = document.createElement("video");
+videoPlayer.autoplay = true;
+videoPlayer.muted = false;
+document.getElementById("videocontainer").appendChild(videoPlayer)
+document.getElementById("videocontainer").style.display = "none";
 
-    let timeout;
 
-    connection.on('data', (data) => {
-        if (data == "pong") {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                console.log("Peer disconnected");
-                if (window.parent.window.callEnded != undefined) {
-                    window.parent.window.callEnded();
-                } else {
-                    window.close();
-                }
-            }, 5000);
-            setTimeout(() => {
-                connection.send('ping');
-            }, 1000);
-        }
-    });
+let audioPlayer = new Audio();
+audioPlayer.autoplay = true;
+peerConnection.addEventListener("track", (e) => {
+    console.log("Incoming track: ", e)
+    if (e.track.kind == "audio") {
+        let stream = new MediaStream([e.track]);
+        audioPlayer.srcObject = stream;
+    }
 
-    let mediaConnection = peer.call(peers[i], audiostream);
-    mediaConnections.push(mediaConnection);
-    mediaConnection.on("stream", (stream) => {
-        console.log("Got stream: ", stream)
-        let audioelement = new Audio();
-        audioelement.srcObject = stream;
-        audioelement.play();
-    })
-}
+    if (e.track.kind == "video") {
+        document.getElementById("videocontainer").style.display = "block";
+        let stream = new MediaStream([e.track])
+        videoPlayer.srcObject = stream;
+        e.track.addEventListener("ended", () => {
+            document.getElementById("videocontainer").style.display = "none";
+        })
+    }
+})
 
-peer.on("call", (mediaConnection) => {
-    mediaConnection.on("stream", (stream) => {
-        console.log("Got stream: ", stream)
-        let audioelement = new Audio();
-        audioelement.srcObject = stream;
-        audioelement.play();
-    })
-    mediaConnections.push(mediaConnection);
-    mediaConnection.answer(audiostream);
-    mediaConnection.on("close", () => {
-        if (window.parent.window.callEnded != undefined) {
-            window.parent.window.callEnded();
-        } else {
-            window.close();
+//build up connection
+peerConnection.addEventListener("icecandidate", (e) => {
+    socket.emit("relay", {
+        deviceID: peers[0],
+        data: {
+            type: "candidate",
+            candidate: e.candidate
         }
     })
 })
 
-document.getElementById("closebtn").addEventListener("click", () => {
-    for (let i in mediaConnections) {
-        mediaConnections[i].close();
+
+peerConnection.addEventListener("negotiationneeded", async (e) => {
+
+    let offer = await peerConnection.createOffer();
+    peerConnection.setLocalDescription(offer);
+    socket.emit("relay", {
+        deviceID: peers[0],
+        data: {
+            type: "offer",
+            offer: offer
+        }
+    })
+
+
+})
+
+socket.on("relay", (data) => {
+    if (data.data.type == "candidate") {
+        peerConnection.addIceCandidate(data.data.candidate)
     }
+})
+
+if (isInitiator) {
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer)
+    socket.emit("relay", {
+        deviceID: peers[0],
+        data: {
+            type: "offer",
+            offer: offer
+        }
+    })
+}
+
+socket.on("relay", async (data) => {
+    if (data.data.type == "answer") {
+        await peerConnection.setRemoteDescription(data.data.answer)
+    }
+})
+
+
+socket.on("relay", async (data) => {
+    if (data.data.type == "offer") {
+        await peerConnection.setRemoteDescription(data.data.offer)
+        const answer = await peerConnection.createAnswer(data.data.offer);
+        await peerConnection.setLocalDescription(answer)
+
+
+        socket.emit("relay", {
+            deviceID: data.senderID,
+            data: {
+                type: "answer",
+                answer: answer
+            }
+        })
+    }
+})
+
+
+
+document.getElementById("closebtn").addEventListener("click", () => {
+
     if (window.parent.window.callEnded != undefined) {
         window.parent.window.callEnded();
     } else {
@@ -218,10 +320,6 @@ function stopMediaStream(mediaStream) {
     mediaStream.getTracks().forEach((track) => track.stop());
 }
 
-//video streaming things
-
-//handle incoming video stream
-let videoStreamCount = 0;
 let dockHideTimeout;
 let mmovelistener = () => {
     document.getElementById("dock").style.bottom = "10px";
@@ -248,74 +346,41 @@ let disableDockAutoHide = () => {
 
 }
 
-vpeer.on("call", (mediaConnection) => {
-    mediaConnection.on("stream", (stream) => {
-        videoStreamCount++;
-        let videoElement = document.createElement("video");
-        videoElement.muted = true;
-        videoElement.autoplay = true;
-        videoElement.srcObject = stream;
-        document.getElementById("videocontainer").appendChild(videoElement);
-        document.getElementById("videocontainer").style.display = "block";
-
-        mediaConnection.on("close", () => {
-            videoStreamCount--;
-            videoElement.remove();
-            if (videoStreamCount == 0) {
-                document.getElementById("videocontainer").style.display = "none";
-            }
-        })
-    })
-
-    mediaConnection.answer(new MediaStream())
+socket.on("relay", (payload) => {
+    if (payload.data.type == "videostopped") {
+        document.getElementById("videocontainer").style.display = "none";
+    }
 })
 
-/**
- * Returns a function to stop the video streaming
- */
-let startVideoStream = async () => {
-    let selfView = document.createElement("video");
-    selfView.classList.add("selfView");
-    selfView.autoplay = true;
-    selfView.muted = true;
-    let stream = await getCameraStream();
-    selfView.srcObject = stream;
-    document.body.appendChild(selfView);
-    let connections = [];
-    for (let i in peers) {
-        let mediaConnection = vpeer.call("video" + peers[i], stream);
-        connections.push(mediaConnection);
-    }
-
-    return () => {
-        for (let i in connections) {
-            connections[i].close();
-            stopMediaStream(stream);
-            selfView.remove();
-
-        }
-    }
-}
-
-
-let stopVideoStream = null;
+let videoStreaming = false;
+let videoStream = null;
+let videoSender;
 let toggleVideo = async () => {
-    if (stopVideoStream == null) {
-        document.getElementById("screenbtn").style.display = "none";
+    if (videoStreaming == false) {
+        videoStream = await getCameraStream()
+        let videotrack = videoStream.getVideoTracks()[0];
+        videoSender = peerConnection.addTrack(videotrack);
+        videoStreaming = true;
+        document.getElementById("selfView").srcObject = videoStream;
+        document.getElementById("selfView").style.display = "block";
         document.getElementById("videobtn").innerHTML = '<i class="fa-solid fa-video"></i>';
-        stopVideoStream = await startVideoStream();
-        return;
-    }
-
-    stopVideoStream();
-    if (canCaptureScreen() == true) {
+        document.getElementById("screenbtn").style.display = "none";
+    } else {
+        videoStreaming = false;
+        document.getElementById("videobtn").innerHTML = '<i class="fa-solid fa-video-slash"></i>';
+        peerConnection.removeTrack(videoSender);
+        socket.emit("relay", {
+            deviceID: peers[0],
+            data: {
+                type: "videostopped"
+            }
+        })
+        stopMediaStream(videoStream)
+        document.getElementById("selfView").style.display = "none";
         document.getElementById("screenbtn").style.display = "block";
     }
-    document.getElementById("videobtn").innerHTML = '<i class="fa-solid fa-video-slash"></i>';
-    stopVideoStream = null;
+
 }
-
-
 
 document.getElementById("videobtn").addEventListener("click", () => {
     toggleVideo();
@@ -356,95 +421,41 @@ if (canCaptureScreen() == true) {
     document.getElementById("screenbtn").style.display = "block";
 }
 
+let toggleScreenCapture = async () => {
+    if (videoStreaming == false) {
+        videoStream = await captureScreen();
+        let videotrack = videoStream.getVideoTracks()[0];
+        videoSender = peerConnection.addTrack(videotrack);
+        videoStreaming = true;
 
-//handle incoming video stream
-let svideoStreamCount = 0;
-
-speer.on("call", (mediaConnection) => {
-    mediaConnection.on("stream", (stream) => {
-        svideoStreamCount++;
-        let videoElement = document.createElement("video");
-        videoElement.muted = false;
-        videoElement.autoplay = true;
-        videoElement.srcObject = stream;
-        document.getElementById("videocontainer").appendChild(videoElement);
-        document.getElementById("videocontainer").style.display = "block";
-        enableDockAutoHide();
-
-        mediaConnection.on("close", () => {
-            svideoStreamCount--;
-            videoElement.remove();
-            disableDockAutoHide();
-            if (svideoStreamCount == 0) {
-                document.getElementById("videocontainer").style.display = "none";
+        videoStream.getVideoTracks()[0].addEventListener("ended", () => {
+            if (videoStreaming == true) {
+                toggleScreenCapture();
             }
         })
-    })
-
-    mediaConnection.answer(new MediaStream())
-})
-
-/**
- * Returns a function to stop the video streaming
- */
-let startsVideoStream = async (streamendCallback = () => { }) => {
-    let selfView = document.createElement("video");
-    selfView.classList.add("selfView");
-    selfView.autoplay = true;
-    selfView.muted = true;
-    let stream = await captureScreen();
-
-    selfView.srcObject = stream;
-    document.body.appendChild(selfView);
-
-    let connections = [];
-    for (let i in peers) {
-        let mediaConnection = speer.call("screen" + peers[i], stream);
-        connections.push(mediaConnection);
-    }
-
-    let stopFunction = () => {
-        for (let i in connections) {
-            connections[i].close();
-            stopMediaStream(stream);
-            selfView.remove();
-        }
-    }
-
-    let track = stream.getTracks()[0];
-    track.onended = () => {
-        streamendCallback();
-    }
-
-    return stopFunction;
-}
-
-
-let stopsVideoStream = null;
-let togglesVideo = async () => {
-
-    let disSvideo = () => {
-        stopsVideoStream();
-        document.getElementById("videobtn").style.display = "block";
-        document.getElementById("screenbtn").style.backgroundColor = "transparent";
-        stopsVideoStream = null;
-    }
-
-
-    if (stopsVideoStream == null) {
+        document.getElementById("selfView").srcObject = videoStream;
+        document.getElementById("selfView").style.display = "block";
         document.getElementById("videobtn").style.display = "none";
         document.getElementById("screenbtn").style.backgroundColor = "red";
-        stopsVideoStream = await startsVideoStream(() => {
-            disSvideo();
-        });
-        return;
+    } else {
+        document.getElementById("screenbtn").style.backgroundColor = "transparent";
+        videoStreaming = false;
+        peerConnection.removeTrack(videoSender);
+        socket.emit("relay", {
+            deviceID: peers[0],
+            data: {
+                type: "videostopped"
+            }
+        })
+        stopMediaStream(videoStream)
+        document.getElementById("selfView").style.display = "none";
+        document.getElementById("videobtn").style.display = "block";
     }
-
-    disSvideo();
 }
 
+
 document.getElementById("screenbtn").addEventListener("click", () => {
-    togglesVideo();
+    toggleScreenCapture();
 })
 
 

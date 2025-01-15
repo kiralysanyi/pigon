@@ -60,7 +60,7 @@ const sendCancelNotification = (userID, messageID) => {
     }
 }
 
-const sendNotification = (userID, title, body, messageID, imageUrl = undefined) => {
+const sendNotification = (userID, title, body, messageID = 0) => {
     console.log("Firebase: ", userID, title, body, subs[userID]);
     let registrationTokens = [];
     if (subs[userID] == undefined) {
@@ -97,6 +97,61 @@ const sendNotification = (userID, title, body, messageID, imageUrl = undefined) 
 
 }
 
+let getfbclients = (userid) => {
+    try {
+        return Object.keys(subs[userid])
+    } catch (error) {
+        return [];
+    }
+}
+
+let sendCallSignal = (userID, callid, displayName, chatid) => {
+    try {
+        for (let i in subs[userID]) {
+            let registrationToken = subs[userID][i]
+            let msg = {
+                data: {
+                    type: "call",
+                    username: displayName,
+                    callid: callid,
+                    date: new Date().toISOString().toString()
+                },
+                token: registrationToken
+            }
+            admin.messaging().send(msg).then((result) => {
+                console.log("Callsignal: ", result)
+            }).catch((error) => {
+                console.error("Callsignal: ", error)
+            })
+        }
+    } catch (error) {
+        console.error("Failed to send callsignal", userID, callid, error)
+    }
+}
+
+let cancelCallSignal = (userID, callid) => {
+    try {
+        for (let i in subs[userID]) {
+            let registrationToken = subs[userID][i]
+            let msg = {
+                data: {
+                    type: "cancelcall",
+                    callid: callid,
+                    date: new Date().toISOString().toString()
+                },
+                token: registrationToken
+            }
+            admin.messaging().send(msg).then((result) => {
+                console.log("Callsignal (cancel): ", result)
+            }).catch((error) => {
+                console.error("Callsignal (cancel): ", error)
+            })
+        }
+    } catch (error) {
+        console.error("Failed to send callsignal cancellation", userID, callid, error)
+    }
+}
+
 let fbunsubscribe = (userID, deviceID) => {
     console.log("FB Unsubscribe: ", userID, deviceID);
     try {
@@ -112,4 +167,4 @@ let fbunsubscribe = (userID, deviceID) => {
 
 }
 
-module.exports = { sendNotification, registerFirebaseClient, fbunsubscribe, sendCancelNotification }
+module.exports = { sendNotification, registerFirebaseClient, fbunsubscribe, sendCancelNotification, getfbclients, sendCallSignal, cancelCallSignal }

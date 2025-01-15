@@ -55,6 +55,7 @@ let newChatHandler = ({ isGroupChat, chatID, chatName, participants, initiator }
 const { sqlQuery } = require("../things/db")
 
 const { removeValue, escapeJsonControlCharacters } = require("../things/helper");
+const { getfbclients, cancelCallSignal, sendCallSignal } = require("../firebase");
 
 function sanitizeInput(input) {
     // Replace characters that could break JSON
@@ -86,6 +87,8 @@ let socketLogoutHandler = (app) => {
     })
 }
 
+var fbCallHandlers = {}
+
 let connectionHandler = (socket) => {
     if (socket.userInfo == undefined) {
         return;
@@ -112,6 +115,13 @@ let connectionHandler = (socket) => {
         
     })
 
+    //this is used to accept or decline the call after a socket connected to the server. this is needed for the android app in the first place.
+    socket.on("answercall", ({callid, accepted, reason}) => {
+        if (fbCallHandlers[callid] != undefined) {
+            fbCallHandlers[callid](accepted, reason)
+        }
+    })
+
     socket.on("call", async ({ callid, username, chatid }) => {
         console.log("New call: ", callid, username, chatid);
         const callerID = socket.userInfo.userID;
@@ -121,26 +131,52 @@ let connectionHandler = (socket) => {
         called = (removeValue(called, callerID))[0];
         console.log("Called: ", called);
         sendDataToSockets(called, "incomingcall", { callid, username, chatid });
-        socket.once("cancelcall", ({ callid, username, chatid }) => {
-            sendDataToSockets(called, "cancelledcall", { callid, username, chatid })
-        })
-        if (isUserOnline(called) == false) {
+        sendCallSignal(called, callid, username, chatid);
+        
+
+        let calltimeout = setTimeout(() => {
+            cancelCallSignal(called, callid);
             sendPushNotification(called, "Missed Call", { type: "text", content: "You missed a call from: " + username }, 0);
             socket.emit("callresponse" + callid, { accepted: false, reason: "Not available" });
-            return;
-        }
+            if (fbCallHandlers[callid] != undefined) {
+                delete fbCallHandlers[callid]
+            }
+        }, 60*1000);;
+
+        socket.once("cancelcall", ({ callid, username, chatid }) => {
+            clearTimeout(calltimeout)
+            cancelCallSignal(called, callid);
+            sendDataToSockets(called, "cancelledcall", { callid, username, chatid })
+            if (fbCallHandlers[callid] != undefined) {
+                delete fbCallHandlers[callid]
+            }
+            
+        })
 
         let targetSockets = getSocketsForUser(called)
+        fbCallHandlers[callid] = (accepted, reason) => {
+            socket.emit("callresponse" + callid, {accepted, reason})
+            let sockets = getCallUsers(called)
+            for (let i in sockets) {
+                sockets[i].emit("acceptedcall")
+            }
+            delete fbCallHandlers[callid]
+        }
 
         for (let i in targetSockets) {
             targetSockets[i].once("response" + callid, ({ accepted, reason }) => {
+                clearTimeout(calltimeout)
                 for (let x in targetSockets) {
                     targetSockets[x].emit("acceptedcall");
                 }
                 console.log(accepted, reason);
+                if (fbCallHandlers[callid] != undefined) {
+                    delete fbCallHandlers[callid]
+                }
                 socket.emit("callresponse" + callid, { accepted, reason })
             })
         }
+
     });
 
     socket.on("setLastRead", async ({ chatID, messageID }) => {

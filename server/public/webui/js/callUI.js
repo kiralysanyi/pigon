@@ -111,10 +111,24 @@ const peerConnection = new RTCPeerConnection(configuration);
 
 peerConnection.addEventListener("connectionstatechange", (e) => {
     console.log("Connection state: ", peerConnection.connectionState)
+    if (peerConnection.connectionState == "closed" || peerConnection.connectionState == "disconnected" || peerConnection.connectionState == "failed") {
+        if (window.parent.window.callEnded != undefined) {
+            window.parent.window.callEnded();
+        } else {
+            window.close();
+        }
+    }
 })
 
 peerConnection.addEventListener("iceconnectionstatechange", (e) => {
     console.log("Connection state: ", peerConnection.connectionState);
+    if (peerConnection.connectionState == "closed" || peerConnection.connectionState == "disconnected" || peerConnection.connectionState == "failed") {
+        if (window.parent.window.callEnded != undefined) {
+            window.parent.window.callEnded();
+        } else {
+            window.close();
+        }
+    }
 })
 
 

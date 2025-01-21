@@ -198,8 +198,11 @@ peerConnection.addEventListener("track", (e) => {
         e.track.addEventListener("ended", () => {
             document.getElementById("videocontainer").style.display = "none";
         })
+
+        
     }
 })
+
 
 //build up connection
 peerConnection.addEventListener("icecandidate", (e) => {

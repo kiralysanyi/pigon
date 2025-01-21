@@ -39,6 +39,7 @@
     <div class="space"></div>
     <img id="userimage">
     <h2 id="username">johnny</h2>
+    <h3 id="joindate"></h3>
     <pre id="bio"></pre>
 </body>
 <script type="module">
@@ -51,6 +52,9 @@
 
     document.getElementById("userimage").src = "/api/v1/auth/pfp?id=" + userid + "&smol=true";
     document.getElementById("username").innerHTML = userinfo.data.username;
+
+    let registerdate = new Date(userinfo.data.registerDate)
+    document.getElementById("joindate").innerHTML = `Joined pigon: ${registerdate.toLocaleDateString()}`
 
     res = await fetch("/api/v1/auth/extrainfo?userID=" + userid, { credentials: "include" });
     let userinfo_extra = await res.json();

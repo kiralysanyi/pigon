@@ -26,6 +26,7 @@
 </head>
 
 <body>
+    <video src="./background.mp4" autoplay muted id="videobackground"></video>
     <nav>
         <div id="openSidebarBtn">
             <i class="fas fa-bars"></i>
@@ -94,5 +95,10 @@
 </body>
 <script src="./js/noblur.js"></script>
 <script type="module" src="./js/main.js"></script>
+<script>
+    setTimeout(() => {
+        document.getElementById("videobackground").style.opacity = 0
+    }, 15*1000);
+</script>
 
 </html>

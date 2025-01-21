@@ -1,6 +1,8 @@
 const fs = require("fs")
 
 
+const firebaseEnabled = fs.existsSync("./firebase.json")
+
 let subs = {}
 
 if (!fs.existsSync("./firebase_subs.json")) {
@@ -12,14 +14,22 @@ subs = JSON.parse(fs.readFileSync("./firebase_subs.json"))
 let admin = require("firebase-admin");
 
 
-let serviceAccount = require("./firebase.json");
+let serviceAccount;
+
+if (firebaseEnabled) {
+    serviceAccount = require("./firebase.json");
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+    });
+}
 
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
+
 
 const registerFirebaseClient = (userID, deviceID, registrationToken) => {
+    if (!firebaseEnabled) {
+        return;
+    }
     if (subs[userID] == undefined) {
         subs[userID] = {}
     }
@@ -29,6 +39,9 @@ const registerFirebaseClient = (userID, deviceID, registrationToken) => {
 }
 
 const sendCancelNotification = (userID, messageID) => {
+    if (!firebaseEnabled) {
+        return;
+    }
     let registrationTokens = [];
     if (subs[userID] == undefined) {
         console.log("Firebase: userid not found ", userID)
@@ -61,6 +74,9 @@ const sendCancelNotification = (userID, messageID) => {
 }
 
 const sendNotification = (userID, title, body, messageID = 0) => {
+    if (!firebaseEnabled) {
+        return;
+    }
     console.log("Firebase: ", userID, title, body, subs[userID]);
     let registrationTokens = [];
     if (subs[userID] == undefined) {
@@ -98,6 +114,9 @@ const sendNotification = (userID, title, body, messageID = 0) => {
 }
 
 let getfbclients = (userid) => {
+    if (!firebaseEnabled) {
+        return [];
+    }
     try {
         return Object.keys(subs[userid])
     } catch (error) {
@@ -106,6 +125,9 @@ let getfbclients = (userid) => {
 }
 
 let sendCallSignal = (userID, callid, displayName, chatid) => {
+    if (!firebaseEnabled) {
+        return;
+    }
     try {
         for (let i in subs[userID]) {
             let registrationToken = subs[userID][i]
@@ -130,6 +152,9 @@ let sendCallSignal = (userID, callid, displayName, chatid) => {
 }
 
 let cancelCallSignal = (userID, callid) => {
+    if (!firebaseEnabled) {
+        return;
+    }
     try {
         for (let i in subs[userID]) {
             let registrationToken = subs[userID][i]
@@ -153,6 +178,9 @@ let cancelCallSignal = (userID, callid) => {
 }
 
 let fbunsubscribe = (userID, deviceID) => {
+    if (!firebaseEnabled) {
+        return;
+    }
     console.log("FB Unsubscribe: ", userID, deviceID);
     try {
         

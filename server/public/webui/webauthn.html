@@ -5,73 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webauthn register</title>
-    <style>
-        body {
-            background-color: rgb(32, 32, 32);
-            color: white;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        #container {
-            position: fixed;
-            top: 0px;
-            left: 50%;
-            transform: translate(-50%, 0%);
-            width: 700px;
-            padding: 10px;
-            background-color: rgb(61, 61, 61);
-            height: 100%;
-            overflow: auto;
-        }
-
-        .settings_group {
-            position: relative;
-            width: calc(100% - 50px);
-            height: auto;
-            margin-top: 10px;
-            margin-left: 10px;
-            background-color: rgb(31, 31, 31);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0px 0px 5px 5px rgb(68, 68, 68);
-
-        }
-
-        @media only screen and (max-width: 700px) {
-            #container {
-                width: 100%;
-            }
-        }
-
-        #goback {
-            height: 40px;
-            line-height: 40px;
-            text-align: center;
-            padding: 0px;
-            user-select: none;
-            width: calc(100% - 20px);
-            transition: 200ms;
-        }
-
-        #goback:hover {
-            background-color: rgb(53, 53, 53);
-        }
-
-        button {
-            position: relative;
-            color: white;
-            border: none;
-            height: 40px;
-            border-radius: 15px;
-            transition: 200ms;
-            width: 140px;
-            background-color: rgb(0, 119, 255);
-        }
-
-        button:hover {
-            filter: saturate(4);
-        }
-    </style>
+    <link rel="stylesheet" href="css/settingspage.css">
 </head>
 
 <body>
@@ -81,7 +15,7 @@
         </div>
         <div class="settings_group">
             <h1>Webauthn registration</h1>
-            <p>This is an experimental function. Enabling developer tools is higly recommended.</p>
+            <p>Add a passkey to log in without a password. Learn more about passkeys <a href="https://fidoalliance.org/passkeys/" target="_blank">here</a>.</p>
             <button id="regbutton">Add passkey</button>
         </div>
 

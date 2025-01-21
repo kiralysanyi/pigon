@@ -155,6 +155,7 @@ let connectionHandler = (socket) => {
 
         let targetSockets = getSocketsForUser(called)
         fbCallHandlers[callid] = (accepted, reason) => {
+            clearTimeout(calltimeout)
             socket.emit("callresponse" + callid, {accepted, reason})
             let sockets = getSocketsForUser(called)
             for (let i in sockets) {

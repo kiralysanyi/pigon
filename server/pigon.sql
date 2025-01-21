@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Dec 25, 2024 at 06:01 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Gép: 127.0.0.1
+-- Létrehozás ideje: 2025. Jan 21. 08:41
+-- Kiszolgáló verziója: 10.4.32-MariaDB
+-- PHP verzió: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `pigon`
+-- Adatbázis: `pigon`
 --
 CREATE DATABASE IF NOT EXISTS `pigon` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `pigon`;
@@ -26,7 +26,7 @@ USE `pigon`;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `callhistory`
+-- Tábla szerkezet ehhez a táblához `callhistory`
 --
 
 CREATE TABLE `callhistory` (
@@ -39,7 +39,7 @@ CREATE TABLE `callhistory` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `chats`
+-- Tábla szerkezet ehhez a táblához `chats`
 --
 
 CREATE TABLE `chats` (
@@ -54,7 +54,7 @@ CREATE TABLE `chats` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `credentials`
+-- Tábla szerkezet ehhez a táblához `credentials`
 --
 
 CREATE TABLE `credentials` (
@@ -67,7 +67,7 @@ CREATE TABLE `credentials` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `devices`
+-- Tábla szerkezet ehhez a táblához `devices`
 --
 
 CREATE TABLE `devices` (
@@ -81,7 +81,7 @@ CREATE TABLE `devices` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `files`
+-- Tábla szerkezet ehhez a táblához `files`
 --
 
 CREATE TABLE `files` (
@@ -93,7 +93,7 @@ CREATE TABLE `files` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `messages`
+-- Tábla szerkezet ehhez a táblához `messages`
 --
 
 CREATE TABLE `messages` (
@@ -108,7 +108,7 @@ CREATE TABLE `messages` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user-chat`
+-- Tábla szerkezet ehhez a táblához `user-chat`
 --
 
 CREATE TABLE `user-chat` (
@@ -120,7 +120,7 @@ CREATE TABLE `user-chat` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `userconfig`
+-- Tábla szerkezet ehhez a táblához `userconfig`
 --
 
 CREATE TABLE `userconfig` (
@@ -131,7 +131,7 @@ CREATE TABLE `userconfig` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `userinfo_extra`
+-- Tábla szerkezet ehhez a táblához `userinfo_extra`
 --
 
 CREATE TABLE `userinfo_extra` (
@@ -144,7 +144,7 @@ CREATE TABLE `userinfo_extra` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Tábla szerkezet ehhez a táblához `users`
 --
 
 CREATE TABLE `users` (
@@ -155,171 +155,171 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Indexes for dumped tables
+-- Indexek a kiírt táblákhoz
 --
 
 --
--- Indexes for table `callhistory`
+-- A tábla indexei `callhistory`
 --
 ALTER TABLE `callhistory`
   ADD PRIMARY KEY (`id`),
   ADD KEY `callhistory-chats` (`chatid`);
 
 --
--- Indexes for table `chats`
+-- A tábla indexei `chats`
 --
 ALTER TABLE `chats`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `credentials`
+-- A tábla indexei `credentials`
 --
 ALTER TABLE `credentials`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user-webauthn` (`userID`);
 
 --
--- Indexes for table `devices`
+-- A tábla indexei `devices`
 --
 ALTER TABLE `devices`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user-devices` (`userID`);
 
 --
--- Indexes for table `files`
+-- A tábla indexei `files`
 --
 ALTER TABLE `files`
   ADD PRIMARY KEY (`id`),
   ADD KEY `chatid` (`chatid`);
 
 --
--- Indexes for table `messages`
+-- A tábla indexei `messages`
 --
 ALTER TABLE `messages`
   ADD PRIMARY KEY (`id`),
   ADD KEY `messages-chats` (`chatid`);
 
 --
--- Indexes for table `user-chat`
+-- A tábla indexei `user-chat`
 --
 ALTER TABLE `user-chat`
   ADD KEY `userID` (`userID`),
   ADD KEY `chatid` (`chatid`);
 
 --
--- Indexes for table `userconfig`
+-- A tábla indexei `userconfig`
 --
 ALTER TABLE `userconfig`
   ADD PRIMARY KEY (`userID`);
 
 --
--- Indexes for table `userinfo_extra`
+-- A tábla indexei `userinfo_extra`
 --
 ALTER TABLE `userinfo_extra`
   ADD UNIQUE KEY `userID_2` (`userID`),
   ADD KEY `userID` (`userID`);
 
 --
--- Indexes for table `users`
+-- A tábla indexei `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- A kiírt táblák AUTO_INCREMENT értéke
 --
 
 --
--- AUTO_INCREMENT for table `callhistory`
+-- AUTO_INCREMENT a táblához `callhistory`
 --
 ALTER TABLE `callhistory`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `chats`
+-- AUTO_INCREMENT a táblához `chats`
 --
 ALTER TABLE `chats`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `credentials`
+-- AUTO_INCREMENT a táblához `credentials`
 --
 ALTER TABLE `credentials`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `devices`
+-- AUTO_INCREMENT a táblához `devices`
 --
 ALTER TABLE `devices`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `files`
+-- AUTO_INCREMENT a táblához `files`
 --
 ALTER TABLE `files`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `messages`
+-- AUTO_INCREMENT a táblához `messages`
 --
 ALTER TABLE `messages`
   MODIFY `id` int(255) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
--- Constraints for dumped tables
+-- Megkötések a kiírt táblákhoz
 --
 
 --
--- Constraints for table `callhistory`
+-- Megkötések a táblához `callhistory`
 --
 ALTER TABLE `callhistory`
   ADD CONSTRAINT `callhistory-chats` FOREIGN KEY (`chatid`) REFERENCES `chats` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Constraints for table `credentials`
+-- Megkötések a táblához `credentials`
 --
 ALTER TABLE `credentials`
   ADD CONSTRAINT `user-webauthn` FOREIGN KEY (`userID`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Constraints for table `devices`
+-- Megkötések a táblához `devices`
 --
 ALTER TABLE `devices`
   ADD CONSTRAINT `user-devices` FOREIGN KEY (`userID`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Constraints for table `files`
+-- Megkötések a táblához `files`
 --
 ALTER TABLE `files`
   ADD CONSTRAINT `file-chat` FOREIGN KEY (`chatid`) REFERENCES `chats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `messages`
+-- Megkötések a táblához `messages`
 --
 ALTER TABLE `messages`
   ADD CONSTRAINT `messages-chats` FOREIGN KEY (`chatid`) REFERENCES `chats` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Constraints for table `user-chat`
+-- Megkötések a táblához `user-chat`
 --
 ALTER TABLE `user-chat`
   ADD CONSTRAINT `chatid` FOREIGN KEY (`chatid`) REFERENCES `chats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `userID` FOREIGN KEY (`userID`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `userconfig`
+-- Megkötések a táblához `userconfig`
 --
 ALTER TABLE `userconfig`
   ADD CONSTRAINT `user-config` FOREIGN KEY (`userID`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Constraints for table `userinfo_extra`
+-- Megkötések a táblához `userinfo_extra`
 --
 ALTER TABLE `userinfo_extra`
   ADD CONSTRAINT `usrid` FOREIGN KEY (`userID`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;

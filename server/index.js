@@ -360,7 +360,11 @@ app.get("/.well-known/assetlinks.json", (req, res) => {
     res.sendFile(__dirname + "/assetlinks.json")
 })
 
+require("./adminpanel/adminpanel").adminpanel(app);
+app.use('/adminpanel/ui', express.static(__dirname + "/adminpanel/ui"))
+
 server.listen(process.env.PORT, () => {
     console.log(`Listening on port:${process.env.PORT}`);
     console.log(`Origin: ${process.env.ORIGIN}`);
 })
+

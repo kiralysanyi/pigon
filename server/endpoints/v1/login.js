@@ -34,7 +34,7 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
 
 
 
-    let response = await sqlQuery(`SELECT id, username FROM users WHERE username=?`, [username])
+    let response = await sqlQuery(`SELECT id, username, isadmin FROM users WHERE username=?`, [username])
     //id, username;
     let userInfo = response[0];
     let deviceName = "N/A"
@@ -53,6 +53,11 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
             "deviceName": deviceName
         }
 
+        let isAdmin = false;
+        if (userInfo["isadmin"] == 1) {
+            isAdmin = true;
+        }
+
         //creating jwt token
         //the token will expire after 7 days
         //TODO: make the expirity modifiable by the user
@@ -62,6 +67,7 @@ const loginHandler = async (req = app.request, res = app.response, next = () => 
                 userID: userInfo["id"],
                 username: userInfo["username"],
                 deviceID: deviceID,
+                isAdmin,
                 deviceInfo: deviceInfo,
             }, process.env.JWT_SECRET, { expiresIn: "7d" });
 

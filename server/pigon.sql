@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Jan 21. 08:41
+-- Létrehozás ideje: 2025. Jan 21. 09:12
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -151,7 +151,8 @@ CREATE TABLE `users` (
   `id` int(10) NOT NULL,
   `username` varchar(255) NOT NULL,
   `passwordHash` varchar(500) NOT NULL,
-  `registerDate` timestamp NOT NULL DEFAULT current_timestamp()
+  `registerDate` timestamp NOT NULL DEFAULT current_timestamp(),
+  `isadmin` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

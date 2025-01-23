@@ -9,10 +9,12 @@
 </head>
 
 <body>
+    <div class="backgroundgeci"></div>
     <div id="container">
-        <div onclick="location.href = 'index.html'" class="settings_group" id="goback">
-            <h2>Go back</h2>
+        <div class="title_text">
+            <h2> Passkey settings </h2>
         </div>
+        
         <div class="settings_group">
             <h1>Webauthn registration</h1>
             <p>Add a passkey to log in without a password. Learn more about passkeys <a href="https://fidoalliance.org/passkeys/" target="_blank">here</a>.</p>
@@ -24,7 +26,9 @@
             <p>Warning! This will invalidate currently used passkeys forever!</p>
             <button style="background-color: rgb(133, 0, 0);" id="disablebtn">Disable</button>
         </div>
-
+        <div onclick="location.href = 'index.html'" class="settings_group" id="goback">
+            <h2>Go back</h2>
+        </div>
 
     </div>
 </body>

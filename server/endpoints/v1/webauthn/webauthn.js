@@ -32,7 +32,7 @@ let registration = req.body.registration;
 
     const expected = {
         challenge: req.body.challenge,
-        origin: origin
+        origin: (origin) => allowedOrigins.includes(origin)
     }
 
     console.log(expected)

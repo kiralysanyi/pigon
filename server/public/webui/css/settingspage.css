@@ -96,3 +96,14 @@ button:hover {
     padding-bottom: 10px;
     border-bottom: 3px solid rgb(30,134,204);
 }
+
+.settings_group p a{
+    text-decoration: none;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.settings_group p a:hover{
+    color: rgb(30,134,204);
+}

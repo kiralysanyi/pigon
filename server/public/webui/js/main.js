@@ -26,22 +26,36 @@ window.userinfo = userinfo;
 
 console.log(userinfo);
 
+function isLessThan700px() {
+    var width = window.innerWidth;
+    console.log("Das ist width", width)
+    if (width < 700) {
+        return true
+    } else {
+        return false
+    }
+}
+
 function openSidebar() {
-    let container = document.getElementById("mainSidebarContainer");
-    let sidebar = document.getElementById("mainSidebar");
-    container.style.display = "block";
-    setTimeout(() => {
-        sidebar.style.left = "10px";
-    }, 50);
+    if (isLessThan700px()) {
+        let container = document.getElementById("mainSidebarContainer");
+        let sidebar = document.getElementById("mainSidebar");
+        container.style.display = "block";
+        setTimeout(() => {
+            sidebar.style.left = "10px";
+        }, 50);
+    }
 }
 
 function closeSidebar() {
-    let container = document.getElementById("mainSidebarContainer");
-    let sidebar = document.getElementById("mainSidebar");
-    sidebar.style.left = "-310px";
-    setTimeout(() => {
-        container.style.display = "none";
-    }, 550);
+    if (isLessThan700px()) {
+        let container = document.getElementById("mainSidebarContainer");
+        let sidebar = document.getElementById("mainSidebar");
+        sidebar.style.left = "-310px";
+        setTimeout(() => {
+            container.style.display = "none";
+        }, 550);
+    }
 }
 
 document.getElementById("mainSidebar").addEventListener("click", (e) => {
@@ -318,10 +332,10 @@ let renderChatsSB = async (renderFromSaved = false) => {
                 method: "GET",
                 credentials: "include"
             });
-    
+
             response = await response.json();
             console.log(response);
-    
+
             if (response.success == true) {
                 chats = response["data"];
             } else {

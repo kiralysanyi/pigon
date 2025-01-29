@@ -1,4 +1,8 @@
+// Ha még nincs az elemek között, akkor hozzuk létre
 let element = document.createElement("img");
+
+
+element.id = "pigonImg";
 element.style.width = "256px";
 element.style.height = "256px";
 element.style.transform = "rotate(50deg) scaleX(-1)";
@@ -9,14 +13,23 @@ element.style.transition = "200ms";
 element.src = "/app/pigonicon.png";
 element.style.display = "none";
 
-let audioElement = document.createElement("audio")
-audioElement.style.display = "none";
-audioElement.src = "/app/pigon.mp3";
+document.body.appendChild(element);
+
+
+if (!document.getElementById("pigonAudio")) {
+    let audioElement = document.createElement("audio");
+    audioElement.id = "pigonAudio";
+    audioElement.style.display = "none";
+    audioElement.src = "/app/pigon.mp3";
+
+    document.body.appendChild(audioElement);
+}
 
 function pigonOverlay() {
-    element.style.display = "block";
+    let element = document.getElementById("pigonImg");
+    let audioElement = document.getElementById("pigonAudio");
 
-    document.body.appendChild(element);
+    element.style.display = "block";
     audioElement.play();
 
     setTimeout(() => {

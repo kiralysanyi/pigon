@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pigon</title>
     <link rel="stylesheet" href="css/main.css">
-    <script src="js/pigonoverlay.js"></script>
+
 </head>
 
 <body>
+    <div class="background"></div>
     <nav>
         <img src="pigonicon.png" width="32px" height="32px" alt="pigon">
         <div class="title">Pigon</div>
@@ -19,16 +20,16 @@
             <h1>Welcome to PIGON!!!</h1>
             <p> <b>The future of instant messengers </b></p>
             <p>(the 47th one)</p>
-        </div>
-
-        <div class="card">
-            <h1>Login/Register</h1>
-            <button id="loginbtn">Login</button>
-            <br>
-            <button id="regbutton">Register</button>
+            <div class="login_section">
+                <h1>Login/Register</h1>
+                <button id="loginbtn">Login</button>
+                <br>
+                <button id="regbutton">Register</button>
+            </div>
         </div>
     </div>
 </body>
+<script src="js/pigonoverlay.js"></script>
     <script>
         document.getElementById("regbutton").addEventListener("click", () => {
             pigonOverlay();

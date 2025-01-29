@@ -179,10 +179,18 @@ nav {
     float: left;
     height: 80px;
     padding-left: 80px;
+    padding-left: 80px;
     user-select: none;
     line-height: 80px;
-    font-size: 30px;
+    font-size: 1.3rem;
     border-radius: 10px;
+}
+
+.resultElement span{
+    display: grid;
+    width: 100%;
+    line-height: 80px;
+    overflow: hidden;
 }
 
 .resultElement img {
@@ -194,6 +202,7 @@ nav {
     border-radius: 100%;
     border: none;
 }
+
 
 #callbtn {
     position: absolute;

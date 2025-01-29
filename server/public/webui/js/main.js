@@ -362,7 +362,7 @@ let renderChatsSB = async (renderFromSaved = false) => {
             element.style.backgroundColor = "blue";
         }
 
-        element.innerHTML = chats[i]["name"];
+        element.innerHTML = `<span>${chats[i]["name"]}</span>`;
         element.appendChild(elementPfp);
         sbcontent.appendChild(element);
         element.addEventListener("click", async () => {

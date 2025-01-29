@@ -90,6 +90,10 @@ let createChatHandler = (newChatHandler = ({ isGroupChat, chatID, chatName, part
             let chatname = uuidv4();
             if (req.body.isGroupChat == true) {
                 chatname = req.body.chatName
+                if (chatname.length > 10) {
+                    res.status(400).json({success:false, message: "elbasztad, hosszu a nev"})
+                    return
+                }
             }
 
             //check if private chat exists with same participants

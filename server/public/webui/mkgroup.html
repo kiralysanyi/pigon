@@ -189,13 +189,26 @@
     let addedUsersDiv = document.getElementById("addedUsers");
 
     let promptFunction = () => {
-        name = window.prompt("Chat name");
-        if (name == "" || name == undefined) {
-            promptFunction();
-        }
+    name = window.prompt("Chat name");
+
+    if (!name || name.length > 10) { 
+        alert("A név nem lehet üres és maximum 10 karakter hosszú lehet!");
+        promptFunction();
+        return; // Kilép, hogy ne fusson tovább a kód
     }
 
-    promptFunction();
+    // HTML tagek eltávolítása
+    let tempDiv = document.createElement("div");
+    tempDiv.innerText = name;
+    name = tempDiv.innerHTML;
+
+    // Alternatív megoldás (ha teljesen el akarod távolítani a HTML tageket)
+    name = name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+};
+
+
+
+    promptFunction(); 
 
     /**
  * Removes a specific value from an array.

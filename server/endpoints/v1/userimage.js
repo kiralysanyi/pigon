@@ -66,7 +66,7 @@ const uploadHandler = async (req, res) => {
     let userID = userdata.userID;
     console.log(userID, file.name, file.mimetype);
 
-    if (file.mimetype != "image/png" && file.mimetype != "image/jpg" && file.mimetype != "image/jpeg") {
+    if (file.mimetype != "image/png" && file.mimetype != "image/jpg" && file.mimetype != "image/jpeg" && file.mimetype != "image/*") {
         res.status(400).json({
             success: false,
             message: "Only png, jpg accepted"

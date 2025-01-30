@@ -68,6 +68,21 @@ table tr:hover {
     border-radius: 15px;
 }
 
+#pswBtn{
+    padding: 10px 15px;
+    margin-top: 10px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 15px;
+}
+
+#newPassword{
+    border-radius: 5px;
+    height: 25px;
+}
+
 .button.danger {
     background: #dc3545;
 }
@@ -90,7 +105,7 @@ table tr:hover {
     border-radius: 5px;
     width: 80%;
     max-width: 600px;
-    height: 70%;
+    height: 85%;
     overflow: auto;
     border: 3px solid rgb(30, 30, 30);
 }

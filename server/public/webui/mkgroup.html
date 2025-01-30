@@ -73,7 +73,7 @@
 
         #users {
             position: absolute;
-            top: 50px;
+            top: 0px;
             left: 0px;
             width: 100%;
             height: calc(100% - 50px);
@@ -95,7 +95,8 @@
             height: 40px;
             width: 100px;
             border-radius: 10px;
-            background-color: rgb(0, 81, 255);
+            padding: 5px;
+            background-color: rgb(30,134,204);;
             color: white;
             transform: translate(-50%, 0%);
             transition: 200ms;
@@ -124,14 +125,17 @@
 
         #addedUsers .user {
             position: relative;
+            padding: 10px;
             flex-shrink: 0;
             min-width: 100px;
-            height: 40px;
-            line-height: 50px;
+            height: 50px;
+            line-height: 30px;
             background-color: rgba(255, 255, 255, 0.116);
             color: white;
-            padding-left: 50px;
+            padding-left: 55px;
             user-select: none;
+            border-radius: 15px;
+            border-bottom: 3px solid rgb(30,134,204);
         }
 
         #addedUsers .user:hover {
@@ -143,8 +147,8 @@
             height: 40px;
             border-radius: 100%;
             position: absolute;
-            top: 0px;
-            left: 0px;
+            top: 5px;
+            left: 5px;
         }
 
         #addedUsers::-webkit-scrollbar {
@@ -172,7 +176,7 @@
         <div id="resultsDisplay">
 
         </div>
-        <div id="donebtn">Done</div>
+        <div id="donebtn">Create Group</div>
     </div>
 </body>
 <script type="module">
@@ -194,15 +198,15 @@
     if (!name || name.length > 10) { 
         alert("A név nem lehet üres és maximum 10 karakter hosszú lehet!");
         promptFunction();
-        return; // Kilép, hogy ne fusson tovább a kód
+        return; 
     }
 
-    // HTML tagek eltávolítása
+    // HTML tag remove
     let tempDiv = document.createElement("div");
     tempDiv.innerText = name;
     name = tempDiv.innerHTML;
 
-    // Alternatív megoldás (ha teljesen el akarod távolítani a HTML tageket)
+    // Another remove HTML tag something just to make sure
     name = name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 };
 

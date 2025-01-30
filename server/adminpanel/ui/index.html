@@ -29,7 +29,8 @@
         <section id="chats">
             <h2>Chats</h2>
             <div class="box">
-            <a href="chats.html"><button>View chats</button></a></div>
+                <a href="chats.html"><button>View chats</button></a>
+            </div>
         </section>
 
         <div id="userModal" class="modal">
@@ -40,31 +41,49 @@
                 <p><strong>User ID:</strong> <span id="modalUserID"></span></p>
                 <iframe style="width: 100%; height: 500px;" src="" id="userinfoiframe"></iframe>
                 <button class="button danger">Delete User</button>
+
+                <h2>Jelszó Változtatás</h2>
+                <form id="passwordForm">
+                    <label for="newPassword">Új jelszó:</label>
+                    <input type="text" id="newPassword" required>
+                    <button type="submit" id="pswBtn">Jelszó Módosítás</button>
+                </form>
+                <p id="message"></p>
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = '/adminpanel';
+        const API_URL = "/adminpanel";
+        let selectedUserId = null; // Tárolja a kiválasztott felhasználó ID-ját
 
-        async function fetchData(endpoint) {
+        async function fetchData(endpoint, method = "GET", body = null) {
             try {
-                const response = await fetch(`${API_URL}/${endpoint}`, {
+                const options = {
+                    method,
                     headers: {
-                        'x-user-id': '1' // Replace with actual user ID header
+                        "Content-Type": "application/json",
+                        "x-user-id": "1" // Replace with actual user ID header
                     }
-                });
+                };
+
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(`${API_URL}/${endpoint}`, options);
                 const data = await response.json();
+
                 if (data.success) {
                     return data.data;
                 } else {
                     alert(`Error: ${data.message}`);
-                    return [];
+                    return null;
                 }
             } catch (error) {
                 console.error(`Error fetching ${endpoint}:`, error);
-                alert('An error occurred while fetching data. Please try again.');
-                return [];
+                alert("Hiba történt az adatok lekérése közben. Kérlek, próbáld újra.");
+                return null;
             }
         }
 
@@ -83,6 +102,7 @@
         }
 
         function showUserModal(user) {
+            selectedUserId = user.id; // Beállítjuk a kiválasztott felhasználó ID-ját
             document.getElementById("userModal").style.display = "flex";
             document.getElementById("modalUserName").textContent = user.username;
             document.getElementById("modalUserID").textContent = user.id;
@@ -91,28 +111,59 @@
         }
 
         function closeModal() {
+            document.getElementById("userinfoiframe").src = "about:blank" 
             document.getElementById('userModal').style.display = 'none';
+            selectedUserId = null; // Modal bezárásakor töröljük az ID-t
         }
 
         async function loadUsers() {
-            const users = await fetchData('users');
-            const tbody = document.querySelector('#users-table tbody');
-            tbody.innerHTML = '';
+            const users = await fetchData("users");
+            const tbody = document.querySelector("#users-table tbody");
+            tbody.innerHTML = "";
             users.forEach(user => {
-                const row = document.createElement('tr');
-                row.addEventListener('click', () => showUserModal(user));
+                const row = document.createElement("tr");
+                row.addEventListener("click", () => showUserModal(user));
                 row.innerHTML = `
                     <td>${escapeHtml(user.id.toString())}</td>
                     <td>${escapeHtml(user.username)}</td>
-                    <td>${user.isadmin ? 'Yes' : 'No'}</td>
+                    <td>${user.isadmin ? "Yes" : "No"}</td>
                     <td>${escapeHtml(user.registerDate)}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener("DOMContentLoaded", () => {
             loadUsers();
+        });
+
+        document.getElementById("passwordForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!selectedUserId) {
+                alert("Nincs kiválasztott felhasználó!");
+                return;
+            }
+
+            const newPassword = document.getElementById("newPassword").value;
+
+            const result = await fetch("/adminpanel/changepass", {
+                credentials: "include",
+                body: JSON.stringify({ userId: selectedUserId, newPassword }),
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+                
+            })
+
+            const responseData = await result.json();
+
+            if (responseData.success) {
+                document.getElementById("message").innerText = "Jelszó sikeresen módosítva!";
+                document.getElementById("newPassword").value = "";
+            } else {
+                document.getElementById("message").innerText = "Hiba történt a jelszó módosításakor!";
+            }
         });
     </script>
 </body>

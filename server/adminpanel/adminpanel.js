@@ -1,5 +1,6 @@
 const { sqlQuery } = require("../things/db")
-const { authMiddleWare } = require("../things/auth_middleware")
+const { authMiddleWare } = require("../things/auth_middleware");
+const { hashPass } = require("../things/password");
 
 // Middleware to check if the user is an admin
 async function isAdminMiddleware(req, res, next) {
@@ -34,6 +35,27 @@ const adminpanel = (app) => {
             console.error('Error fetching chats:', error);
             res.status(500).json({ success: false, message: 'Internal server error' });
         }
+    }); 
+
+    // Change password
+    app.post('/adminpanel/changepass', async (req, res) => {
+        try {
+            const { userId, newPassword } = req.body;
+    
+            if (!userId || !newPassword) {
+                return res.status(400).json({ success: false, message: 'User ID and new password are required' });
+            }
+
+            const hashedPassword = hashPass(newPassword)
+    
+            // SQL UPDATE helyes szintaxisa
+            await sqlQuery('UPDATE `users` SET `passwordHash` = ? WHERE `id` = ?', [hashedPassword, userId]);
+    
+            res.json({ success: true, message: 'Password changed successfully' });
+        } catch (error) {
+            console.error('Error changing user password!', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
     });
 
     // Get all messages for a specific chat
@@ -65,6 +87,7 @@ const adminpanel = (app) => {
             res.status(500).json({ success: false, message: 'Internal server error' });
         }
     });
+
 
     // Get usernames for a specific chat
     app.get('/adminpanel/chats/:chatId/usernames', async (req, res) => {

@@ -36,15 +36,29 @@ function isLessThan700px() {
     }
 }
 
-function openSidebar() {
+window.addEventListener("resize", () => {
+    console.log(isLessThan700px())
     if (isLessThan700px()) {
-        let container = document.getElementById("mainSidebarContainer");
-        let sidebar = document.getElementById("mainSidebar");
-        container.style.display = "block";
-        setTimeout(() => {
-            sidebar.style.left = "10px";
-        }, 50);
+        closeSidebar();
+    } else {
+        openSidebar();
     }
+})
+
+function openSidebar() {
+
+    let container = document.getElementById("mainSidebarContainer");
+    let sidebar = document.getElementById("mainSidebar");
+    container.style.display = "block";
+    setTimeout(() => {
+        if (isLessThan700px()) {
+            sidebar.style.left = "10px";
+        } else {
+            sidebar.style.left = "0px";
+        }
+
+    }, 50);
+
 }
 
 function closeSidebar() {
@@ -453,14 +467,16 @@ let renderChatsSB = async (renderFromSaved = false) => {
         })
     }
 
-    //open a chat if defined in the location.hash
-    let chatToOpen = location.hash.substring(1);
-    if (chatToOpen != "") {
-        try {
-            document.getElementById("chat" + chatToOpen).click();
-        } catch (error) {
-            console.error("Chat not found: ", chatToOpen)
-            location.hash = "";
+    if (!renderFromSaved) {
+        //open a chat if defined in the location.hash
+        let chatToOpen = location.hash.substring(1);
+        if (chatToOpen != "") {
+            try {
+                document.getElementById("chat" + chatToOpen).click();
+            } catch (error) {
+                console.error("Chat not found: ", chatToOpen)
+                location.hash = "";
+            }
         }
     }
     hideLoadingScreen();

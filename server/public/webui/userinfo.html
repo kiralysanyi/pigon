@@ -59,8 +59,8 @@
     res = await fetch("/api/v1/auth/extrainfo?userID=" + userid, { credentials: "include" });
     let userinfo_extra = await res.json();
     if (userinfo_extra.success == true) {
-        document.getElementById("username").innerHTML = `${userinfo_extra["data"]["fullname"]} (${userinfo["data"]["username"]})`;
-        document.getElementById("bio").innerHTML = userinfo_extra["data"]["bio"];
+        document.getElementById("username").textContent = `${userinfo_extra["data"]["fullname"]} (${userinfo["data"]["username"]})`;
+        document.getElementById("bio").textContent = userinfo_extra["data"]["bio"];
     }
 </script>
 

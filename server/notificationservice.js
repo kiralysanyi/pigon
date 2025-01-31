@@ -35,8 +35,12 @@ let addRoute = (app) => {
 }
 
 
-let sendPushNotification = (target, title, message, url, messageID) => {
-    sendNotification(target, title, message.content, messageID, url);
+let sendPushNotification = (target, title, message, messageID, chatid) => {
+    let msg = message.content;
+    if (message.type != "text") {
+        msg = "Media"
+    }
+    sendNotification(target, title, msg, messageID, chatid);
 }
 
 

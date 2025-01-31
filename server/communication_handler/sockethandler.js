@@ -247,7 +247,7 @@ let connectionHandler = (socket) => {
                     if (message.type == "text") {
                         message.content = rawMessage;
                     }
-                    sendPushNotification(toNotify[i], senderName, message, "/app/webui/index.html#" + chatID, latestmessageinchat);
+                    sendPushNotification(toNotify[i], senderName, message, latestmessageinchat, chatID);
                 }
             }
 

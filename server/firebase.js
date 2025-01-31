@@ -73,7 +73,7 @@ const sendCancelNotification = (userID, messageID) => {
     }
 }
 
-const sendNotification = (userID, title, body, messageID = 0) => {
+const sendNotification = (userID, title, body, messageID = 0, chatid = 0) => {
     if (!firebaseEnabled) {
         return;
     }
@@ -99,6 +99,7 @@ const sendNotification = (userID, title, body, messageID = 0) => {
                 body: body,
                 type: "message",
                 messageID: messageID.toString(),
+                chatid: chatid.toString(),
                 date: new Date().toISOString().toString()
             },
             token: registrationTokens[i]

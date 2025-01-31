@@ -14,11 +14,18 @@ document.body.appendChild(loadingScreen)
 
 let showLoadingScreen = (message) => {
     loadingScreen.style.display = "block";
+    setTimeout(() => {
+        loadingScreen.style.opacity = 1;
+    }, 20);
     messageDisplay.innerHTML = message;
 }
 
 let hideLoadingScreen = () => {
-    loadingScreen.style.display = "none";
+    loadingScreen.style.opacity = 0;
+    setTimeout(() => {
+        loadingScreen.style.display = "none";
+    }, 300);
+    
 }
 
 export {showLoadingScreen, hideLoadingScreen}

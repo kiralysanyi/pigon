@@ -1,5 +1,16 @@
 :root {
-    --backdrop-filter: blur(4px);
+    --backdrop-filter: blur(16px);
+}
+
+#bgblur {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    backdrop-filter: blur(4px);
+    transition: 300ms;
 }
 
 body {
@@ -27,11 +38,11 @@ nav {
 
 #mainSidebarContainer {
     position: fixed;
-    top: 40px;
+    top: 0px;
     left: 5px;
     width: 100%;
-    height: 96%;
-    z-index: 2;
+    height: 100%;
+    z-index: 1000;
 }
 
 #mainSidebar {
@@ -44,7 +55,7 @@ nav {
     border-radius: 10px;
     transition: 500ms;
     text-align: center;
-    backdrop-filter: blur(8px);
+    backdrop-filter: var(--backdrop-filter);
 }
 
 #mainSidebar h1{
@@ -245,7 +256,6 @@ nav {
     box-sizing: border-box;
     padding-top: 70px;
     padding-bottom: 70px;
-    backdrop-filter: blur(5px);
 }
 
 /* scrollbar customisation */
@@ -443,7 +453,7 @@ nav {
     width: 100%;
     height: 100%;
     backdrop-filter: var(--backdrop-filter);
-    z-index: 100;
+    z-index: 100000;
     transition: 500ms;
     overflow-x: auto;
 }
@@ -747,12 +757,33 @@ nav {
     }
 
     #mainSidebarContainer {
+        top: 5px;
+        height: calc(100% - 10px);
         width: 300px;
+        left: 5px;
         border-radius: 20px;
     }
 
-    #msgcontainer, #textcontainer {
+    #mainSidebar {
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+    }
+
+    nav {
+        width: calc(100% - 315px);
+        left: 310px;
+    }
+
+    #msgcontainer {
         width: calc(100% - 310px);
         left: 310px;
     }
+
+    #textcontainer {
+        width: calc(100% - 320px);
+        left: 315px;
+    }
+
 }

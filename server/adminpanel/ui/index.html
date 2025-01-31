@@ -82,7 +82,7 @@
                 }
             } catch (error) {
                 console.error(`Error fetching ${endpoint}:`, error);
-                alert("Hiba történt az adatok lekérése közben. Kérlek, próbáld újra.");
+                alert("An error occurred while retrieving the data. Please try again.");
                 return null;
             }
         }
@@ -140,7 +140,7 @@
         document.getElementById("passwordForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             if (!selectedUserId) {
-                alert("Nincs kiválasztott felhasználó!");
+                alert("No user selected");
                 return;
             }
 
@@ -159,10 +159,10 @@
             const responseData = await result.json();
 
             if (responseData.success) {
-                document.getElementById("message").innerText = "Jelszó sikeresen módosítva!";
+                document.getElementById("message").innerText = "Password updated successfully";
                 document.getElementById("newPassword").value = "";
             } else {
-                document.getElementById("message").innerText = "Hiba történt a jelszó módosításakor!";
+                document.getElementById("message").innerText = "An error occurred while changing the password!";
             }
         });
     </script>

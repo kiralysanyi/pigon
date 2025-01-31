@@ -245,8 +245,9 @@ let renderChat = (page = 1) => {
         credentials: "include"
     }).then(async (response) => {
         let res = await response.json();
-        let createElement = (message, senderID, senderName, date, read) => {
+        let createElement = (message, senderID, senderName, date, read, id) => {
             let element = document.createElement("div");
+            element.id = `msg${id}`;
             element.classList.add("msg");
             let element_namedisplay = document.createElement("div");
             element_namedisplay.classList.add("name");
@@ -258,6 +259,16 @@ let renderChat = (page = 1) => {
             element.appendChild(element_pfp);
             element.appendChild(element_msg);
             element_namedisplay.innerHTML = senderName;
+
+            if (senderID == userinfo.id) {
+                contextMenu(element, ["Cancel message"], (selected) => {
+                    if (selected == "Cancel message") {
+                        console.log("Cancel message: ", id)
+                        socket.emit("cancelmessage", {messageID: id})
+                    }
+                })
+            }
+
             if (userinfo.id == senderID) {
                 element_namedisplay.innerHTML = "You"
             }
@@ -292,7 +303,7 @@ let renderChat = (page = 1) => {
                 let message = JSON.parse(escapeJsonControlCharacters(res[i]["message"]));
                 let senderID = res[i]["senderid"];
                 let senderName = res[i]["username"];
-                msgcontainer.appendChild(createElement(message, senderID, senderName, res[i]["date"], res[i]["read"]))
+                msgcontainer.appendChild(createElement(message, senderID, senderName, res[i]["date"], res[i]["read"], res[i]["messageID"]))
             }
             setTimeout(() => {
                 msgcontainer.scrollTop = msgcontainer.scrollHeight;
@@ -307,7 +318,7 @@ let renderChat = (page = 1) => {
                 let message = JSON.parse(res[i]["message"]);
                 let senderID = res[i]["senderid"];
                 let senderName = res[i]["username"];
-                msgcontainer.prepend(createElement(message, senderID, senderName, res[i]["date"]))
+                msgcontainer.prepend(createElement(message, senderID, senderName, res[i]["date"], res[i]["messageID"]))
             }
         }
         hideLoadingScreen();
@@ -486,12 +497,13 @@ renderChatsSB();
 
 
 
-let addMessageToContainer = (chatID, senderID, name, message, type) => {
+let addMessageToContainer = (chatID, senderID, name, message, type, messageID) => {
     if (chatID != selectedchat) {
         return;
     }
 
     let element = document.createElement("div");
+    element.id = `msg${messageID}`
     element.classList.add("msg");
     let element_namedisplay = document.createElement("div");
     element_namedisplay.classList.add("name");
@@ -522,7 +534,26 @@ let addMessageToContainer = (chatID, senderID, name, message, type) => {
         element_msg.innerHTML = `<video src="${message}" controls loop autoplay muted></video>`
     }
 
+    if (senderID == userinfo.id) {
+        contextMenu(element, ["Cancel message"], (selected) => {
+            if (selected == "Cancel message") {
+                console.log("Cancel message: ", messageID)
+                socket.emit("cancelmessage", {messageID})
+            }
+        })
+    }
+
 }
+
+socket.on("cancelmessage", ({chatID, messageID}) => {
+    if (selectedchat == chatID) {
+        try {
+            document.getElementById(`msg${messageID}`).remove()
+        } catch (error) {
+            console.error(error)
+        }
+    }
+})
 
 socket.on("message", (data) => {
     //data:{"chatID":66,"senderID":17,"message":{"type":"text","content":"Sznia"}}
@@ -539,7 +570,7 @@ socket.on("message", (data) => {
     console.log(data);
 
     if (selectedchat == data["chatID"]) {
-        addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], data["message"]["content"], data["message"]["type"]);
+        addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], data["message"]["content"], data["message"]["type"], data["messageID"]);
         socket.emit("setLastRead", {
             chatID: data["chatID"],
             messageID: data["messageID"]

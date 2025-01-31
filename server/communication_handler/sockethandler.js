@@ -104,19 +104,19 @@ let connectionHandler = (socket) => {
     })
 
     //relay data between sockets
-    socket.on("relay", ({deviceID, data}) => {
+    socket.on("relay", ({ deviceID, data }) => {
         try {
             const targetUserID = socket_userid[deviceID];
-            sockets[targetUserID][deviceID].emit("relay", {senderID: socket.userInfo.deviceID, data})
+            sockets[targetUserID][deviceID].emit("relay", { senderID: socket.userInfo.deviceID, data })
         } catch (error) {
             console.error(error)
             socket.emit("error", error)
         }
-        
+
     })
 
     //this is used to accept or decline the call after a socket connected to the server. this is needed for the android app in the first place.
-    socket.on("answercall", ({callid, accepted, reason}) => {
+    socket.on("answercall", ({ callid, accepted, reason }) => {
         if (fbCallHandlers[callid] != undefined) {
             fbCallHandlers[callid](accepted, reason)
         }
@@ -132,7 +132,7 @@ let connectionHandler = (socket) => {
         console.log("Called: ", called);
         sendDataToSockets(called, "incomingcall", { callid, username, chatid });
         sendCallSignal(called, callid, username, chatid);
-        
+
 
         let calltimeout = setTimeout(() => {
             cancelCallSignal(called, callid);
@@ -141,7 +141,7 @@ let connectionHandler = (socket) => {
             if (fbCallHandlers[callid] != undefined) {
                 delete fbCallHandlers[callid]
             }
-        }, 60*1000);;
+        }, 60 * 1000);;
 
         socket.once("cancelcall", ({ callid, username, chatid }) => {
             clearTimeout(calltimeout)
@@ -150,13 +150,13 @@ let connectionHandler = (socket) => {
             if (fbCallHandlers[callid] != undefined) {
                 delete fbCallHandlers[callid]
             }
-            
+
         })
 
         let targetSockets = getSocketsForUser(called)
         fbCallHandlers[callid] = (accepted, reason) => {
             clearTimeout(calltimeout)
-            socket.emit("callresponse" + callid, {accepted, reason})
+            socket.emit("callresponse" + callid, { accepted, reason })
             let sockets = getSocketsForUser(called)
             for (let i in sockets) {
                 sockets[i].emit("acceptedcall")
@@ -198,6 +198,44 @@ let connectionHandler = (socket) => {
                 }
             }
         }, 1000);
+    })
+
+    socket.on("cancelmessage", ({ messageID }) => {
+        //get info about this message
+        sqlQuery("SELECT * FROM messages WHERE id=?", [messageID]).then((result) => {
+            if (result.length == 0) {
+                socket.emit("error", "Message not found: " + messageID)
+                return;
+            }
+
+            //verify if the message belongs to the requestor
+
+            if (result[0].senderid != socket.userInfo.userID) {
+                socket.emit("error", "This message belongs to an other user.")
+                return;
+            }
+
+            //everything went great now get the chatid, broadcast a cancel signal and flag the message as cancelled
+
+            const chatid = result[0]["chatid"]
+
+            sqlQuery(`SELECT participants FROM chats WHERE id=?`, [chatid]).then((result) => {
+                sqlQuery(`DELETE FROM messages WHERE id=?`, [messageID])
+                let toNotify = JSON.parse(result[0]["participants"]);
+
+                for (let i in toNotify) {
+                    sendDataToSockets(toNotify[i], "cancelmessage", { messageID, chatID: chatid })
+                }
+            }).catch((err) => {
+                console.error(err)
+                socket.emit("error", err)
+            })
+
+
+        }).catch((err) => {
+            console.error(err)
+            socket.emit("error", err)
+        })
     })
 
     socket.on("message", async ({ chatID, message }) => {

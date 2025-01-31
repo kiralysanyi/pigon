@@ -6,9 +6,16 @@ window.addEventListener("mousemove", (e) => {
     y = e.clientY;
 })
 
-const contextMenu = (target = document.getElementById("target"), items, callback = (selected) => {}) => {
+const contextMenu = (target = document.getElementById("target"), items, callback = (selected) => { }) => {
+
     console.log(items, target);
     target.addEventListener("contextmenu", (e) => {
+        let menus = document.getElementsByClassName("contextMenu");
+        console.log(menus)
+
+        for (let i = 0; i < menus.length; i++) {
+            menus[i].remove();
+        }
         const menu = document.createElement("div");
         menu.classList.add("contextMenu");
         for (let i in items) {
@@ -38,4 +45,4 @@ const contextMenu = (target = document.getElementById("target"), items, callback
     })
 }
 
-export {contextMenu}
+export { contextMenu }

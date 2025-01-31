@@ -220,7 +220,7 @@ let connectionHandler = (socket) => {
             const chatid = result[0]["chatid"]
 
             sqlQuery(`SELECT participants FROM chats WHERE id=?`, [chatid]).then((result) => {
-                sqlQuery(`DELETE FROM messages WHERE id=?`, [messageID])
+                sqlQuery(`UPDATE messages SET cancelled = 1 WHERE id=?`, [messageID])
                 let toNotify = JSON.parse(result[0]["participants"]);
 
                 for (let i in toNotify) {

@@ -75,24 +75,20 @@ nav .title {
 button {
     width: 100px;
     height: 40px;
-    background-color: rgb(0, 90, 143);
+    background-color: rgb(0, 190, 0);
     color: white;
     border: none;
     outline: none;
     margin: 5px;
     border-radius: 10px;
     transition: 200ms;
-    border: 2px solid rgb(48, 47, 47);
+    border: 1px solid rgb(48, 47, 47);
 }
 
 button:hover {
-    background-color: rgb(0, 115, 182);
+    background-color: rgb(0, 130, 0);
 }
 
-button:focus {
-    outline: solid yellow;
-    background-color: rgb(0, 115, 182);
-}
 
 .formContainer {
     position: absolute;

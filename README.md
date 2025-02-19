@@ -6,3 +6,7 @@
 ## Testing server
 
 Available here: [pigon.ddns.net](https://pigon.ddns.net/app)
+
+## About the project
+
+This is also part of the school project somewhat mentioned in pigon-android

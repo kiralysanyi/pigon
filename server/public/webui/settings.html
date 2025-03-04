@@ -69,6 +69,11 @@
         #deleteacc:hover {
             background-color: red;
         }
+
+        #adminbtn{
+            margin-top: 50px;
+            background-color: rgb(235, 105, 19);
+        }
     </style>
 </head>
 
@@ -79,13 +84,13 @@
         <button id="webauthn">Passkeys</button>
         <button id="changepass">Change password</button>
         <button id="extra">Update user info</button>
-        <button  id="deleteacc">Delete Account</button>
+        <button id="deleteacc">Delete Account</button>
+        <button id="adminbtn">Admin panel</button>
     </div>
 </body>
 <script type="module">
     document.getElementById("changepass").addEventListener("click", () => {
         window.parent.location.href = "changepass.html"
-
     })
 
     document.getElementById("webauthn").addEventListener("click", () => {
@@ -99,6 +104,12 @@
     document.getElementById("deleteacc").addEventListener("click", () => {
         window.parent.location.href = "delete.html"
     })
+    document.getElementById("adminbtn").addEventListener("click", () => {
+        window.parent.location.href = "/adminpanel/ui/";
+    })
+
+
+
 
     async function getUserInfo(userID = null) {
         const body = userID ? JSON.stringify({ userID }) : null;
@@ -110,7 +121,7 @@
         });
         const data = await response.json();
         if (data.success) {
-            console.log('User info retrieved', data.data);
+            console.log('User info retrieved');
         } else {
             console.error('Failed to retrieve user info', data.data.message);
         }
@@ -118,7 +129,6 @@
     }
 
     let userinfo = await getUserInfo()
-    console.log(userinfo)
 
     document.getElementById("pfp").src = "/api/v1/auth/pfp?id=" + userinfo.data.id;
 
@@ -170,6 +180,27 @@
             window.alert(`Failed to upload file`);
         }
     }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+    const adminBtn = document.getElementById("adminbtn");
+    let userinfo = await getUserInfo();
+    console.log("userinfogeci", userinfo);
+
+        try {
+            let userinfo = await getUserInfo();
+            if (!userinfo.success) throw new Error("User info retrieval failed");
+
+            if (!userinfo.data || !userinfo.data.isAdmin) {
+                adminBtn.style.display = "none"; 
+            } else {
+                adminBtn.style.display = "block"; // Biztosan megjelenik
+            }
+
+        } catch (error) {
+            console.error("Error fetching user info:", error);
+            alert("Hiba történt a felhasználói adatok lekérésekor.");
+        }
+    });
 
 </script>
 

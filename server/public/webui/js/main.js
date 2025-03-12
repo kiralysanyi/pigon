@@ -161,7 +161,7 @@ document.getElementById("adduserbtn").addEventListener("click", () => {
     gruppModal.open();
 })
 
-document.getElementById("newchatbtn").addEventListener("click", () => {
+document.getElementById("newchatbtn").addEventListener("click", async () => {
     let newModal = new modal("New chat");
     let contentElement = newModal.contentElement;
 
@@ -176,25 +176,37 @@ document.getElementById("newchatbtn").addEventListener("click", () => {
     resultsDisplay.classList.add("resultsDisplay");
     contentElement.appendChild(resultsDisplay);
 
-    searchInput.addEventListener("keyup", async () => {
-        let results = await auth.searchUsers(searchInput.value);
-        resultsDisplay.innerHTML = "";
+    let allUsers = await auth.searchUsers("");
+    renderUserList(allUsers, resultsDisplay, newModal);
 
-        for (let i in results) {
-            let resultElement = document.createElement("div");
-            resultElement.classList.add("resultElement");
-            resultElement.innerHTML = results[i]["username"];
-            let resultImage = document.createElement("img");
-            resultImage.src = "/api/v1/auth/pfp?id=" + results[i]["id"];
-            resultElement.appendChild(resultImage);
-            resultsDisplay.appendChild(resultElement);
-            resultElement.addEventListener("click", () => {
-                newModal.close();
-                addPrivateChat(results[i]["id"]);
-            })
-        }
-    })
-})
+    searchInput.addEventListener("keyup", async () => {
+        let filteredResults = allUsers.filter(user => 
+            user.username.toLowerCase().includes(searchInput.value.toLowerCase())
+        );
+        renderUserList(filteredResults, resultsDisplay, newModal);
+    });
+});
+
+function renderUserList(users, resultsDisplay, newModal) {
+    resultsDisplay.innerHTML = "";
+
+    for (let user of users) {
+        let resultElement = document.createElement("div");
+        resultElement.classList.add("resultElement");
+        resultElement.innerHTML = user.username;
+        
+        let resultImage = document.createElement("img");
+        resultImage.src = "/api/v1/auth/pfp?id=" + user.id;
+        resultElement.appendChild(resultImage);
+
+        resultsDisplay.appendChild(resultElement);
+
+        resultElement.addEventListener("click", () => {
+            newModal.close();
+            addPrivateChat(user.id);
+        });
+    }
+}
 
 let sbcontent = document.getElementById("sbcontent");
 

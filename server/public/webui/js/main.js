@@ -161,7 +161,7 @@ document.getElementById("adduserbtn").addEventListener("click", () => {
     gruppModal.open();
 })
 
-document.getElementById("newchatbtn").addEventListener("click", () => {
+document.getElementById("newchatbtn").addEventListener("click", async () => {
     let newModal = new modal("New chat");
     let contentElement = newModal.contentElement;
 
@@ -176,25 +176,37 @@ document.getElementById("newchatbtn").addEventListener("click", () => {
     resultsDisplay.classList.add("resultsDisplay");
     contentElement.appendChild(resultsDisplay);
 
-    searchInput.addEventListener("keyup", async () => {
-        let results = await auth.searchUsers(searchInput.value);
-        resultsDisplay.innerHTML = "";
+    let allUsers = await auth.searchUsers("");
+    renderUserList(allUsers, resultsDisplay, newModal);
 
-        for (let i in results) {
-            let resultElement = document.createElement("div");
-            resultElement.classList.add("resultElement");
-            resultElement.innerHTML = results[i]["username"];
-            let resultImage = document.createElement("img");
-            resultImage.src = "/api/v1/auth/pfp?id=" + results[i]["id"];
-            resultElement.appendChild(resultImage);
-            resultsDisplay.appendChild(resultElement);
-            resultElement.addEventListener("click", () => {
-                newModal.close();
-                addPrivateChat(results[i]["id"]);
-            })
-        }
-    })
-})
+    searchInput.addEventListener("keyup", async () => {
+        let filteredResults = allUsers.filter(user => 
+            user.username.toLowerCase().includes(searchInput.value.toLowerCase())
+        );
+        renderUserList(filteredResults, resultsDisplay, newModal);
+    });
+});
+
+function renderUserList(users, resultsDisplay, newModal) {
+    resultsDisplay.innerHTML = "";
+
+    for (let user of users) {
+        let resultElement = document.createElement("div");
+        resultElement.classList.add("resultElement");
+        resultElement.innerHTML = user.username;
+        
+        let resultImage = document.createElement("img");
+        resultImage.src = "/api/v1/auth/pfp?id=" + user.id;
+        resultElement.appendChild(resultImage);
+
+        resultsDisplay.appendChild(resultElement);
+
+        resultElement.addEventListener("click", () => {
+            newModal.close();
+            addPrivateChat(user.id);
+        });
+    }
+}
 
 let sbcontent = document.getElementById("sbcontent");
 
@@ -556,45 +568,68 @@ socket.on("cancelmessage", ({chatID, messageID}) => {
 })
 
 socket.on("message", (data) => {
-    //data:{"chatID":66,"senderID":17,"message":{"type":"text","content":"Sznia"}}
-    data = JSON.parse(data);
+    try {
+        if (typeof data === "string") {
+            data = JSON.parse(data);
+        }
+        
+        let arrayIndex = chats.findIndex(chat => chat.chatid === data.chatID);
+        if (arrayIndex === -1) return; // Exit if chat is not found
+        
+        chats[arrayIndex].lastInteraction = new Date().toISOString();
+        reorderChatsByLastInteraction();
+        renderChatsSB(true);
+        
+        if (data.senderID === userinfo.id) {
+            data.senderName = "You";
+        }
+        
+        console.log(data);
+        
+        if (selectedchat === data.chatID) {
+            addMessageToContainer(
+                data.chatID,
+                data.senderID,
+                data.senderName,
+                data.message.content,
+                data.message.type,
+                data.messageID
+            );
+            socket.emit("setLastRead", {
+                chatID: data.chatID,
+                messageID: data.messageID
+            });
+        } else {
+            notifyUser(data);
+        }
 
-    let arrayIndex = chats.findIndex(chat => chat.chatid === data.chatID);
-    chats[arrayIndex].lastInteraction = new Date().toISOString();
-    reorderChatsByLastInteraction();
-    renderChatsSB(true);
-    if (data["senderID"] == userinfo["id"]) {
-        data["senderName"] = "You"
+        // Highlight chat if it is not the selected one and the message is from another user
+        let chatElement = document.getElementById("chat" + data.chatID);
+        if (chatElement && selectedchat !== data.chatID && data.senderID !== userinfo.id) {
+            chatElement.style.backgroundColor = "blue";
+        }
+    } catch (error) {
+        console.error("Error processing message:", error);
     }
+});
 
-    console.log(data);
-
-    if (selectedchat == data["chatID"]) {
-        addMessageToContainer(data["chatID"], data["senderID"], data["senderName"], data["message"]["content"], data["message"]["type"], data["messageID"]);
-        socket.emit("setLastRead", {
-            chatID: data["chatID"],
-            messageID: data["messageID"]
-        })
-    } else {
-        let notification = new Notification(data["senderName"], { badge: "/favicon.ico", icon: "/app/webui/pigonicon.png", body: data["message"]["content"] });
+function notifyUser(data) {
+    if (!document.hasFocus()) {
+        let notification = new Notification(data.senderName, {
+            badge: "/favicon.ico",
+            icon: "/app/webui/pigonicon.png",
+            body: data.message.content
+        });
         notification.addEventListener("click", () => {
-            document.getElementById("chat" + data["chatID"]).click();
+            let chatElement = document.getElementById("chat" + data.chatID);
+            if (chatElement) {
+                chatElement.click();
+            }
             window.focus();
-        })
+        });
     }
+}
 
-    if (document.hasFocus() == false) {
-        let notification = new Notification(data["senderName"], { badge: "/favicon.ico", icon: "/app/webui/pigonicon.png", body: data["message"]["content"] });
-        notification.addEventListener("click", () => {
-            document.getElementById("chat" + data["chatID"]).click();
-            window.focus();
-        })
-    }
-
-    if (selectedchat != data["chatID"] && data["senderID"] != userinfo["id"]) {
-        document.getElementById("chat" + data["chatID"]).style.backgroundColor = "blue";
-    }
-})
 
 socket.on("newchat", (data) => {
     renderChatsSB();

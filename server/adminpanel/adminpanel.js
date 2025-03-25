@@ -4,22 +4,23 @@ const { hashPass } = require("../things/password");
 
 // Middleware to check if the user is an admin
 async function isAdminMiddleware(req, res, next) {
-    if (req.userdata.isAdmin == true) {
+    if (req.userdata.isAdmin == 1) { 
         next();
     } else {
         res.status(403).json({ success: false, message: "Access denied" })
     }
 }
 
+
 const adminpanel = (app) => {
     app.use("/adminpanel", authMiddleWare)
     app.use("/adminpanel", isAdminMiddleware)
-
+    
     // Get all users
     app.get('/adminpanel/users', async (req, res) => {
         try {
             const users = await sqlQuery('SELECT id, username, isadmin, registerDate FROM users', []);
-            res.json({ success: true, message: 'Users retrieved successfully.', data: users });
+            res.json({ success: true, message: 'Users retrieved successfully.', data: users }); 
         } catch (error) {
             console.error('Error fetching users:', error);
             res.status(500).json({ success: false, message: 'Internal server error' });
@@ -138,6 +139,27 @@ const adminpanel = (app) => {
             res.status(500).json({ success: false, message: 'Internal server error' });
         }
     });
+
+
+    // Delete a user
+    app.delete('/adminpanel/users/:userId', async (req, res) => {
+        const { userId } = req.params;
+
+        try {
+            // Delete user data
+            await sqlQuery('DELETE FROM `user-chat` WHERE userID = ?', [userId]); 
+            await sqlQuery('DELETE FROM messages WHERE senderID = ?', [userId]); 
+            
+            // delete user
+            await sqlQuery('DELETE FROM users WHERE id = ?', [userId]);
+
+            res.json({ success: true, message: 'User deleted successfully.' });
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    });
+
 }
 
 module.exports = { adminpanel }

@@ -69,6 +69,11 @@
         #deleteacc:hover {
             background-color: red;
         }
+
+        #adminbtn{
+            margin-top: 50px;
+            background-color: rgb(235, 105, 19);
+        }
     </style>
 </head>
 
@@ -79,50 +84,62 @@
         <button id="webauthn">Passkeys</button>
         <button id="changepass">Change password</button>
         <button id="extra">Update user info</button>
-        <button  id="deleteacc">Delete Account</button>
+        <button id="deleteacc">Delete Account</button>
+        <button id="adminbtn">Admin panel</button>
     </div>
 </body>
 <script type="module">
-    document.getElementById("changepass").addEventListener("click", () => {
-        window.parent.location.href = "changepass.html"
+    async function getUserInfo() {
+        try {
+            const response = await fetch('/api/v1/auth/userinfo', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: "include"
+            });
 
-    })
+            const data = await response.json();
+            if (!data.success) throw new Error("User info retrieval failed");
+
+            return data;
+        } catch (error) {
+            console.error("Error fetching user info:", error);
+            return { success: false };
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const adminBtn = document.getElementById("adminbtn");
+        adminBtn.style.display = "none"; // Alapértelmezett elrejtés
+
+        let userinfo = await getUserInfo();
+        console.log("User info response:", userinfo); // Ellenőrizd a konzolon
+        if (userinfo.success && userinfo.data && userinfo.data.isAdmin === 1) { 
+            adminBtn.style.display = "block";
+        }
+
+        document.getElementById("pfp").src = "/api/v1/auth/pfp?id=" + userinfo.data.id;
+        document.getElementById("username").innerHTML = userinfo.data.username;
+    });
+
+    document.getElementById("adminbtn").addEventListener("click", () => {
+        window.parent.location.href = "/adminpanel/ui/";
+    });
+
+    document.getElementById("changepass").addEventListener("click", () => {
+        window.parent.location.href = "changepass.html";
+    });
 
     document.getElementById("webauthn").addEventListener("click", () => {
-        window.parent.location.href = "webauthn.html"
+        window.parent.location.href = "webauthn.html";
     });
 
     document.getElementById("extra").addEventListener("click", () => {
-        window.parent.location.href = "settings_extra.html"
+        window.parent.location.href = "settings_extra.html";
     });
 
     document.getElementById("deleteacc").addEventListener("click", () => {
-        window.parent.location.href = "delete.html"
-    })
-
-    async function getUserInfo(userID = null) {
-        const body = userID ? JSON.stringify({ userID }) : null;
-        const response = await fetch('/api/v1/auth/userinfo', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: "include",
-            body: body
-        });
-        const data = await response.json();
-        if (data.success) {
-            console.log('User info retrieved', data.data);
-        } else {
-            console.error('Failed to retrieve user info', data.data.message);
-        }
-        return data;
-    }
-
-    let userinfo = await getUserInfo()
-    console.log(userinfo)
-
-    document.getElementById("pfp").src = "/api/v1/auth/pfp?id=" + userinfo.data.id;
-
-    document.getElementById("username").innerHTML = userinfo.data.username
+        window.parent.location.href = "delete.html";
+    });
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -130,7 +147,7 @@
 
     fileInput.addEventListener("change", () => {
         uploadFile();
-    })
+    });
 
     document.getElementById("pfp").addEventListener("click", () => {
         fileInput.click();
@@ -147,12 +164,10 @@
         const file = fileInput.files[0];
         const formData = new FormData();
 
-        // Append the file to the FormData object
         formData.append('image', file);
 
         try {
-            // Make the POST request to your server's upload endpoint
-            const response = await fetch('/api/v1/auth/pfp', { // Replace with your server URL
+            const response = await fetch('/api/v1/auth/pfp', {
                 method: 'POST',
                 credentials: "include",
                 body: formData,
@@ -170,7 +185,7 @@
             window.alert(`Failed to upload file`);
         }
     }
-
 </script>
+
 
 </html>

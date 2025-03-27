@@ -10,6 +10,7 @@ DB_PASSWORD=""
 DBNAME="pigon"
 JWT_SECRET="kcske"
 ORIGIN="http://localhost:8080"
+CORS="http://localhost:5173"
 ```
 
 ### Setup database

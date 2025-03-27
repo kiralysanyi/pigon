@@ -5,7 +5,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server, { cookie: true, path: "/socketio", cors: {credentials: true, origin: "http://localhost:5173"} });
+const io = new Server(server, { cookie: true, path: "/socketio", cors: {credentials: true, origin: process.env.CORS} });
 let cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 let jsonParser = bodyParser.json;
@@ -22,7 +22,7 @@ app.use(fileupload({ limits: { files: 1, fileSize: 10000000 } }));
 app.use(jsonParser());
 app.use(cookieParser());
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CORS,
     credentials: true
 }));
 

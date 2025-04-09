@@ -1,0 +1,274 @@
+{
+  "v": 6,
+  "name": "pigon",
+  "folders": [],
+  "requests": [
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/login",
+      "name": "Login",
+      "params": [],
+      "headers": [],
+      "method": "POST",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"username\": \"sergei1\",\n  \"password\": \"12345678\"\n}"
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/register",
+      "name": "Register",
+      "params": [],
+      "headers": [],
+      "method": "POST",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"username\": \"sergei1\",\n  \"password\": \"12345678\"\n}"
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/delete",
+      "name": "Delete account",
+      "params": [],
+      "headers": [],
+      "method": "DELETE",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"username\": \"sergei1\",\n  \"password\": \"12345678\"\n}"
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/devices",
+      "name": "GetDevices",
+      "params": [],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/userinfo",
+      "name": "GetUserinfo",
+      "params": [],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/userinfo",
+      "name": "GetUserinfoByID",
+      "params": [
+        {
+          "key": "userID",
+          "value": "1",
+          "active": true,
+          "description": ""
+        }
+      ],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/logout",
+      "name": "Logout",
+      "params": [],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/removedevice",
+      "name": "RemoveDevice",
+      "params": [],
+      "headers": [],
+      "method": "DELETE",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"deviceID\": \"sdawdadawda\"\n}"
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/changepass",
+      "name": "ChangePass",
+      "params": [],
+      "headers": [],
+      "method": "PUT",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"oldpass\": \"12345678\",\n  \"newpass\": \"12345678\"\n}"
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/pfp",
+      "name": "PFP",
+      "params": [
+        {
+          "key": "id",
+          "value": "1",
+          "active": true,
+          "description": ""
+        },
+        {
+          "key": "smol",
+          "value": "true",
+          "active": true,
+          "description": ""
+        }
+      ],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/chat/chats",
+      "name": "GetChats",
+      "params": [],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {}
+    },
+    {
+      "v": "11",
+      "endpoint": "<<base_url>>/auth/pfp",
+      "name": "UploadPFP",
+      "params": [],
+      "headers": [],
+      "method": "POST",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "",
+      "body": {
+        "body": [],
+        "contentType": "multipart/form-data",
+        "showIndividualContentType": true
+      },
+      "requestVariables": [],
+      "responses": {}
+    }
+  ],
+  "headers": [],
+  "auth": {
+    "authType": "none",
+    "authActive": true
+  },
+  "_ref_id": "coll_m99jb3pe_d60cd39f-3c48-4348-a7cb-0c278205a545"
+}

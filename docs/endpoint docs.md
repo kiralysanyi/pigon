@@ -177,12 +177,8 @@ Retrieve information about a specific user or the currently logged-in user if no
 ### **Method**  
 `GET`
 
-### **Optional Request Body**
-```json
-{
-    "userID": 123
-}
-```
+### **Optional query param**
+
 - `userID` *(optional)*: The ID of the user you want information about.
 
 ### **Response (Success)**
@@ -399,7 +395,7 @@ Get profile picture of a user.
 ### **Method**  
 `GET`
 
-### **Request Params**
+### **Request query params**
 - `id` : The ID of the user
 - `smol` : (Optional) Return max 256x256 image
 
@@ -478,7 +474,5 @@ Upload profile picture of a user.
 
 ### **Request Body**
 Formdata containing the image. Note: You have to be authenticated for this request.
-Provide the file under the image key.
+Provide the file under the `image` key.
 
-
-### **Response (Success)**

@@ -1,0 +1,12 @@
+{
+  "id": "neynifah6ih",
+  "v": 1,
+  "name": "pigon",
+  "variables": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1/api/v1",
+      "secret": false
+    }
+  ]
+}

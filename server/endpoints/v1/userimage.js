@@ -53,6 +53,13 @@ const getImageHandler = (req, res) => {
 
 const uploadHandler = async (req, res) => {
     let userdata = req.userdata;
+    if (!req.files) {
+        res.status(400).json({
+            success: false,
+            message: "Image not provided"
+        });
+        return;
+    }
 
     if (!req.files.image) {
         res.status(400).json({

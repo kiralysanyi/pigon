@@ -199,7 +199,7 @@ async function checkIfLoggedIn(redirect = false) {
     }
 
     if (userinfo.success == true && redirect == true) {
-        location.replace("/app/webui/index.html");
+        location.replace("/oldui/webui/index.html");
     }
 }
 

@@ -26,7 +26,7 @@ function decodeHTML(html) {
 }
 
 let audioElement = document.createElement("audio");
-audioElement.src = "/app/pigon.mp3"
+audioElement.src = "/oldui/pigon.mp3"
 audioElement.loop = true;
 audioElement.autoplay = false;
 audioElement.muted = false;

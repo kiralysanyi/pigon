@@ -2,13 +2,13 @@
     "name": "Pigon",
     "short_name": "pigon",
     "lang": "en-US",
-    "start_url": "/app/webui/index.html",
+    "start_url": "/oldui/webui/index.html",
     "display": "standalone",
     "background_color": "gray",
     "theme_color": "black",
     "icons": [
       {
-        "src": "/app/pigonicon.png",
+        "src": "/oldui/pigonicon.png",
         "sizes": "512x512",
         "type": "image/png"
       }

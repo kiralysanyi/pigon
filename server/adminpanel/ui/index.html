@@ -107,7 +107,7 @@
             document.getElementById("modalUserName").textContent = user.username;
             document.getElementById("modalUserID").textContent = user.id;
             const iframe = document.getElementById("userinfoiframe");
-            iframe.src = `/app/webui/userinfo.html#${user.id}`;
+            iframe.src = `/oldui/webui/userinfo.html#${user.id}`;
         }
 
         function closeModal() {

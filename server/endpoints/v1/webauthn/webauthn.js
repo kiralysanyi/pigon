@@ -7,7 +7,7 @@ const fs = require("fs");
 let challenges = [];
 const origin = process.env.ORIGIN;
 
-const allowedOrigins = [origin, "android:apk-key-hash:8gym9SvvYCvHtXdlJaOKguZ6LGEJt5jY7IZL6jB32gc"]
+const allowedOrigins = [origin, "android:apk-key-hash:8gym9SvvYCvHtXdlJaOKguZ6LGEJt5jY7IZL6jB32gc", "http://localhost:5173"]
 
 const challengeHandler = async (req, res) => {
     const challenge = server.randomChallenge();

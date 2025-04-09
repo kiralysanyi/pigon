@@ -9,7 +9,7 @@ import { addPrivateChat, sendFile, sendMessage, socket } from "./chat.js";
 /*
 let isLoggedIn = await auth.checkIfLoggedIn();
 if (isLoggedIn == false) {
-    location.replace("/app/login.html")
+    location.replace("/oldui/login.html")
 }
     */
 
@@ -18,7 +18,7 @@ if (isLoggedIn == false) {
 
 let userinfo = await auth.getUserInfo();
 if (userinfo.success == false) {
-    location.href = "/app/login.html"
+    location.href = "/oldui/login.html"
 }
 
 userinfo = userinfo.data;
@@ -88,7 +88,7 @@ document.getElementById("openSidebarBtn").addEventListener("click", () => {
 document.getElementById("logoutbtn").addEventListener("click", async () => {
     let data = await auth.logout();
     if (data.success == true) {
-        location.replace("/app/login.html");
+        location.replace("/oldui/login.html");
     }
 })
 
@@ -617,7 +617,7 @@ function notifyUser(data) {
     if (!document.hasFocus()) {
         let notification = new Notification(data.senderName, {
             badge: "/favicon.ico",
-            icon: "/app/webui/pigonicon.png",
+            icon: "/oldui/webui/pigonicon.png",
             body: data.message.content
         });
         notification.addEventListener("click", () => {

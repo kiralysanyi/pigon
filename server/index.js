@@ -84,15 +84,15 @@ app.post("/api/v1/auth/pfp", userimage.uploadHandler);
 
 
 
-app.use("/app/webui/", async (req, res, next) => {
+app.use("/oldui/webui/", async (req, res, next) => {
     if (!req.cookies["token"]) {
         console.log("No token provided");
-        res.redirect("/app/login.html");
+        res.redirect("/oldui/login.html");
         return;
     }
     if (await verifyToken(req.cookies["token"]) == false) {
         console.log("Invalid token");
-        res.redirect("/app/login.html");
+        res.redirect("/oldui/login.html");
         return;
     }
 
@@ -100,10 +100,10 @@ app.use("/app/webui/", async (req, res, next) => {
 
 })
 
-app.use("/app", express.static(__dirname + "/public"));
+app.use("/oldui", express.static(__dirname + "/public"));
 
 app.get("/", (req, res) => {
-    res.redirect("/app/login.html");
+    res.redirect("/oldui/login.html");
 })
 
 app.use("/api/v1/chat/messages", authMiddleWare);

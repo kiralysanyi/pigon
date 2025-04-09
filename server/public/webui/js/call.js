@@ -50,7 +50,7 @@ let incomingCallHandler = (callID, userName, cb = (accepted, reason) => { }) => 
 
         //open callUI in an iframe
         let frame = document.createElement("iframe");
-        frame.src = `/app/webui/callUI.html#${callID}`;
+        frame.src = `/oldui/webui/callUI.html#${callID}`;
         callDisplay.appendChild(frame);
         //add minimize button
         let minimizetogglebtn = document.createElement("div");
@@ -153,7 +153,7 @@ let call = async (chatID, socket) => {
         inCall = true;
         callDisplay.innerHTML = "";
         let frame = document.createElement("iframe");
-        frame.src = `/app/webui/callUI.html#${data["callid"]}`;
+        frame.src = `/oldui/webui/callUI.html#${data["callid"]}`;
         callDisplay.appendChild(frame);
         //add minimize button
         let minimizetogglebtn = document.createElement("div");

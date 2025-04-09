@@ -31,8 +31,8 @@ self.addEventListener('push', function (e) {
   const data = e.data.json();
   self.registration.showNotification(data.title, {
     body: data.body,
-    badge: "/app/favicon.ico",
-    icon: "/app/pigonicon.png",
+    badge: "/oldui/favicon.ico",
+    icon: "/oldui/pigonicon.png",
     data: {
       url: data.url // Add a custom property to hold the URL
     }
@@ -100,8 +100,8 @@ self.addEventListener('fetch', (event) => {
 const CACHE_NAME = 'webapp-cache';
 const VERSION_URL = '/api/v1/cacheversion'; // URL to fetch the version number
 const ASSETS = [
-  '/app/',
-  '/app/webui/'
+  '/oldui/',
+  '/oldui/webui/'
 ];
 
 // Install event: Cache all assets

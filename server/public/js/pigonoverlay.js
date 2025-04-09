@@ -10,7 +10,7 @@ element.style.left = "-300px";
 element.style.top = "100px";
 element.style.position = "absolute";
 element.style.transition = "200ms";
-element.src = "/app/pigonicon.png";
+element.src = "/oldui/pigonicon.png";
 element.style.display = "none";
 
 document.body.appendChild(element);
@@ -20,7 +20,7 @@ if (!document.getElementById("pigonAudio")) {
     let audioElement = document.createElement("audio");
     audioElement.id = "pigonAudio";
     audioElement.style.display = "none";
-    audioElement.src = "/app/pigon.mp3";
+    audioElement.src = "/oldui/pigon.mp3";
 
     document.body.appendChild(audioElement);
 }

@@ -5,7 +5,8 @@
 
 ## Testing server
 
-Available here: [pigon.ddns.net](https://pigon.ddns.net/app)
+Available here: [pigon.ddns.net](https://pigon.ddns.net/)
+For the old ui: [pigon.ddns.net/oldui](https://pigon.ddns.net/oldui)
 
 ## About the project
 

@@ -207,7 +207,7 @@ async function checkIfLoggedIn() {
 
 let isLoggedIn = await checkIfLoggedIn();
 if (isLoggedIn == false) {
-    location.replace("/app/login.html")
+    location.replace("/oldui/login.html")
 }
 
 function searchUsers(query) {

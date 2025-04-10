@@ -8,6 +8,13 @@
 
 ## Frontend
 
+### Original design
+
+![design](https://github.com/kiralysanyi/pigon/blob/main/docs/screenshots/design.png?raw=true)
+[Figma](https://www.figma.com/design/1QQBod8NGTsnYNqcjABflI/%C3%A9g%C5%91-f%C3%A1kja-az-orsz%C3%A1gh%C3%A1zn%C3%A1l?node-id=0-1&m=dev&t=yET02Vc6KlB5MWgF-1)
+
+None of the frontends look like the original design and we were lazy to update the figma project.
+
 We have multiple frontends for Pigon.
 
 - An android app

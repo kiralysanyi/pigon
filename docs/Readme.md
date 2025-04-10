@@ -1,5 +1,8 @@
 # Pigon docs
 
+[API docs](https://github.com/kiralysanyi/pigon/blob/main/docs/endpoint%20docs.md)
+[Setup](https://github.com/kiralysanyi/pigon/blob/main/docs/setup.md)
+
 ## Frontend
 
 We have multiple frontends for Pigon.

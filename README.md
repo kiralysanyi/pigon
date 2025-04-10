@@ -8,6 +8,6 @@
 Available here: [pigon.ddns.net](https://pigon.ddns.net/)
 For the old ui: [pigon.ddns.net/oldui](https://pigon.ddns.net/oldui)
 
-## About the project
+## Documentation
 
-This is also part of the school project somewhat mentioned in pigon-android
+[Docs](https://github.com/kiralysanyi/pigon/blob/main/docs/Readme.md)

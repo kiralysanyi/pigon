@@ -1,7 +1,10 @@
 # Pigon docs
 
-[API docs](https://github.com/kiralysanyi/pigon/blob/main/docs/endpoint%20docs.md)
-[Setup](https://github.com/kiralysanyi/pigon/blob/main/docs/setup.md)
+- [API docs](https://github.com/kiralysanyi/pigon/blob/main/docs/endpoint%20docs.md)
+
+- [Setup](https://github.com/kiralysanyi/pigon/blob/main/docs/setup.md)
+
+- [Screenshots](https://github.com/kiralysanyi/pigon/blob/main/docs/screenshots)
 
 ## Frontend
 

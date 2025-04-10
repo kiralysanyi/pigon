@@ -74,5 +74,53 @@ Note: callhistory table is not in use
   - devdocs.io
   - DrawSQL
   - phpmyadmin
+ 
+  ## Admin panel
+
+  Available under /adminpanel/ui
+
+  ## Structure (inside server folder)
+
+  - adminpanel: admin panel related stuff
+  - communication_handler: socketio related handlers
+  - endpoints: every endpoint handler is here, except call handling and admin panel
+  - public: this contains the integrated ui (a.k.a oldui)
+  - webauthn: webauthn library fork (git submodule)
+  - things: things, utils, helpers
+
+  ## Some code snippets because why the hell not
+
+  ### Auth middleware
+
+  ```js
+  let authMiddleWare = async (req, res, next) => {
+        if (!req.cookies.token) {
+            res.status(403).json({
+                success: false,
+                message: "Failed to verify user"
+            });
+            return;
+        }
+    
+        let verificationResponse = await verifyToken(req.cookies.token);
+        if (verificationResponse.success == false) {
+            res.status(403).json({
+                success: false,
+                message: "Failed to verify token"
+            });
+            return;
+        }
+
+        let userdata = verificationResponse.data;
+        req.userdata = userdata;
+        next();
+        }
+  ```
+
+What the heck does this do?
+
+Checks for token in cookies, verifies jwt token if exists, and adds userdata to req object and continues
+
+# VPS
 
 VPS provider for test server: [Vipy](https://vipy.hu)
